@@ -39,9 +39,6 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <SidebarTrigger />
-                <h1 className="text-2xl font-semibold text-foreground">
-                  Wendeal Reports
-                </h1>
               </div>
               
               <div className="flex items-center gap-3">

@@ -25,9 +25,9 @@ export function DashboardSidebar() {
   return (
     <Sidebar className="border-r border-border">
       <SidebarHeader className="px-4 py-4 border-b border-border">
-        <h2 className="text-lg font-semibold text-sidebar-foreground">
-          报告分类
-        </h2>
+        <h1 className="text-xl font-bold text-sidebar-foreground">
+          Wendeal Reports
+        </h1>
       </SidebarHeader>
       
       <SidebarContent>
@@ -51,9 +51,6 @@ export function DashboardSidebar() {
 
         {/* 分类树 */}
         <div className="px-2 py-2 border-t border-border">
-          <h3 className="text-sm font-medium text-sidebar-foreground px-2 py-2">
-            按分类浏览
-          </h3>
           <CategoryTree />
         </div>
 
