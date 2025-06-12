@@ -8,13 +8,13 @@ import {
   SidebarMenuItem,
   SidebarMenuButton
 } from '@/components/ui/sidebar';
-import { CategoryTree } from './CategoryTree';
-import { ReportList } from './ReportList';
+import { DraggableCategoryTree } from './DraggableCategoryTree';
+import { CategoryToolbar } from './CategoryToolbar';
 import { useAppStore } from '@/store/useAppStore';
 import { File, Star, Clock } from 'lucide-react';
 
 export function DashboardSidebar() {
-  const { selectedCategory, setSelectedCategory } = useAppStore();
+  const { selectedCategory, setSelectedCategory, categories, setSelectedReport } = useAppStore();
 
   const quickActions = [
     { id: 'favorites', label: '收藏夹', icon: Star },
@@ -37,7 +37,10 @@ export function DashboardSidebar() {
             {quickActions.map((action) => (
               <SidebarMenuItem key={action.id}>
                 <SidebarMenuButton
-                  onClick={() => setSelectedCategory(action.id)}
+                  onClick={() => {
+                    setSelectedCategory(action.id);
+                    setSelectedReport(null); // 清除选中的报告
+                  }}
                   isActive={selectedCategory === action.id}
                   className="w-full justify-start"
                 >
@@ -49,17 +52,13 @@ export function DashboardSidebar() {
           </SidebarMenu>
         </div>
 
-        {/* 分类树 */}
-        <div className="px-2 py-2 border-t border-border">
-          <CategoryTree />
-        </div>
-
-        {/* 报告列表 */}
-        {selectedCategory && (
-          <div className="flex-1 border-t border-border">
-            <ReportList categoryId={selectedCategory} />
+        {/* 分类管理 */}
+        <div className="border-t border-border">
+          <CategoryToolbar />
+          <div className="px-2 py-2">
+            <DraggableCategoryTree categories={categories} />
           </div>
-        )}
+        </div>
       </SidebarContent>
     </Sidebar>
   );
