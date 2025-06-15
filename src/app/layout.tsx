@@ -24,9 +24,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" translate="no">
       <head>
         <meta name="theme-color" content="#ffffff" />
+        <meta name="google" content="notranslate" />
+        <meta name="translate" content="no" />
       </head>
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}

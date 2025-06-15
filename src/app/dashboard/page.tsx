@@ -3,16 +3,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
-import { mockCategories, mockReports, buildCategoryTree, calculateReportCounts } from '@/data/mockData';
+import { mockReports, buildCategoryTree, calculateReportCounts } from '@/data/mockData';
 import { processReports } from '@/lib/searchUtils';
 import { ReportViewer } from '@/components/report-viewer/ReportViewer';
 import { UploadDialog } from '@/components/upload/UploadDialog';
+import { CreateReportDialog } from '@/components/upload/CreateReportDialog';
 import { DashboardSidebar } from '@/components/sidebar/DashboardSidebar';
 import { Button } from '@/components/ui/button';
-import { Upload, Settings } from 'lucide-react';
+import { Upload, Settings, FileText } from 'lucide-react';
 
 export default function DashboardPage() {
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [isCreateReportDialogOpen, setIsCreateReportDialogOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [draggedReport, setDraggedReport] = useState<any>(null);
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
@@ -93,13 +95,10 @@ export default function DashboardPage() {
     
     console.log('Reports changed, updating categories. Reports count:', reports.length);
     
-    if (reports.length > 0) {
-      const updatedCategories = calculateReportCounts(mockCategories, reports);
-      const categoryTree = buildCategoryTree(updatedCategories, reports);
-      setCategories(categoryTree);
-      console.log('Categories updated with report counts');
-    }
-  }, [reports, setCategories, isClient]);
+    // 直接使用store中的分类数据，不需要重新计算
+    // store中的分类数据已经是从数据库加载的最新数据
+    console.log('Categories already loaded from database:', categories.length);
+  }, [reports, categories, isClient]);
 
   // 应用搜索、过滤和排序
   const { categoryReports, totalCategoryReports } = useMemo(() => {
@@ -626,6 +625,8 @@ export default function DashboardPage() {
               </button>
               
               <button
+                onClick={() => setIsCreateReportDialogOpen(true)}
+                disabled={operationLoading}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -633,39 +634,44 @@ export default function DashboardPage() {
                   gap: '8px',
                   padding: '8px 16px',
                   borderRadius: '8px',
-                  border: `1px solid ${theme === 'dark' ? 'rgba(55, 65, 81, 0.8)' : 'rgba(209, 213, 219, 0.8)'}`,
-                  backgroundColor: theme === 'dark' ? 'rgba(30, 41, 59, 0.8)' : 'rgba(255, 255, 255, 0.9)',
-                  color: theme === 'dark' ? '#e2e8f0' : '#374151',
+                  border: 'none',
+                  background: operationLoading 
+                    ? 'rgba(156, 163, 175, 0.8)' 
+                    : `linear-gradient(135deg, ${theme === 'dark' ? 'rgba(139, 92, 246, 0.8)' : 'rgba(139, 92, 246, 0.9)'}, ${theme === 'dark' ? 'rgba(236, 72, 153, 0.8)' : 'rgba(236, 72, 153, 0.9)'})`,
+                  color: 'white',
                   fontSize: '14px',
                   fontWeight: '500',
-                  cursor: 'pointer',
+                  cursor: operationLoading ? 'not-allowed' : 'pointer',
                   transition: 'all 0.2s ease',
                   backdropFilter: 'blur(8px)',
                   height: '36px',
-                  boxShadow: theme === 'dark' 
-                    ? '0 1px 3px rgba(0, 0, 0, 0.3)' 
-                    : '0 1px 3px rgba(0, 0, 0, 0.1)'
+                  boxShadow: operationLoading 
+                    ? '0 1px 3px rgba(0, 0, 0, 0.2)' 
+                    : (theme === 'dark' 
+                      ? '0 2px 8px rgba(139, 92, 246, 0.3)' 
+                      : '0 2px 8px rgba(139, 92, 246, 0.2)')
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = theme === 'dark' ? 'rgba(55, 65, 81, 0.8)' : 'rgba(249, 250, 251, 1)';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = theme === 'dark' 
-                    ? '0 4px 12px rgba(0, 0, 0, 0.4)' 
-                    : '0 4px 12px rgba(0, 0, 0, 0.15)';
+                  if (!operationLoading) {
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = theme === 'dark' 
+                      ? '0 4px 16px rgba(139, 92, 246, 0.4)' 
+                      : '0 4px 16px rgba(139, 92, 246, 0.3)';
+                    e.currentTarget.style.background = `linear-gradient(135deg, ${theme === 'dark' ? 'rgba(139, 92, 246, 1)' : 'rgba(139, 92, 246, 1)'}, ${theme === 'dark' ? 'rgba(236, 72, 153, 1)' : 'rgba(236, 72, 153, 1)'})`;
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = theme === 'dark' ? 'rgba(30, 41, 59, 0.8)' : 'rgba(255, 255, 255, 0.9)';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = theme === 'dark' 
-                    ? '0 1px 3px rgba(0, 0, 0, 0.3)' 
-                    : '0 1px 3px rgba(0, 0, 0, 0.1)';
-                }}
-                onClick={() => {
-                  alert('设置功能即将推出！');
+                  if (!operationLoading) {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = theme === 'dark' 
+                      ? '0 2px 8px rgba(139, 92, 246, 0.3)' 
+                      : '0 2px 8px rgba(139, 92, 246, 0.2)';
+                    e.currentTarget.style.background = `linear-gradient(135deg, ${theme === 'dark' ? 'rgba(139, 92, 246, 0.8)' : 'rgba(139, 92, 246, 0.9)'}, ${theme === 'dark' ? 'rgba(236, 72, 153, 0.8)' : 'rgba(236, 72, 153, 0.9)'})`;
+                  }
                 }}
               >
-                <Settings style={{ width: '16px', height: '16px' }} />
-                设置
+                <FileText style={{ width: '16px', height: '16px' }} />
+                新增报告
               </button>
             </div>
           </div>
@@ -885,6 +891,12 @@ export default function DashboardPage() {
       <UploadDialog
         open={isUploadDialogOpen}
         onOpenChange={setIsUploadDialogOpen}
+      />
+      
+      {/* 新增报告对话框 */}
+      <CreateReportDialog
+        open={isCreateReportDialogOpen}
+        onOpenChange={setIsCreateReportDialogOpen}
       />
 
     </div>

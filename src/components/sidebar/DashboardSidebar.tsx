@@ -353,7 +353,7 @@ function CategoryCard({
             {count}
           </div>
           
-          {/* 删除按钮 - 显示给所有分类 */}
+          {/* 删除按钮 - 显示给所有分类，但对受保护的分类显示不同样式 */}
           {onDelete && (
             <button
               onClick={(e) => {
@@ -364,24 +364,33 @@ function CategoryCard({
                 padding: '6px',
                 border: 'none',
                 borderRadius: '6px',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                color: '#dc2626',
-                cursor: 'pointer',
+                backgroundColor: category.id === 'uncategorized' 
+                  ? 'rgba(156, 163, 175, 0.1)' 
+                  : 'rgba(239, 68, 68, 0.1)',
+                color: category.id === 'uncategorized' 
+                  ? '#9ca3af' 
+                  : '#dc2626',
+                cursor: category.id === 'uncategorized' ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 transition: 'all 0.2s ease',
-                marginLeft: '8px'
+                marginLeft: '8px',
+                opacity: category.id === 'uncategorized' ? 0.5 : 1
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
-                e.currentTarget.style.transform = 'scale(1.1)';
+                if (category.id !== 'uncategorized') {
+                  e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.2)';
+                  e.currentTarget.style.transform = 'scale(1.1)';
+                }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-                e.currentTarget.style.transform = 'scale(1)';
+                if (category.id !== 'uncategorized') {
+                  e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                  e.currentTarget.style.transform = 'scale(1)';
+                }
               }}
-              title="删除分类"
+              title={category.id === 'uncategorized' ? '系统分类不能删除' : '删除分类'}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M3 6h18" />
@@ -829,6 +838,11 @@ export function DashboardSidebar() {
                       setTimeout(() => {
                         handleStartEdit(result.category.id, dbCategory.label);
                       }, 100);
+                      
+                      // 触发分类创建事件，通知其他组件更新
+                      window.dispatchEvent(new CustomEvent('categoryCreated', {
+                        detail: { category: result.category }
+                      }));
                       
                       console.log('✅ 新分类创建完成');
                     } else {

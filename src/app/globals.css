@@ -64,4 +64,40 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* 防止浏览器自动翻译高亮 */
+* {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* 移除Chrome翻译高亮 */
+*::-webkit-selection {
+  background: transparent;
+}
+
+*::selection {
+  background: transparent;
+}
+
+/* 防止翻译插件添加样式 */
+[style*="background-color: yellow"],
+[style*="background-color: rgb(255, 255, 0)"],
+[style*="background: yellow"],
+[style*="background: rgb(255, 255, 0)"] {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* 针对Google翻译的特定样式 */
+.goog-te-banner-frame,
+.goog-te-menu-frame {
+  display: none !important;
+}
+
+body {
+  top: 0 !important;
 } 
