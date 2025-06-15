@@ -13,6 +13,7 @@ export interface Report {
   readStatus: 'unread' | 'reading' | 'completed';
   fileSize?: number;
   wordCount?: number;
+  priority?: 'low' | 'medium' | 'high';
 }
 
 // 分类相关类型定义
@@ -115,24 +116,41 @@ export interface AppState {
   batchMode: boolean;
   setBatchMode: (enabled: boolean) => void;
   
+  // 数据加载状态
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
+  
   // 数据
   reports: Report[];
   categories: Category[];
   setReports: (reports: Report[]) => void;
   setCategories: (categories: Category[]) => void;
-  addReport: (report: Report) => void;
   
-  // 报告编辑功能
-  updateReport: (reportId: string, updates: Partial<Report>) => void;
-  deleteReport: (reportId: string) => void;
-  deleteReports: (reportIds: string[]) => void;
-  toggleFavorite: (reportId: string) => void;
-  updateReportsStatus: (reportIds: string[], status: Report['readStatus']) => void;
-  updateReportsCategory: (reportIds: string[], categoryId: string) => void;
-  toggleReportsFavorite: (reportIds: string[], favorite: boolean) => void;
-  replaceReportFile: (reportId: string, newFilePath: string, fileSize?: number, wordCount?: number) => void;
+  // 预定义分类名称管理
+  predefinedCategoryNames: { [key: string]: string };
+  updatePredefinedCategoryName: (categoryId: string, newName: string) => void;
+  loadPredefinedCategoryNames: () => void;
   
-  // 编辑功能（原有的保持兼容）
-  updateCategoryName: (categoryId: string, newName: string) => void;
-  updateReportTitle: (reportId: string, newTitle: string) => void;
+  // 数据加载和刷新
+  loadData: () => Promise<void>;
+  refreshData: () => Promise<void>;
+  
+  // 登录状态检查
+  checkLoginStatus: () => Promise<boolean>;
+  
+  // 报告管理（异步方法）
+  addReport: (report: Omit<Report, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Report>;
+  updateReport: (reportId: string, updates: Partial<Report>) => Promise<Report>;
+  deleteReport: (reportId: string) => Promise<void>;
+  deleteReports: (reportIds: string[]) => Promise<void>;
+  toggleFavorite: (reportId: string) => Promise<void>;
+  updateReportsStatus: (reportIds: string[], status: Report['readStatus']) => Promise<void>;
+  updateReportsCategory: (reportIds: string[], categoryId: string) => Promise<void>;
+  toggleReportsFavorite: (reportIds: string[], favorite: boolean) => Promise<void>;
+  replaceReportFile: (reportId: string, newFilePath: string, fileSize?: number, wordCount?: number) => Promise<void>;
+  
+  // 分类管理（异步方法）
+  updateCategory: (categoryId: string, updates: Partial<Category>) => Promise<void>;
+  addCategory: (category: Omit<Category, 'id' | 'reportCount'>) => Promise<Category>;
+  deleteCategory: (categoryId: string) => Promise<void>;
 } 

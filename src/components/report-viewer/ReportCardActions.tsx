@@ -36,32 +36,44 @@ import { FileReplaceDialog } from './FileReplaceDialog';
 
 interface ReportCardActionsProps {
   report: Report;
+  onMenuOpenChange?: (open: boolean) => void;
 }
 
-export function ReportCardActions({ report }: ReportCardActionsProps) {
+export function ReportCardActions({ report, onMenuOpenChange }: ReportCardActionsProps) {
   const { deleteReport, toggleFavorite, setSelectedReport } = useAppStore();
   
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [replaceDialogOpen, setReplaceDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const handleView = () => {
+  const handleView = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     setSelectedReport(report);
   };
 
-  const handleEdit = () => {
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     setEditDialogOpen(true);
   };
 
-  const handleToggleFavorite = () => {
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     toggleFavorite(report.id);
   };
 
-  const handleReplaceFile = () => {
+  const handleReplaceFile = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     setReplaceDialogOpen(true);
   };
 
-  const handleDelete = () => {
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     setDeleteDialogOpen(true);
   };
 
@@ -70,7 +82,9 @@ export function ReportCardActions({ report }: ReportCardActionsProps) {
     setDeleteDialogOpen(false);
   };
 
-  const handleCopyTitle = async () => {
+  const handleCopyTitle = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
     try {
       await navigator.clipboard.writeText(report.title);
     } catch (error) {
@@ -80,29 +94,46 @@ export function ReportCardActions({ report }: ReportCardActionsProps) {
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu 
+        modal={false} 
+        open={menuOpen} 
+        onOpenChange={(open) => {
+          setMenuOpen(open);
+          onMenuOpenChange?.(open);
+        }}
+      >
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
             size="sm"
             className="h-6 w-6 p-0"
             data-action-button
+            onClick={(e) => e.stopPropagation()}
           >
             <MoreHorizontal className="h-3 w-3" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem onClick={handleView}>
+        <DropdownMenuContent align="end" className="w-48" onClick={(e) => e.stopPropagation()}>
+          <DropdownMenuItem 
+            onClick={handleView}
+            onSelect={(e) => e.preventDefault()}
+          >
             <Eye className="h-4 w-4 mr-2" />
             查看报告
           </DropdownMenuItem>
           
-          <DropdownMenuItem onClick={handleEdit}>
+          <DropdownMenuItem 
+            onClick={handleEdit}
+            onSelect={(e) => e.preventDefault()}
+          >
             <Edit className="h-4 w-4 mr-2" />
             编辑信息
           </DropdownMenuItem>
 
-          <DropdownMenuItem onClick={handleToggleFavorite}>
+          <DropdownMenuItem 
+            onClick={handleToggleFavorite}
+            onSelect={(e) => e.preventDefault()}
+          >
             {report.isFavorite ? (
               <>
                 <StarOff className="h-4 w-4 mr-2" />
@@ -116,14 +147,20 @@ export function ReportCardActions({ report }: ReportCardActionsProps) {
             )}
           </DropdownMenuItem>
 
-          <DropdownMenuItem onClick={handleCopyTitle}>
+          <DropdownMenuItem 
+            onClick={handleCopyTitle}
+            onSelect={(e) => e.preventDefault()}
+          >
             <Copy className="h-4 w-4 mr-2" />
             复制标题
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />
 
-          <DropdownMenuItem onClick={handleReplaceFile}>
+          <DropdownMenuItem 
+            onClick={handleReplaceFile}
+            onSelect={(e) => e.preventDefault()}
+          >
             <Upload className="h-4 w-4 mr-2" />
             替换文件
           </DropdownMenuItem>
@@ -132,6 +169,7 @@ export function ReportCardActions({ report }: ReportCardActionsProps) {
 
           <DropdownMenuItem
             onClick={handleDelete}
+            onSelect={(e) => e.preventDefault()}
             className="text-destructive focus:text-destructive"
           >
             <Trash2 className="h-4 w-4 mr-2" />

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="这是一个测试报告，用于验证上传功能是否正常工作。">
+    <meta name="keywords" content="测试,上传,功能,验证">
+    <title>测试报告 - 上传功能验证</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 30px;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+        .code {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>测试报告 - 上传功能验证</h1>
+    
+    <div class="highlight">
+        <strong>报告摘要：</strong>本报告用于测试Wendeal Reports系统的文件上传功能，验证HTML文件解析、元数据提取和报告创建流程。
+    </div>
+
+    <h2>1. 测试目标</h2>
+    <p>验证以下功能是否正常工作：</p>
+    <ul>
+        <li>HTML文件上传和解析</li>
+        <li>标题自动提取（从title标签或h1标签）</li>
+        <li>描述自动提取（从meta description或首段文字）</li>
+        <li>关键词标签提取（从meta keywords）</li>
+        <li>字数统计功能</li>
+        <li>分类归档功能</li>
+    </ul>
+
+    <h2>2. 测试内容</h2>
+    <p>这个HTML文件包含了完整的结构化内容，包括：</p>
+    
+    <h3>2.1 元数据信息</h3>
+    <div class="code">
+        &lt;title&gt;测试报告 - 上传功能验证&lt;/title&gt;<br>
+        &lt;meta name="description" content="这是一个测试报告..."&gt;<br>
+        &lt;meta name="keywords" content="测试,上传,功能,验证"&gt;
+    </div>
+
+    <h3>2.2 结构化内容</h3>
+    <p>包含标题、段落、列表、代码块等多种HTML元素，用于测试内容解析的完整性。</p>
+
+    <h2>3. 预期结果</h2>
+    <p>上传成功后，系统应该能够：</p>
+    <ol>
+        <li><strong>正确提取标题：</strong>"测试报告 - 上传功能验证"</li>
+        <li><strong>正确提取描述：</strong>"这是一个测试报告，用于验证上传功能是否正常工作。"</li>
+        <li><strong>正确提取标签：</strong>["测试", "上传", "功能", "验证"]</li>
+        <li><strong>计算字数：</strong>应该显示合理的字数统计</li>
+        <li><strong>设置状态：</strong>默认为"未读"状态</li>
+        <li><strong>归档分类：</strong>根据用户选择的分类进行归档</li>
+    </ol>
+
+    <h2>4. 测试步骤</h2>
+    <p>请按照以下步骤进行测试：</p>
+    <ol>
+        <li>点击"📤 上传报告"按钮</li>
+        <li>选择或拖拽此HTML文件</li>
+        <li>选择合适的分类（建议选择"技术文档"或"测试"）</li>
+        <li>点击"上传全部"按钮</li>
+        <li>验证报告是否正确添加到系统中</li>
+        <li>检查报告的各项信息是否正确提取</li>
+    </ol>
+
+    <h2>5. 故障排除</h2>
+    <p>如果上传失败，请检查：</p>
+    <ul>
+        <li>文件格式是否为HTML</li>
+        <li>文件大小是否超过10MB限制</li>
+        <li>浏览器控制台是否有错误信息</li>
+        <li>localStorage是否有足够空间</li>
+    </ul>
+
+    <div class="highlight">
+        <strong>注意：</strong>这是一个测试文件，上传成功后可以安全删除。删除操作也是测试的一部分，用于验证删除功能是否正常工作。
+    </div>
+
+    <h2>6. 技术细节</h2>
+    <p>本测试文件的技术特点：</p>
+    <ul>
+        <li><strong>文件大小：</strong>约5KB，在合理范围内</li>
+        <li><strong>字符编码：</strong>UTF-8，支持中文内容</li>
+        <li><strong>HTML结构：</strong>符合HTML5标准</li>
+        <li><strong>样式：</strong>包含内联CSS样式</li>
+        <li><strong>内容丰富度：</strong>包含多种HTML元素类型</li>
+    </ul>
+
+    <p><em>测试文件创建时间：2025年6月13日</em></p>
+    <p><em>版本：1.0</em></p>
+</body>
+</html> 

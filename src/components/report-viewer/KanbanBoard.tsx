@@ -27,7 +27,7 @@ const STATUS_COLUMNS = [
 ] as const;
 
 export function KanbanBoard({ reports, onReportClick }: KanbanBoardProps) {
-  const { setReports } = useAppStore();
+  const { updateReport } = useAppStore();
   const [activeId, setActiveId] = useState<string | null>(null);
   
   const sensors = useSensors(
@@ -75,18 +75,10 @@ export function KanbanBoard({ reports, onReportClick }: KanbanBoardProps) {
     }
 
     // 更新报告状态
-    const updatedReports = reports.map(report => {
-      if (report.id === reportId) {
-        return {
-          ...report,
-          readStatus: newStatus,
-          updatedAt: new Date(),
-        };
-      }
-      return report;
+    updateReport(reportId, {
+      readStatus: newStatus,
+      updatedAt: new Date(),
     });
-
-    setReports(updatedReports);
   };
 
   const activeReport = activeId ? reports.find(r => r.id === activeId) : null;

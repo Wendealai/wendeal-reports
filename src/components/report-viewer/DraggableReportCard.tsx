@@ -33,6 +33,7 @@ export function DraggableReportCard({
   isDragging = false 
 }: DraggableReportCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { selectedReports, setSelectedReports, batchMode } = useAppStore();
   
   const {
@@ -61,6 +62,9 @@ export function DraggableReportCard({
   const handleCardClick = (e: React.MouseEvent) => {
     // 防止在拖拽时触发点击
     if (isSortableDragging || isDragging) return;
+    
+    // 如果菜单正在打开，不触发报告查看
+    if (isMenuOpen) return;
     
     // 如果点击的是展开按钮或设置按钮区域，不触发报告查看
     if ((e.target as HTMLElement).closest('[data-action-button]')) {
@@ -151,7 +155,10 @@ export function DraggableReportCard({
                 <ChevronDown className="h-3 w-3" />
               )}
             </Button>
-            <ReportCardActions report={report} />
+            <ReportCardActions 
+              report={report} 
+              onMenuOpenChange={setIsMenuOpen}
+            />
           </div>
         </div>
 
