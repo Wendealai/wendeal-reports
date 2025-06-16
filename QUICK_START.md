@@ -46,8 +46,8 @@ docker-compose up -d --build
 
 ## 🌐 访问应用
 
-- **开发环境**: http://localhost:3000
-- **生产环境**: http://your-server-ip
+- **开发环境**: http://localhost:7575
+- **生产环境**: http://your-server-ip:7575
 
 ## 🔧 常用命令
 
@@ -72,7 +72,7 @@ docker-compose up -d --build
 ## 📊 健康检查
 
 ```bash
-curl http://localhost:3000/api/health
+curl http://localhost:7575/api/health
 ```
 
 ## 🔒 生产环境注意事项
@@ -107,9 +107,9 @@ curl http://localhost:3000/api/health
 
 1. **端口被占用**：
    ```bash
-   # 检查端口占用
-   netstat -tulpn | grep :3000
-   # 或修改 docker-compose.yml 中的端口映射
+       # 检查端口占用
+    netstat -tulpn | grep :7575
+    # 或修改 docker-compose.yml 中的端口映射
    ```
 
 2. **权限问题**：
@@ -131,4 +131,4 @@ curl http://localhost:3000/api/health
 
 - 查看详细文档：`DOCKER_DEPLOYMENT.md`
 - GitHub Issues：https://github.com/Wendealai/wendeal-reports/issues
-- 健康检查：http://localhost:3000/api/health 
+- 健康检查：http://localhost:7575/api/health 

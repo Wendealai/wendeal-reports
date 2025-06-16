@@ -74,7 +74,7 @@ deploy_dev() {
     docker-compose up -d --build
     
     print_message "开发环境部署完成！"
-    print_message "访问地址: http://localhost:3000"
+    print_message "访问地址: http://localhost:7575"
 }
 
 # 部署生产环境
@@ -95,7 +95,7 @@ deploy_prod() {
     docker-compose -f docker-compose.prod.yml up -d --build
     
     print_message "生产环境部署完成！"
-    print_message "访问地址: http://your-server-ip"
+    print_message "访问地址: http://your-server-ip:7575"
 }
 
 # 显示状态
@@ -108,7 +108,7 @@ show_status() {
     
     print_message "健康检查:"
     sleep 5
-    curl -f http://localhost:3000/api/health || print_warning "健康检查失败，请检查应用状态"
+    curl -f http://localhost:7575/api/health || print_warning "健康检查失败，请检查应用状态"
 }
 
 # 主函数

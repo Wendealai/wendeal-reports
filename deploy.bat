@@ -61,7 +61,7 @@ if "%MODE%"=="dev" (
     docker-compose up -d --build
     
     echo [INFO] 开发环境部署完成！
-    echo [INFO] 访问地址: http://localhost:3000
+    echo [INFO] 访问地址: http://localhost:7575
 ) else (
     echo [INFO] 开始部署生产环境...
     
@@ -80,7 +80,7 @@ if "%MODE%"=="dev" (
     docker-compose -f docker-compose.prod.yml up -d --build
     
     echo [INFO] 生产环境部署完成！
-    echo [INFO] 访问地址: http://your-server-ip
+    echo [INFO] 访问地址: http://your-server-ip:7575
 )
 
 REM 显示状态
@@ -94,7 +94,7 @@ echo [INFO] 等待应用启动...
 timeout /t 10 /nobreak >nul
 
 echo [INFO] 健康检查:
-curl -f http://localhost:3000/api/health 2>nul
+curl -f http://localhost:7575/api/health 2>nul
 if errorlevel 1 (
     echo [WARNING] 健康检查失败，请检查应用状态
 ) else (

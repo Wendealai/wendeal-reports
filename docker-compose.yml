@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: wendeal-reports-app
     ports:
-      - "3000:3000"
+      - "7575:3000"
     environment:
       - NODE_ENV=production
       - DATABASE_URL=file:/app/data/wendeal.db

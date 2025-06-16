@@ -40,8 +40,8 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ### 4. 访问应用
 
-- 开发环境：http://localhost:3000
-- 生产环境：http://your-server-ip
+- 开发环境：http://localhost:7575
+- 生产环境：http://your-server-ip:7575
 
 ## 🔧 详细配置
 
@@ -53,7 +53,7 @@ docker-compose -f docker-compose.prod.yml up -d
 | `JWT_SECRET` | JWT签名密钥 | - | 是 |
 | `NODE_ENV` | 运行环境 | `production` | 否 |
 | `APP_NAME` | 应用名称 | `Wendeal Reports` | 否 |
-| `APP_URL` | 应用URL | `http://localhost:3000` | 否 |
+| `APP_URL` | 应用URL | `http://localhost:7575` | 否 |
 
 ### 数据持久化
 
@@ -64,8 +64,8 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ### 端口配置
 
-- **开发环境**: 3000
-- **生产环境**: 80 (HTTP), 443 (HTTPS)
+- **开发环境**: 7575
+- **生产环境**: 7575 (HTTP), 443 (HTTPS)
 
 ## 🛠️ 管理命令
 
@@ -183,7 +183,7 @@ http {
 应用提供健康检查端点：
 
 ```bash
-curl http://localhost:3000/api/health
+curl http://localhost:7575/api/health
 ```
 
 ### 备份数据
@@ -225,7 +225,7 @@ docker-compose up -d --build
 3. **端口冲突**
    ```bash
    # 检查端口占用
-   netstat -tulpn | grep :3000
+   netstat -tulpn | grep :7575
    ```
 
 ### 重置应用
