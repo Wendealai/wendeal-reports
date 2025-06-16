@@ -1,3 +1,7 @@
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('ApiClient');
+
 // API客户端配置
 const API_BASE_URL = '/api'
 
@@ -23,7 +27,7 @@ async function request<T>(
     ...options,
   }
 
-  console.log('🌐 API请求开始:', {
+  logger.debug('🌐 API请求开始:', {
     url,
     method: config.method || 'GET',
     headers: config.headers,
@@ -33,7 +37,7 @@ async function request<T>(
   try {
     const response = await fetch(url, config)
     
-    console.log('📡 API响应:', {
+    logger.debug('📡 API响应:', {
       url,
       status: response.status,
       statusText: response.statusText,
@@ -43,16 +47,16 @@ async function request<T>(
     
     const data = await response.json()
 
-    console.log('📄 响应数据:', data);
+    logger.debug('📄 响应数据:', data);
 
     if (!response.ok) {
-      console.error('❌ API错误:', { status: response.status, error: data.error, data });
+      logger.error('❌ API错误:', { status: response.status, error: data.error, data });
       throw new ApiError(response.status, data.error || '请求失败', data)
     }
 
     return data
   } catch (error) {
-    console.error('🚫 网络错误:', error);
+    logger.error('🚫 网络错误:', error);
     if (error instanceof ApiError) {
       throw error
     }

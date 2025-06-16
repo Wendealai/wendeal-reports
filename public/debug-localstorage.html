@@ -1,0 +1,193 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>分类编辑localStorage测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 3px; }
+        .error { background: #f8d7da; color: #721c24; }
+        .success { background: #d4edda; color: #155724; }
+        pre { background: #f1f1f1; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 分类编辑localStorage调试工具</h1>
+    
+    <div class="test-section">
+        <h3>1. localStorage基础测试</h3>
+        <button onclick="testBasicStorage()">测试基础读写</button>
+        <div id="basic-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. 模拟分类编辑流程</h3>
+        <input type="text" id="category-name" placeholder="输入新的分类名称" value="💻 测试技术研究">
+        <button onclick="simulateCategoryEdit()">模拟编辑保存</button>
+        <div id="edit-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. 查看当前localStorage数据</h3>
+        <button onclick="showCurrentData()">显示所有数据</button>
+        <button onclick="clearAllData()">清除所有数据</button>
+        <div id="data-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>4. 刷新持久化测试</h3>
+        <p>执行以下步骤：</p>
+        <ol>
+            <li>点击"模拟编辑保存"</li>
+            <li>查看保存结果</li>
+            <li>刷新此页面(F5)</li>
+            <li>再次点击"显示所有数据"</li>
+            <li>验证数据是否还在</li>
+        </ol>
+    </div>
+    
+    <script>
+        function log(message, type = 'info') {
+            console.log(`[${new Date().toISOString()}] ${message}`);
+        }
+        
+        function showResult(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = message;
+            element.className = 'result ' + (isError ? 'error' : 'success');
+        }
+        
+        function testBasicStorage() {
+            try {
+                const testKey = 'test_storage';
+                const testValue = { message: 'hello', timestamp: new Date().toISOString() };
+                
+                // 写入测试
+                localStorage.setItem(testKey, JSON.stringify(testValue));
+                log('写入localStorage成功');
+                
+                // 读取测试
+                const retrieved = localStorage.getItem(testKey);
+                const parsed = JSON.parse(retrieved);
+                
+                // 清理
+                localStorage.removeItem(testKey);
+                
+                showResult('basic-result', `
+                    ✅ localStorage基础功能正常<br>
+                    写入: ${JSON.stringify(testValue)}<br>
+                    读取: ${JSON.stringify(parsed)}<br>
+                    匹配: ${JSON.stringify(testValue) === JSON.stringify(parsed) ? '是' : '否'}
+                `);
+                
+            } catch (error) {
+                showResult('basic-result', `❌ localStorage基础测试失败: ${error.message}`, true);
+            }
+        }
+        
+        function simulateCategoryEdit() {
+            try {
+                const categoryName = document.getElementById('category-name').value;
+                const categoryId = 'tech-research';
+                
+                log(`开始模拟分类编辑: ${categoryId} -> ${categoryName}`);
+                
+                // 步骤1: 读取现有数据
+                const existing = localStorage.getItem('predefined_category_names') || '{}';
+                const currentNames = JSON.parse(existing);
+                log(`现有数据: ${JSON.stringify(currentNames)}`);
+                
+                // 步骤2: 更新数据
+                const updatedNames = {
+                    ...currentNames,
+                    [categoryId]: categoryName
+                };
+                log(`更新后数据: ${JSON.stringify(updatedNames)}`);
+                
+                // 步骤3: 保存到localStorage
+                localStorage.setItem('predefined_category_names', JSON.stringify(updatedNames));
+                log('数据已保存到localStorage');
+                
+                // 步骤4: 立即验证
+                const verification = localStorage.getItem('predefined_category_names');
+                const verifiedData = JSON.parse(verification);
+                log(`验证读取: ${JSON.stringify(verifiedData)}`);
+                
+                const success = verifiedData[categoryId] === categoryName;
+                
+                showResult('edit-result', `
+                    📝 模拟编辑完成<br>
+                    分类ID: ${categoryId}<br>
+                    新名称: ${categoryName}<br>
+                    保存状态: ${success ? '✅ 成功' : '❌ 失败'}<br>
+                    验证结果: ${verifiedData[categoryId] || '未找到'}<br>
+                    时间戳: ${new Date().toISOString()}
+                `, !success);
+                
+            } catch (error) {
+                showResult('edit-result', `❌ 模拟编辑失败: ${error.message}`, true);
+            }
+        }
+        
+        function showCurrentData() {
+            try {
+                const allKeys = Object.keys(localStorage);
+                const relevantKeys = allKeys.filter(key => 
+                    key.includes('category') || key.includes('predefined')
+                );
+                
+                let output = '<h4>相关localStorage数据:</h4>';
+                
+                if (relevantKeys.length === 0) {
+                    output += '<p>❌ 没有找到相关的localStorage数据</p>';
+                } else {
+                    relevantKeys.forEach(key => {
+                        const value = localStorage.getItem(key);
+                        try {
+                            const parsed = JSON.parse(value);
+                            output += `
+                                <div style="margin: 10px 0;">
+                                    <strong>${key}:</strong><br>
+                                    <pre>${JSON.stringify(parsed, null, 2)}</pre>
+                                </div>
+                            `;
+                        } catch {
+                            output += `
+                                <div style="margin: 10px 0;">
+                                    <strong>${key}:</strong><br>
+                                    <pre>${value}</pre>
+                                </div>
+                            `;
+                        }
+                    });
+                }
+                
+                output += `<p><small>总共 ${allKeys.length} 个localStorage键，其中 ${relevantKeys.length} 个相关</small></p>`;
+                
+                showResult('data-result', output);
+                
+            } catch (error) {
+                showResult('data-result', `❌ 读取数据失败: ${error.message}`, true);
+            }
+        }
+        
+        function clearAllData() {
+            if (confirm('确定要清除所有相关的localStorage数据吗？')) {
+                const keys = ['predefined_category_names', 'custom_categories', 'category_order', 'hidden_categories'];
+                keys.forEach(key => localStorage.removeItem(key));
+                showResult('data-result', '🧹 所有相关数据已清除');
+                log('localStorage数据已清除');
+            }
+        }
+        
+        // 页面加载时自动显示当前数据
+        window.onload = function() {
+            showCurrentData();
+            log('调试页面加载完成');
+        };
+    </script>
+</body>
+</html>

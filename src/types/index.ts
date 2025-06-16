@@ -128,7 +128,7 @@ export interface AppState {
   
   // 预定义分类名称管理
   predefinedCategoryNames: { [key: string]: string };
-  updatePredefinedCategoryName: (categoryId: string, newName: string) => void;
+  updatePredefinedCategoryName: (categoryId: string, newName: string) => Promise<void>;
   loadPredefinedCategoryNames: () => void;
   
   // 数据加载和刷新

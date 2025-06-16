@@ -1,9 +1,8 @@
-﻿import { create } from 'zustand';
+import { create } from 'zustand';
 import { AppState, Report, Category, SearchFilters, SearchHistory, SavedSearch, SortOptions } from '@/types';
 import { reportsApi, categoriesApi } from '@/lib/api-client';
-import { createLogger } from '@/lib/logger';
-
-const logger = createLogger('AppStore');
+import { logger } from '@/lib/logger';
+import type { Report as ApiReport, Category as ApiCategory } from '@/types/api';
 
 export const useAppStore = create<AppState>()((set, get) => ({
   // 侧边栏状态
@@ -86,73 +85,18 @@ export const useAppStore = create<AppState>()((set, get) => ({
     'industry-insights': '🔬 行业洞察',
   },
   
-  // 更新预定义分类名称（基于Context7最佳实践）
-  updatePredefinedCategoryName: async (categoryId: string, newName: string) => {
-    // 🚀 使用Zustand推荐的函数式状态更新，确保引用相等性
-    // 同时在回调中获取更新后的状态用于localStorage
-    let newNamesForLocalStorage: Record<string, string> | undefined;
-
-    set((state) => {
-      const updatedNames = {
-        ...state.predefinedCategoryNames,
-        [categoryId]: newName
-      };
-      newNamesForLocalStorage = updatedNames; // 捕获更新后的状态
-      return {
-        predefinedCategoryNames: updatedNames
-      };
-    });
+  // 更新预定义分类名称
+  updatePredefinedCategoryName: (categoryId: string, newName: string) => {
+    const { predefinedCategoryNames } = get();
+    const updatedNames = {
+      ...predefinedCategoryNames,
+      [categoryId]: newName
+    };
+    set({ predefinedCategoryNames: updatedNames });
     
-    // 持久化到localStorage，确保使用回调中捕获的最新状态
-    if (typeof window !== 'undefined' && newNamesForLocalStorage) {
-      localStorage.setItem('predefined_category_names', JSON.stringify(newNamesForLocalStorage));
-      logger.debug('💾 Predefined category names saved to localStorage:', newNamesForLocalStorage);
-    } else if (typeof window !== 'undefined') {
-      logger.warn('⚠️ newNamesForLocalStorage was undefined, localStorage not updated immediately in set callback.');
-      // Fallback: 尝试再次获取，但这可能仍然不是最新的，更好的方式是依赖回调
-      // const currentStoreState = get();
-      // localStorage.setItem('predefined_category_names', JSON.stringify(currentStoreState.predefinedCategoryNames));
-      // logger.warn('⚠️ Used fallback to get predefinedCategoryNames for localStorage');
-    }
-    
-    // 🚀 新增：同步到数据库
-    try {
-      // 首先尝试在数据库中查找或创建对应的分类
-      const categoryMappings: Record<string, { name: string; icon: string; color: string }> = {
-        'uncategorized': { name: '未分类', icon: '📁', color: '#6B7280' },
-        'tech-research': { name: '技术研究', icon: '💻', color: '#3B82F6' },
-        'market-analysis': { name: '市场分析', icon: '📈', color: '#10B981' },
-        'product-review': { name: '产品评测', icon: '🔍', color: '#F59E0B' },
-        'industry-insights': { name: '行业洞察', icon: '🔬', color: '#8B5CF6' }
-      };
-      
-      const categoryDef = categoryMappings[categoryId as keyof typeof categoryMappings];
-      if (categoryDef) {
-        // 提取新名称（去掉emoji）
-        const cleanName = newName.replace(/^[^\s]*\s/, '').trim();
-        
-        // 尝试更新数据库中的分类
-        const response = await fetch('/api/categories/predefined', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            categoryId,
-            name: cleanName,
-            icon: categoryDef.icon,
-            color: categoryDef.color
-          }),
-        });
-        
-        if (response.ok) {
-          logger.debug('✅ 预定义分类已同步到数据库:', categoryId, cleanName);
-        } else {
-          logger.warn('⚠️ 数据库同步失败，但localStorage已更新:', categoryId);
-        }
-      }
-    } catch (error) {
-      logger.warn('⚠️ 数据库同步出错，但localStorage已更新:', error);
+    // 持久化到localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('predefined_category_names', JSON.stringify(updatedNames));
     }
   },
   
@@ -189,108 +133,15 @@ export const useAppStore = create<AppState>()((set, get) => ({
       logger.debug('📊 API响应 - 报告:', reportsResponse);
       logger.debug('📁 API响应 - 分类:', categoriesResponse);
 
-      // 🚀 关键修复：从数据库加载预定义分类名称
-      const predefinedCategoriesFromDB = (categoriesResponse.categories || []).filter((cat: any) => 
-        cat.id && cat.id.startsWith('predefined-')
-      );
-      
-      if (predefinedCategoriesFromDB.length > 0) {
-        logger.debug('📥 从数据库加载预定义分类:', predefinedCategoriesFromDB);
-        
-        // 构建前端分类名称映射（从数据库ID映射到前端ID）
-        const dbToFrontendMapping: Record<string, string> = {
-          'predefined-uncategorized': 'uncategorized',
-          'predefined-tech-research': 'tech-research',
-          'predefined-market-analysis': 'market-analysis',
-          'predefined-product-review': 'product-review',
-          'predefined-industry-insights': 'industry-insights'
-        };
-        
-        // 构建新的预定义分类名称对象
-        const updatedPredefinedNames: Record<string, string> = {};
-        
-        predefinedCategoriesFromDB.forEach((dbCategory: any) => {
-          const frontendId = dbToFrontendMapping[dbCategory.id];
-          if (frontendId && dbCategory.name && dbCategory.icon) {
-            // 组合emoji和名称
-            const fullName = `${dbCategory.icon} ${dbCategory.name}`;
-            updatedPredefinedNames[frontendId] = fullName;
-            logger.debug(`✅ 映射数据库分类: ${dbCategory.id} → ${frontendId} = "${fullName}"`);
-          }
-        });
-        
-        // 合并数据库预定义分类和localStorage中的自定义名称
-        const localStorageNames = typeof window !== 'undefined' ? 
-          JSON.parse(localStorage.getItem('predefined_category_names') || '{}') : {};
-
-        // 🚀 关键修复：不覆盖用户已编辑的分类名称
-        // 检查localStorage中是否有用户自定义的名称，如果有，则保持不变
-        const currentPredefinedNames = get().predefinedCategoryNames;
-        
-        // 只有当localStorage中有用户编辑的名称时，才优先使用localStorage的值
-        let finalPredefinedNames = { ...currentPredefinedNames };
-        
-        // 只添加新的数据库分类，不覆盖已存在的用户编辑
-        Object.keys(updatedPredefinedNames).forEach(key => {
-          if (!localStorageNames[key] && !currentPredefinedNames[key]) {
-            // 只有当localStorage和当前store中都没有这个分类时，才从数据库添加
-            finalPredefinedNames[key] = updatedPredefinedNames[key];
-          }
-        });
-        
-        // 应用localStorage中的用户编辑（优先级最高）
-        finalPredefinedNames = { ...finalPredefinedNames, ...localStorageNames };
-
-        logger.debug('🔄 保护用户编辑的分类名称合并:', {
-          currentStore: currentPredefinedNames,
-          fromDB: updatedPredefinedNames,
-          fromLocalStorage: localStorageNames,
-          final: finalPredefinedNames
-        });
-
-        // 只有当最终结果与当前不同时才更新
-        if (JSON.stringify(finalPredefinedNames) !== JSON.stringify(currentPredefinedNames)) {
-          set({ predefinedCategoryNames: finalPredefinedNames });
-          logger.debug('✅ 更新了预定义分类名称');
-        } else {
-          logger.debug('✅ 预定义分类名称无需更新，保持用户编辑');
-        }
-
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('predefined_category_names', JSON.stringify(finalPredefinedNames));
-          logger.debug('✅ 预定义分类名称已同步到localStorage和store');
-        }
-      } else {
-        // 数据库中没有预定义分类，尝试从localStorage加载
-        logger.debug('📝 数据库中没有预定义分类，尝试从localStorage加载');
-        const savedNames = typeof window !== 'undefined' ? localStorage.getItem('predefined_category_names') : null;
-        if (savedNames) {
-          try {
-            const parsedNames = JSON.parse(savedNames);
-            // 只有在store中还没有任何预定义名称时才设置，避免覆盖可能的初始默认值
-            if(Object.keys(get().predefinedCategoryNames).length === 0){
-                set({ predefinedCategoryNames: parsedNames });
-                logger.debug('📥 从localStorage加载预定义分类名称:', parsedNames);
-            } else {
-                logger.debug('ℹ️ Store中已有预定义分类，localStorage中的值未覆盖:', get().predefinedCategoryNames);
-            }
-          } catch (error) {
-            logger.error('解析localStorage分类名称失败:', error);
-          }
-        } else {
-          logger.debug('ℹ️ localStorage中也没有预定义分类名称');
-        }
-      }
-
       // 转换后端数据格式为前端格式
-      const transformedReports = (reportsResponse.reports || []).map((apiReport: any) => {
+      const transformedReports = (reportsResponse.reports || []).map((apiReport: ApiReport) => {
         // 创建分类ID映射
         let frontendCategoryId = 'uncategorized';
         
         // 处理分类ID映射
         if (apiReport.categoryId) {
           // 如果有categoryId，尝试从缓存的分类中查找
-          const category = (categoriesResponse.categories || []).find((c: any) => c.id === apiReport.categoryId);
+          const category = (categoriesResponse.categories || []).find((c: ApiCategory) => c.id === apiReport.categoryId);
           if (category) {
             const categoryNameMap: { [key: string]: string } = {
               '技术研究': 'tech-research',
@@ -325,7 +176,7 @@ export const useAppStore = create<AppState>()((set, get) => ({
       logger.debug('✅ 转换后的报告数据:', transformedReports);
 
       // 转换分类数据
-      const transformedCategories: Category[] = (categoriesResponse.categories || []).map((apiCategory: any) => ({
+      const transformedCategories: Category[] = (categoriesResponse.categories || []).map((apiCategory: ApiCategory) => ({
         id: apiCategory.id,
         name: apiCategory.name,
         description: apiCategory.description,
@@ -458,7 +309,7 @@ export const useAppStore = create<AppState>()((set, get) => ({
       // 重新加载分类数据以更新导航栏
       try {
         const categoriesResponse = await categoriesApi.getAll();
-        const transformedCategories: Category[] = (categoriesResponse.categories || []).map((apiCategory: any) => ({
+        const transformedCategories: Category[] = (categoriesResponse.categories || []).map((apiCategory: ApiCategory) => ({
           id: apiCategory.id,
           name: apiCategory.name,
           description: apiCategory.description,
@@ -841,4 +692,4 @@ export const useAppStore = create<AppState>()((set, get) => ({
       throw error;
     }
   },
-}));
+})); 

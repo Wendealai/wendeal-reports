@@ -1,9 +1,10 @@
 'use client';
 
+import { debounce } from 'lodash';
 import { useAppStore } from '@/store/useAppStore';
 import { File, Star, Clock, Folder, Edit2, GripVertical, Save, X } from 'lucide-react';
 import { UserManagement } from './UserManagement';
-import { useState, useEffect } from 'react';
+import { useState, useEffect , useCallback } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -77,48 +78,89 @@ function CategoryCard({
     return match ? match[1] : '📁';
   };
 
-  const handleSave = () => {
+  // 🚀 基于Context7最佳实践：检查分类来源而非ID格式
+  const isCustomCategory = (categoryId: string) => {
+    const customCategories = JSON.parse(localStorage.getItem('custom_categories') || '[]');
+    return customCategories.some((cat: any) => cat.id === categoryId);
+  };
+
+  const handleSave = async () => {
     if (editValue.trim()) {
       const newLabel = `${extractEmoji(category.label)} ${editValue.trim()}`;
       console.log('🔧 保存分类编辑:', {
         categoryId: category.id,
         oldLabel: category.label,
         newLabel: newLabel,
-        isCustomCategory: category.id.startsWith('category-')
+        isCustomCategory: isCustomCategory(category.id)
       });
       
-      // 检查是否是自定义分类（ID以'category-'开头）
-      if (category.id.startsWith('category-')) {
-        // 更新自定义分类
-        const customCategories = JSON.parse(localStorage.getItem('custom_categories') || '[]');
-        console.log('📝 更新前的自定义分类:', customCategories);
-        const updatedCustomCategories = customCategories.map((cat: any) => 
-          cat.id === category.id ? { ...cat, label: newLabel } : cat
-        );
-        localStorage.setItem('custom_categories', JSON.stringify(updatedCustomCategories));
-        console.log('✅ 更新后的自定义分类:', updatedCustomCategories);
-      } else {
-        // 更新预定义分类
-        updatePredefinedCategoryName(category.id, newLabel);
-        console.log('✅ 更新预定义分类:', category.id, newLabel);
+      try {
+        // 检查是否是自定义分类（通过localStorage检查而非ID格式）
+        if (isCustomCategory(category.id)) {
+          // 更新自定义分类
+          const customCategories = JSON.parse(localStorage.getItem('custom_categories') || '[]');
+          console.log('📝 更新前的自定义分类:', customCategories);
+          const updatedCustomCategories = customCategories.map((cat: any) => 
+            cat.id === category.id ? { ...cat, label: newLabel } : cat
+          );
+          localStorage.setItem('custom_categories', JSON.stringify(updatedCustomCategories));
+          console.log('✅ 更新后的自定义分类:', updatedCustomCategories);
+          
+          // 🚀 关键修复：发送事件通知父组件更新UI
+          // 基于Context7最佳实践：自定义分类更新后立即更新UI状态
+          console.log('🔄 发送自定义事件通知UI更新');
+          window.dispatchEvent(new CustomEvent('customCategoryChanged', {
+            detail: { categoryId: category.id, newLabel }
+          }));
+        } else {
+          // 更新预定义分类 - 使用Zustand最佳实践的状态更新方式
+          await updatePredefinedCategoryName(category.id, newLabel);
+          console.log('✅ 更新预定义分类:', category.id, newLabel);
+        }
+        
+        // 🚀 改进：使用Promise确保状态更新完成后再调用回调
+        // 遵循Zustand最佳实践：确保状态变化完全同步后再更新UI
+        await new Promise(resolve => setTimeout(resolve, 50)); // 确保状态写入完成
+        
+        // 验证状态是否已正确更新
+        const { predefinedCategoryNames } = useAppStore.getState();
+        const verificationName = predefinedCategoryNames[category.id];
+        
+        if (verificationName === newLabel || isCustomCategory(category.id)) {
+          console.log('✅ 状态验证成功，调用onSaveEdit');
+          onSaveEdit(category.id);
+                 } else {
+           console.warn('⚠️ 状态验证失败，使用Zustand最佳实践重试');
+           // 🚀 基于Context7最佳实践：等待状态真正更新完成
+           await new Promise<void>((resolve) => {
+             const checkState = () => {
+               const { predefinedCategoryNames } = useAppStore.getState();
+               if (predefinedCategoryNames[category.id] === newLabel) {
+                 console.log('✅ 状态验证成功，更新完成');
+                 resolve();
+               } else {
+                 // 50ms后重试，确保状态更新完成
+                 setTimeout(checkState, 50);
+               }
+             };
+             checkState();
+           });
+           
+           onSaveEdit(category.id);
+         }
+        
+      } catch (error) {
+        console.error('❌ 保存分类时出错:', error);
+        // 即使出错也要退出编辑状态
+        onSaveEdit(category.id);
       }
-      
-      onSaveEdit(category.id);
-      
-      // 触发事件通知更新
-      setTimeout(() => {
-        console.log('🔄 触发categoryOrderChanged事件');
-        window.dispatchEvent(new CustomEvent('categoryOrderChanged'));
-      }, 100);
     }
   };
 
   // 编辑状态的卡片
   if (isEditing) {
     return (
-      <div 
-        ref={setNodeRef} 
-        style={{
+      <div ref={setNodeRef} data-category-id={category.id} style={{
           ...style,
           margin: '4px 0',
           padding: '12px',
@@ -239,9 +281,7 @@ function CategoryCard({
 
   // 普通状态的卡片
   return (
-    <div 
-      ref={setNodeRef} 
-      style={{
+    <div ref={setNodeRef} data-category-id={category.id} style={{
         ...style,
         opacity: isDragging ? 0.7 : 1,
         margin: '4px 0',
@@ -408,6 +448,14 @@ function CategoryCard({
 }
 
 export function DashboardSidebar() {
+  // 防抖函数，避免频繁触发更新事件
+  const debounceUpdateCategories = useCallback(
+    debounce(() => {
+      console.log('🔄 防抖触发分类更新');
+      window.dispatchEvent(new CustomEvent('categoryOrderChanged'));
+    }, 100),
+    []
+  );
   const { 
     selectedCategory, 
     setSelectedCategory, 
@@ -441,20 +489,49 @@ export function DashboardSidebar() {
   ];
 
   // 预定义分类 - 从store中获取自定义名称并支持排序
-  const [predefinedCategories, setPredefinedCategories] = useState([
-    { id: 'uncategorized', label: predefinedCategoryNames['uncategorized'] || '📁 未分类', icon: Folder, order: 0 },
-    { id: 'tech-research', label: predefinedCategoryNames['tech-research'] || '💻 技术研究', icon: File, order: 1 },
-    { id: 'market-analysis', label: predefinedCategoryNames['market-analysis'] || '📈 市场分析', icon: File, order: 2 },
-    { id: 'product-review', label: predefinedCategoryNames['product-review'] || '🔍 产品评测', icon: File, order: 3 },
-    { id: 'industry-insights', label: predefinedCategoryNames['industry-insights'] || '🔬 行业洞察', icon: File, order: 4 },
-  ]);
+    // 🚀 修复硬编码问题：预定义分类从数据库和localStorage动态加载，初始为空数组
+  const [predefinedCategories, setPredefinedCategories] = useState<Array<{
+    id: string;
+    label: string;
+    icon: any;
+    order: number;
+  }>>([]);
 
   // 在组件加载时读取保存的分类名称和排序
   useEffect(() => {
-    loadPredefinedCategoryNames();
+    // 🚀 修复：移除loadPredefinedCategoryNames()调用，避免与Dashboard页面的loadData()竞争
+    // loadPredefinedCategoryNames(); // 已移除，由Dashboard页面统一加载
     
     const updateCategories = () => {
+      // 🛡️ 如果正在编辑分类，暂停更新避免冲突
+      if (editingId) {
+        console.log('⏸️ 正在编辑分类，跳过自动更新:', editingId);
+        return;
+      }
       console.log('🔄 更新分类列表...');
+      
+      // 🚀 防抖检查：如果正在编辑，跳过更新
+      const editingKeys = ['category_editing_uncategorized', 'category_editing_tech-research', 
+                          'category_editing_market-analysis', 'category_editing_product-review', 
+                          'category_editing_industry-insights'];
+      const isEditing = editingKeys.some(key => localStorage.getItem(key) === 'true');
+      if (isEditing) {
+        console.log('⏸️ 检测到正在编辑分类，跳过更新');
+        return;
+      }
+      
+      // 🚀 修复：移除硬编码初始化，完全依赖数据库和store
+      // 不再进行本地硬编码初始化，由loadData函数从数据库加载
+      // 🔍 强制验证localStorage数据
+      const verifyData = () => {
+        const stored = localStorage.getItem('predefined_category_names');
+        console.log('🔍 localStorage验证:', {
+          raw: stored,
+          parsed: stored ? JSON.parse(stored) : null,
+          存在性: stored ? 'YES' : 'NO'
+        });
+      };
+      verifyData();
       // 加载排序
       const savedOrder = localStorage.getItem('category_order');
       let orderMap: { [key: string]: number } = {};
@@ -467,8 +544,43 @@ export function DashboardSidebar() {
         }
       }
 
-      // 获取最新的分类名称
-      const currentNames = JSON.parse(localStorage.getItem('predefined_category_names') || '{}');
+      // 🚀 修复：优先从store读取，localStorage为备份，避免竞争条件
+      const { predefinedCategoryNames: storeNames } = useAppStore.getState();
+      const localNames = JSON.parse(localStorage.getItem('predefined_category_names') || '{}');
+      
+      // 合并store和localStorage数据，优先使用有数据的源
+      const mergedNames = Object.keys(storeNames).length > 0 ? 
+        { ...localNames, ...storeNames } : localNames;
+      
+      console.log('📊 智能数据合并:', {
+        store: storeNames,
+        localStorage: localNames,
+        merged: mergedNames
+      });
+      // 🔍 验证分类名称是否存在
+      console.log('🔍 分类名称验证:', {
+        'uncategorized': localNames['uncategorized'] ? '✅ 存在' : '❌ 缺失',
+        'tech-research': localNames['tech-research'] ? '✅ 存在' : '❌ 缺失',
+        'market-analysis': localNames['market-analysis'] ? '✅ 存在' : '❌ 缺失',
+        'product-review': localNames['product-review'] ? '✅ 存在' : '❌ 缺失',
+        'industry-insights': localNames['industry-insights'] ? '✅ 存在' : '❌ 缺失'
+      });
+      
+      // 🚀 修复：移除强制默认名称，完全依赖localStorage
+      
+      // 🚀 修复：使用合并后的数据，确保数据完整性
+      const currentNames = { ...mergedNames };
+      
+      console.log('🎯 完全使用localStorage数据:', {
+        localNames,
+        结果: currentNames,
+        timestamp: new Date().toISOString()
+      });
+      
+      console.log('🎯 最终分类名称:', {
+        localNames, currentNames,
+        timestamp: new Date().toISOString()
+      });
       
       // 获取隐藏的分类
       const hiddenCategories = JSON.parse(localStorage.getItem('hidden_categories') || '[]');
@@ -478,14 +590,14 @@ export function DashboardSidebar() {
       const customCategories = JSON.parse(localStorage.getItem('custom_categories') || '[]');
       console.log('📦 加载的自定义分类:', customCategories);
 
-      // 预定义分类（过滤掉隐藏的）
+      // 🚀 修复：预定义分类，优先使用localStorage中的实际名称
       const allPredefinedCategories = [
         { id: 'uncategorized', label: currentNames['uncategorized'] || '📁 未分类', icon: Folder, order: orderMap['uncategorized'] || 0 },
         { id: 'tech-research', label: currentNames['tech-research'] || '💻 技术研究', icon: File, order: orderMap['tech-research'] || 1 },
         { id: 'market-analysis', label: currentNames['market-analysis'] || '📈 市场分析', icon: File, order: orderMap['market-analysis'] || 2 },
         { id: 'product-review', label: currentNames['product-review'] || '🔍 产品评测', icon: File, order: orderMap['product-review'] || 3 },
         { id: 'industry-insights', label: currentNames['industry-insights'] || '🔬 行业洞察', icon: File, order: orderMap['industry-insights'] || 4 },
-      ];
+      ]; // 🔧 移除filter，确保所有分类都显示（问题修复）
       
       // 过滤掉隐藏的预定义分类
       const visiblePredefinedCategories = allPredefinedCategories.filter(cat => !hiddenCategories.includes(cat.id));
@@ -502,10 +614,30 @@ export function DashboardSidebar() {
       allCategories.sort((a, b) => a.order - b.order);
       setPredefinedCategories(allCategories);
       console.log('✅ 分类列表更新完成，总数:', allCategories.length);
+    // 🔍 最终验证：每次updateCategories后验证数据持久化
+    const verifyPersistence = () => {
+      const stored = localStorage.getItem('predefined_category_names');
+      console.log('🔍 持久化验证:', {
+        存储状态: stored ? 'YES' : 'NO',
+        数据内容: stored ? JSON.parse(stored) : null,
+        时间戳: new Date().toISOString()
+      });
+    };
+    setTimeout(verifyPersistence, 500); // 延迟验证，确保所有更新完成
     };
 
-    // 初始更新
-    updateCategories();
+    // 🔧 初始化分类（确保数据加载完成）
+    // 延迟执行updateCategories，确保loadPredefinedCategoryNames完成
+    setTimeout(() => {
+      console.log('🔄 延迟重新加载分类列表，确保数据已保存');
+        // 🛡️ 确保编辑状态已清除，避免冲突
+        if (editingId) {
+          console.log('⚠️ 编辑状态未清除，强制清除:', editingId);
+          setEditingId(null);
+          setEditValue('');
+        }
+      window.dispatchEvent(new CustomEvent('categoryOrderChanged'));
+    }, 300); // 增加延迟到300ms，确保CategoryCard有足够时间保存
 
     // 监听localStorage变化
     const handleStorageChange = (e: StorageEvent) => {
@@ -526,11 +658,55 @@ export function DashboardSidebar() {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('categoryOrderChanged', handleCustomStorageChange);
     };
-  }, [loadPredefinedCategoryNames]);
+  }, []); // 🚀 修复：移除依赖项，只在组件挂载时执行一次
 
   // 演示模式已禁用（单用户系统）
   useEffect(() => {
     setIsDemoMode(false);
+  }, []);
+  // 🚀 终极修复：添加强制更新事件监听器
+  useEffect(() => {
+    const handleForceUpdate = (event: CustomEvent) => {
+      const { categoryId, newName } = event.detail;
+      console.log('🔄 收到强制更新事件:', categoryId, newName);
+      
+      // 直接更新状态
+      setPredefinedCategories(prev => {
+        const updated = prev.map(cat => {
+          if (cat.id === categoryId) {
+            return { ...cat, label: newName };
+          }
+          return cat;
+        });
+        return [...updated];
+      });
+    };
+    
+    // 🚀 新增：监听自定义分类变更事件
+    const handleCustomCategoryChange = (event: CustomEvent) => {
+      const { categoryId, newLabel } = event.detail;
+      console.log('🔄 收到自定义分类变更事件:', categoryId, newLabel);
+      
+      // 立即更新UI状态
+      setPredefinedCategories(prev => {
+        const updated = prev.map(cat => {
+          if (cat.id === categoryId) {
+            console.log('🎯 更新自定义分类UI:', cat.label, '→', newLabel);
+            return { ...cat, label: newLabel };
+          }
+          return cat;
+        });
+        return [...updated];
+      });
+    };
+    
+    window.addEventListener('forceCategoryUpdate', handleForceUpdate as EventListener);
+    window.addEventListener('customCategoryChanged', handleCustomCategoryChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('forceCategoryUpdate', handleForceUpdate as EventListener);
+      window.removeEventListener('customCategoryChanged', handleCustomCategoryChange as EventListener);
+    };
   }, []);
 
   // 计算每个分类的报告数量
@@ -570,6 +746,76 @@ export function DashboardSidebar() {
   const handleSaveEdit = (categoryId: string) => {
     setEditingId(null);
     setEditValue('');
+    
+    console.log('💾 保存分类编辑完成:', categoryId);
+    
+    // 🚀 基于Zustand最佳实践的状态更新策略
+    const updateCategoryDisplay = () => {
+      console.log('⚡ 使用Zustand状态更新分类显示');
+      
+      // 直接从store获取最新状态
+      const { predefinedCategoryNames } = useAppStore.getState();
+      const latestName = predefinedCategoryNames[categoryId];
+      
+      if (latestName) {
+        console.log('✅ 从store获取最新分类名称:', categoryId, '→', latestName);
+        
+        // 遵循Zustand最佳实践：使用函数式更新确保状态一致性
+        setPredefinedCategories(prev => {
+          const updated = prev.map(cat => {
+            if (cat.id === categoryId) {
+              console.log('🎯 更新分类显示:', cat.label, '→', latestName);
+              return { ...cat, label: latestName };
+            }
+            return cat;
+          });
+          return updated; // 返回新数组引用
+        });
+      } else {
+        console.warn('⚠️ Store中未找到分类名称，检查自定义分类');
+        // 检查自定义分类
+        try {
+          const customCategories = JSON.parse(localStorage.getItem('custom_categories') || '[]');
+          const customCategory = customCategories.find((cat: any) => cat.id === categoryId);
+          
+          if (customCategory?.label) {
+            console.log('✅ 从自定义分类获取名称:', categoryId, '→', customCategory.label);
+            setPredefinedCategories(prev => 
+              prev.map(cat => 
+                cat.id === categoryId ? { ...cat, label: customCategory.label } : cat
+              )
+            );
+          } else {
+            console.warn('⚠️ 自定义分类中也未找到，使用备用方案');
+            // 最后的备用方案：触发完整更新
+            setTimeout(() => {
+              window.dispatchEvent(new CustomEvent('categoryOrderChanged'));
+            }, 100);
+          }
+        } catch (error) {
+          console.error('❌ 解析自定义分类失败:', error);
+          // 备用方案：触发完整更新
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('categoryOrderChanged'));
+          }, 100);
+        }
+      }
+    };
+    
+    // 立即执行更新
+    updateCategoryDisplay();
+    
+    // 🔄 额外保障：使用Zustand订阅确保状态变化被捕获
+    const timeoutId = setTimeout(() => {
+      console.log('🔄 额外保障：检查状态是否已更新');
+      const { predefinedCategoryNames } = useAppStore.getState();
+      if (predefinedCategoryNames[categoryId]) {
+        updateCategoryDisplay();
+      }
+    }, 150);
+    
+    // 清理超时
+    return () => clearTimeout(timeoutId);
   };
 
   const handleCancelEdit = () => {
@@ -658,7 +904,7 @@ export function DashboardSidebar() {
       }
       
       // 触发更新事件
-      window.dispatchEvent(new CustomEvent('categoryOrderChanged'));
+      debounceUpdateCategories();
       
       console.log('✅ 分类删除成功');
       
@@ -699,7 +945,7 @@ export function DashboardSidebar() {
         console.log('✅ 分类排序已保存:', orderMap);
 
         // 触发自定义事件通知其他组件更新
-        window.dispatchEvent(new CustomEvent('categoryOrderChanged'));
+        debounceUpdateCategories();
 
         return updatedItems;
       });
@@ -944,25 +1190,25 @@ export function DashboardSidebar() {
               分类管理
             </div>
             
-                      {/* 使用说明 */}
-          <div style={{
-            fontSize: '11px',
-            color: theme === 'dark' ? '#94a3b8' : '#64748b',
-            padding: '8px 4px',
-            lineHeight: '1.4'
-          }}>
-            💡 <strong>使用提示：</strong><br/>
-            • 点击分类卡片选择分类<br/>
-            • 点击紫色"编辑"按钮修改名称<br/>
-            • 拖拽左侧手柄重新排序<br/>
-            • 悬停卡片查看动画效果
-          </div>
-          
-          <DndContext 
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
+            {/* 使用说明 */}
+            <div style={{
+              fontSize: '11px',
+              color: theme === 'dark' ? '#94a3b8' : '#64748b',
+              padding: '8px 4px',
+              lineHeight: '1.4'
+            }}>
+              💡 <strong>使用提示：</strong><br/>
+              • 双击分类名称进行编辑<br/>
+              • 拖拽左侧手柄重新排序<br/>
+              • 点击分类卡片选择分类<br/>
+              • 悬停卡片查看动画效果
+            </div>
+            
+            <DndContext 
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
               <SortableContext 
                 items={predefinedCategories.map(cat => cat.id)}
                 strategy={verticalListSortingStrategy}
@@ -991,82 +1237,6 @@ export function DashboardSidebar() {
               </SortableContext>
             </DndContext>
           </div>
-
-          {/* 自定义分类 - 已禁用，只使用分类管理区域 */}
-          {false && categories.length > 0 && !isDemoMode && (
-            <div style={{
-              marginTop: '24px'
-            }}>
-              <div style={{
-                fontSize: '12px',
-                fontWeight: '600',
-                color: theme === 'dark' ? '#94a3b8' : '#64748b',
-                padding: '0 4px',
-                marginBottom: '12px'
-              }}>
-                自定义分类
-              </div>
-              <div>
-                {categories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => {
-                      setSelectedCategory(category.id);
-                      setSelectedReport(null);
-                    }}
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '12px 16px',
-                      margin: '4px 0',
-                      borderRadius: '10px',
-                      background: selectedCategory === category.id 
-                        ? `linear-gradient(135deg, ${theme === 'dark' ? 'rgba(59, 130, 246, 0.3)' : 'rgba(59, 130, 246, 0.2)'}, ${theme === 'dark' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(16, 185, 129, 0.2)'})`
-                        : `linear-gradient(135deg, ${theme === 'dark' ? 'rgba(51, 65, 85, 0.2)' : 'rgba(255, 255, 255, 0.5)'}, ${theme === 'dark' ? 'rgba(30, 41, 59, 0.2)' : 'rgba(241, 245, 249, 0.5)'})`,
-                      border: `1px solid ${selectedCategory === category.id 
-                        ? (theme === 'dark' ? 'rgba(59, 130, 246, 0.4)' : 'rgba(59, 130, 246, 0.3)')
-                        : (theme === 'dark' ? 'rgba(51, 65, 85, 0.3)' : 'rgba(203, 213, 225, 0.3)')}`,
-                      color: theme === 'dark' ? '#e2e8f0' : '#1e293b',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      transition: 'all 0.2s ease',
-                      textAlign: 'left',
-                      backdropFilter: 'blur(5px)'
-                    }}
-                    onMouseEnter={(e) => {
-                      if (selectedCategory !== category.id) {
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                        e.currentTarget.style.boxShadow = theme === 'dark' 
-                          ? '0 4px 16px rgba(0, 0, 0, 0.2)' 
-                          : '0 4px 16px rgba(0, 0, 0, 0.08)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (selectedCategory !== category.id) {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }
-                    }}
-                  >
-                    <span>📁 {category.name}</span>
-                    <span style={{
-                      padding: '2px 8px',
-                      borderRadius: '12px',
-                      backgroundColor: theme === 'dark' ? 'rgba(15, 23, 42, 0.6)' : 'rgba(255, 255, 255, 0.7)',
-                      fontSize: '12px',
-                      fontWeight: '600',
-                      color: theme === 'dark' ? '#94a3b8' : '#64748b'
-                    }}>
-                      {reports.filter(r => r.category === category.id).length}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
       

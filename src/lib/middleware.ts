@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, extractTokenFromHeader, JWTPayload } from '@/lib/auth'
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('Middleware');
 
 export interface AuthenticatedRequest extends NextRequest {
   user?: JWTPayload
@@ -36,7 +39,7 @@ export function withAuth(handler: (req: AuthenticatedRequest, context?: any) => 
       return handler(authenticatedRequest, context)
 
     } catch (error) {
-      console.error('Auth middleware error:', error)
+      logger.error('Auth middleware error:', error)
       return NextResponse.json(
         { error: '认证失败' },
         { status: 401 }
@@ -63,7 +66,7 @@ export function withOptionalAuth(handler: (req: AuthenticatedRequest, context?: 
       return handler(request as AuthenticatedRequest, context)
 
     } catch (error) {
-      console.error('Optional auth middleware error:', error)
+      logger.error('Optional auth middleware error:', error)
       return handler(request as AuthenticatedRequest, context)
     }
   }

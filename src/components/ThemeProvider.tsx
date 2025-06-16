@@ -2,6 +2,9 @@
 
 import { useEffect, ReactNode } from 'react';
 import { useAppStore } from '@/store/useAppStore';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('ThemeProvider');
 
 interface ThemeProviderProps {
   children: ReactNode;
@@ -27,7 +30,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     }
     
     // 调试输出
-    console.log('Theme applied:', theme, 'HTML classes:', root.className);
+    logger.debug('Theme applied:', theme, 'HTML classes:', root.className);
   }, [theme]);
 
   return <>{children}</>;

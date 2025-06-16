@@ -1,10 +1,13 @@
 'use client';
 
 import { useEffect } from 'react';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('Page');
 
 export default function Home() {
   useEffect(() => {
-    console.log('单用户系统，直接跳转到仪表板');
+    logger.debug('单用户系统，直接跳转到仪表板');
     window.location.href = '/dashboard';
   }, []);
 

@@ -3,6 +3,9 @@
 import { Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/store/useAppStore';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('ThemeToggle');
 
 
 export function ThemeToggle() {
@@ -10,7 +13,7 @@ export function ThemeToggle() {
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
-    console.log('Toggling theme from', theme, 'to', newTheme);
+    logger.debug('Toggling theme from', theme, 'to', newTheme);
     setTheme(newTheme);
   };
 

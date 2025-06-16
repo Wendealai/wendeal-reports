@@ -64,6 +64,13 @@ export default function DashboardPage() {
         console.log('🔄 Dashboard 开始加载数据');
         await loadData();
         console.log('✅ Dashboard 数据加载完成');
+        
+        // 🚀 修复：移除强制重置逻辑，避免覆盖用户的分类编辑
+        // 注释掉强制触发更新，让Zustand自然的状态订阅机制处理UI更新
+        // setTimeout(() => {
+        //   window.dispatchEvent(new CustomEvent('categoryOrderChanged'));
+        //   console.log('📢 通知sidebar更新分类显示');
+        // }, 100);
       } catch (error) {
         console.error('❌ Dashboard 数据加载失败:', error);
       }
