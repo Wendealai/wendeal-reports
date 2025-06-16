@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  wendeal-reports:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wendeal-reports-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=file:/app/data/wendeal.db
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
+      - NEXT_TELEMETRY_DISABLED=1
+    volumes:
+      # 持久化数据库文件
+      - wendeal_data:/app/data
+      # 持久化上传文件
+      - wendeal_uploads:/app/public/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  wendeal_data:
+    driver: local
+  wendeal_uploads:
+    driver: local 
