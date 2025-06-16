@@ -20,6 +20,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/useAppStore';
 import { ReportCardActions } from './ReportCardActions';
+import { safeTextContent } from '@/lib/htmlUtils';
 
 interface DraggableReportCardProps {
   report: Report;
@@ -168,7 +169,7 @@ export function DraggableReportCard({
             {/* 描述 */}
             {report.description && (
               <p className="text-xs text-muted-foreground line-clamp-3">
-                {report.description}
+                {safeTextContent(report.description, 150)}
               </p>
             )}
             

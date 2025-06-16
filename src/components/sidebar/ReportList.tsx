@@ -8,6 +8,7 @@ import { getReportsByCategory } from '@/data/mockData';
 import { useMemo } from 'react';
 import { Star, Clock, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { safeTextContent } from '@/lib/htmlUtils';
 
 interface ReportListProps {
   categoryId: string;
@@ -60,7 +61,7 @@ function ReportCard({ report }: { report: Report }) {
           
           {report.description && (
             <p className="text-xs text-muted-foreground line-clamp-2">
-              {report.description}
+              {safeTextContent(report.description, 100)}
             </p>
           )}
           

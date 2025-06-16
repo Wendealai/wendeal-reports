@@ -6,6 +6,8 @@ import { Star, Clock, FileText, ExternalLink, ArrowLeft, Edit, StarOff, Trash2 }
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { ReportEditDialog } from './ReportEditDialog';
+import { safeTextContent } from '@/lib/htmlUtils';
+import { PDFViewer } from '@/components/pdf/PDFViewer';
 
 interface ReportViewerProps {
   report: Report;
@@ -221,6 +223,9 @@ export function ReportViewer({ report }: ReportViewerProps) {
   const handleOpenInNewTab = () => {
     if (contentBlobUrl) {
       window.open(contentBlobUrl, '_blank');
+    } else if (report.filePath) {
+      // 如果没有contentBlobUrl但有filePath，直接打开filePath
+      window.open(report.filePath, '_blank');
     } else {
       console.warn('No content URL available');
     }
@@ -283,13 +288,17 @@ export function ReportViewer({ report }: ReportViewerProps) {
                 )}
               </div>
               
+              {/* 描述 */}
               {report.description && (
-                <p style={{ 
-                  color: theme === 'dark' ? '#94a3b8' : '#64748b',
-                  margin: 0
+                <div style={{ 
+                  marginBottom: '1rem', 
+                  fontSize: '0.95rem', 
+                  lineHeight: '1.6', 
+                  color: theme === 'dark' ? '#cbd5e1' : '#64748b',
+                  fontStyle: 'italic' 
                 }}>
-                  {report.description}
-                </p>
+                  {safeTextContent(report.description)}
+                </div>
               )}
               
               <div style={{ 
@@ -393,41 +402,62 @@ export function ReportViewer({ report }: ReportViewerProps) {
         backgroundColor: theme === 'dark' ? '#1e293b' : '#ffffff'
       }}>
         <div style={{ padding: 0, height: '100%' }}>
-          {isLoading ? (
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              height: '100%' 
-            }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{
-                  width: '2rem',
-                  height: '2rem',
-                  border: `2px solid ${theme === 'dark' ? '#334155' : '#e2e8f0'}`,
-                  borderTop: `2px solid ${theme === 'dark' ? '#60a5fa' : '#2563eb'}`,
-                  borderRadius: '50%',
-                  animation: 'spin 1s linear infinite',
-                  margin: '0 auto 1rem auto'
-                }} />
-                <p style={{ color: theme === 'dark' ? '#94a3b8' : '#64748b' }}>加载报告中...</p>
-              </div>
-            </div>
-          ) : (
-            <iframe
-              ref={iframeRef}
-              src={contentBlobUrl}
-              style={{ 
-                width: '100%', 
-                height: '100%', 
-                border: 0, 
-                borderRadius: '0.5rem' 
-              }}
-              title={report.title}
-              onLoad={handleIframeLoad}
-              onLoadStart={() => setIsLoading(true)}
-            />
-          )}
+          {(() => {
+            // 检查是否是PDF文件
+            const isPDF = (report as any).fileType === 'pdf' || 
+                         report.filePath?.startsWith('blob:') ||
+                         report.filePath?.toLowerCase().includes('.pdf');
+            
+            if (isPDF && report.filePath) {
+              return (
+                <PDFViewer
+                  file={report.filePath}
+                  style={{ height: '100%', borderRadius: '0.5rem' }}
+                />
+              );
+            }
+            
+            // HTML文件使用iframe显示
+            if (isLoading) {
+              return (
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  height: '100%' 
+                }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{
+                      width: '2rem',
+                      height: '2rem',
+                      border: `2px solid ${theme === 'dark' ? '#334155' : '#e2e8f0'}`,
+                      borderTop: `2px solid ${theme === 'dark' ? '#60a5fa' : '#2563eb'}`,
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite',
+                      margin: '0 auto 1rem auto'
+                    }} />
+                    <p style={{ color: theme === 'dark' ? '#94a3b8' : '#64748b' }}>加载报告中...</p>
+                  </div>
+                </div>
+              );
+            }
+            
+            return (
+              <iframe
+                ref={iframeRef}
+                src={contentBlobUrl}
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  border: 0, 
+                  borderRadius: '0.5rem' 
+                }}
+                title={report.title}
+                onLoad={handleIframeLoad}
+                onLoadStart={() => setIsLoading(true)}
+              />
+            );
+          })()}
         </div>
       </div>
 

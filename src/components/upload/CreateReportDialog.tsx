@@ -4,6 +4,9 @@ import React, { useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { SimpleCategorySelector } from './SimpleCategorySelector';
 import { X, FileText, Save, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { extractDescriptionFromHtml } from '@/lib/htmlUtils';
 
 interface CreateReportDialogProps {
   open: boolean;
@@ -50,10 +53,7 @@ export function CreateReportDialog({ open, onOpenChange }: CreateReportDialogPro
 
   // 从HTML内容中提取描述
   const extractDescriptionFromHTML = (html: string): string => {
-    // 移除HTML标签，获取纯文本
-    const textContent = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-    // 取前200个字符作为描述
-    return textContent.length > 200 ? textContent.substring(0, 200) + '...' : textContent;
+    return extractDescriptionFromHtml(html, 200);
   };
 
   // 处理HTML内容变化

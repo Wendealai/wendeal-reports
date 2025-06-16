@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML描述显示修复测试</title>
+    <meta name="description" content="这是一个包含 <strong>HTML标签</strong> 和 <em>格式化文本</em> 的描述，应该被正确处理为纯文本显示。">
+    <meta name="keywords" content="HTML,描述,修复,测试">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+        .info-box {
+            background-color: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>HTML描述显示修复测试报告</h1>
+    
+    <div class="highlight">
+        <strong>测试目标：</strong>验证报告副标题不再显示HTML代码，而是显示清洁的文本摘要。
+    </div>
+
+    <h2>问题背景</h2>
+    <p>之前报告的副标题位置显示的是完整的HTML代码，包含所有的标签如 &lt;div&gt;、&lt;p&gt;、&lt;strong&gt; 等，这影响了用户体验。</p>
+    
+    <div class="info-box">
+        <h3>修复方案</h3>
+        <ul>
+            <li>创建了 <code>htmlUtils.ts</code> 工具文件</li>
+            <li>实现了 <code>safeTextContent()</code> 函数来安全处理HTML内容</li>
+            <li>使用 <code>extractDescriptionFromHtml()</code> 从HTML中提取clean描述</li>
+            <li>在所有显示描述的组件中应用这些工具函数</li>
+        </ul>
+    </div>
+
+    <h2>测试场景</h2>
+    <p>本报告的描述包含HTML标签：</p>
+    <ul>
+        <li><strong>Meta描述</strong>：包含 &lt;strong&gt; 和 &lt;em&gt; 标签</li>
+        <li><strong>正文内容</strong>：包含各种HTML元素</li>
+        <li><strong>样式标签</strong>：应该被完全移除</li>
+    </ul>
+
+    <h2>预期结果</h2>
+    <p>在报告列表和详情页面中，描述应该显示为：</p>
+    <blockquote>
+        "这是一个包含 HTML标签 和 格式化文本 的描述，应该被正确处理为纯文本显示。"
+    </blockquote>
+    
+    <p><em>而不是显示原始的HTML代码。</em></p>
+
+    <h2>涉及的组件</h2>
+    <ul>
+        <li>DraggableReportCard.tsx - 卡片视图中的描述</li>
+        <li>ReportList.tsx - 侧边栏列表中的描述</li>
+        <li>ReportViewer.tsx - 报告详情页的描述</li>
+        <li>Dashboard页面 - 仪表板中的描述显示</li>
+        <li>FileUpload.tsx - 上传时的描述提取</li>
+        <li>CreateReportDialog.tsx - 创建对话框的描述处理</li>
+    </ul>
+
+    <div class="highlight">
+        <strong>测试方法：</strong>上传此HTML文件，检查在各个位置的描述显示是否为纯文本而非HTML代码。
+    </div>
+</body>
+</html> 

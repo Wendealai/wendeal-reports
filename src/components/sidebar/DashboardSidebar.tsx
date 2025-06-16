@@ -95,9 +95,11 @@ function CategoryCard({
       });
       
       try {
-        // 检查是否是自定义分类（通过localStorage检查而非ID格式）
+        // 🚀 React最佳实践：统一状态更新机制
+        // 无论是自定义分类还是预定义分类，都通过同一套流程处理
+        
         if (isCustomCategory(category.id)) {
-          // 更新自定义分类
+          // 更新自定义分类到localStorage
           const customCategories = JSON.parse(localStorage.getItem('custom_categories') || '[]');
           console.log('📝 更新前的自定义分类:', customCategories);
           const updatedCustomCategories = customCategories.map((cat: any) => 
@@ -106,53 +108,75 @@ function CategoryCard({
           localStorage.setItem('custom_categories', JSON.stringify(updatedCustomCategories));
           console.log('✅ 更新后的自定义分类:', updatedCustomCategories);
           
-          // 🚀 关键修复：发送事件通知父组件更新UI
-          // 基于Context7最佳实践：自定义分类更新后立即更新UI状态
-          console.log('🔄 发送自定义事件通知UI更新');
+          // 🚀 关键修复：立即更新UI状态 - 基于React最佳实践的状态提升
           window.dispatchEvent(new CustomEvent('customCategoryChanged', {
             detail: { categoryId: category.id, newLabel }
           }));
+          
+          // 🚀 React状态管理最佳实践：确保组件状态同步
+          // 强制触发父组件状态更新，确保UI立即反映变化
+          const forceUpdateEvent = new CustomEvent('forceCategoryUpdate', {
+            detail: { 
+              categoryId: category.id, 
+              newLabel,
+              type: 'custom'
+            }
+          });
+          window.dispatchEvent(forceUpdateEvent);
+          
         } else {
           // 更新预定义分类 - 使用Zustand最佳实践的状态更新方式
           await updatePredefinedCategoryName(category.id, newLabel);
           console.log('✅ 更新预定义分类:', category.id, newLabel);
+          
+          // 🚀 React useEffect最佳实践：确保状态变化触发重新渲染
+          window.dispatchEvent(new CustomEvent('forceCategoryUpdate', {
+            detail: { 
+              categoryId: category.id, 
+              newLabel,
+              type: 'predefined'
+            }
+          }));
         }
         
-        // 🚀 改进：使用Promise确保状态更新完成后再调用回调
-        // 遵循Zustand最佳实践：确保状态变化完全同步后再更新UI
-        await new Promise(resolve => setTimeout(resolve, 50)); // 确保状态写入完成
+        // 调用父组件的保存回调
+        onSaveEdit(category.id);
+        console.log('✅ 分类名称保存完成:', category.id, '→', newLabel);
         
-        // 验证状态是否已正确更新
-        const { predefinedCategoryNames } = useAppStore.getState();
-        const verificationName = predefinedCategoryNames[category.id];
+        // 🚀 React最佳实践：状态验证和延迟更新保障
+        // 基于React文档中的状态管理模式，确保异步更新的一致性
+        const verifyStateUpdate = async () => {
+          // 等待状态传播
+          await new Promise(resolve => setTimeout(resolve, 50));
+          
+          let verified = false;
+          
+          if (isCustomCategory(category.id)) {
+            // 验证自定义分类更新
+            const updatedCustomCategories = JSON.parse(localStorage.getItem('custom_categories') || '[]');
+            const updatedCategory = updatedCustomCategories.find((cat: any) => cat.id === category.id);
+            verified = updatedCategory?.label === newLabel;
+            console.log('🔍 自定义分类状态验证:', verified ? '✅ 成功' : '❌ 失败');
+          } else {
+            // 验证预定义分类更新
+            const { predefinedCategoryNames } = useAppStore.getState();
+            verified = predefinedCategoryNames[category.id] === newLabel;
+            console.log('🔍 预定义分类状态验证:', verified ? '✅ 成功' : '❌ 失败');
+          }
+          
+          if (!verified) {
+            console.warn('⚠️ 状态验证失败，触发备用更新机制');
+            // 备用方案：强制刷新整个分类列表
+            window.dispatchEvent(new CustomEvent('categoryOrderChanged'));
+          }
+        };
         
-        if (verificationName === newLabel || isCustomCategory(category.id)) {
-          console.log('✅ 状态验证成功，调用onSaveEdit');
-          onSaveEdit(category.id);
-                 } else {
-           console.warn('⚠️ 状态验证失败，使用Zustand最佳实践重试');
-           // 🚀 基于Context7最佳实践：等待状态真正更新完成
-           await new Promise<void>((resolve) => {
-             const checkState = () => {
-               const { predefinedCategoryNames } = useAppStore.getState();
-               if (predefinedCategoryNames[category.id] === newLabel) {
-                 console.log('✅ 状态验证成功，更新完成');
-                 resolve();
-               } else {
-                 // 50ms后重试，确保状态更新完成
-                 setTimeout(checkState, 50);
-               }
-             };
-             checkState();
-           });
-           
-           onSaveEdit(category.id);
-         }
+        verifyStateUpdate();
         
       } catch (error) {
-        console.error('❌ 保存分类时出错:', error);
-        // 即使出错也要退出编辑状态
-        onSaveEdit(category.id);
+        console.error('❌ 保存分类名称时出错:', error);
+        // 错误处理：显示用户友好的错误信息
+        alert('保存分类名称时出现错误，请重试。');
       }
     }
   };
@@ -664,25 +688,27 @@ export function DashboardSidebar() {
   useEffect(() => {
     setIsDemoMode(false);
   }, []);
-  // 🚀 终极修复：添加强制更新事件监听器
+  // 🚀 React最佳实践：统一的分类更新事件监听器
   useEffect(() => {
-    const handleForceUpdate = (event: CustomEvent) => {
-      const { categoryId, newName } = event.detail;
-      console.log('🔄 收到强制更新事件:', categoryId, newName);
+    // 处理强制分类更新事件
+    const handleForceCategoryUpdate = (event: CustomEvent) => {
+      const { categoryId, newLabel, type } = event.detail;
+      console.log('🔄 收到强制分类更新事件:', { categoryId, newLabel, type });
       
-      // 直接更新状态
+      // 🚀 React状态管理最佳实践：立即更新UI状态
       setPredefinedCategories(prev => {
         const updated = prev.map(cat => {
           if (cat.id === categoryId) {
-            return { ...cat, label: newName };
+            console.log('🎯 强制更新分类UI:', cat.label, '→', newLabel);
+            return { ...cat, label: newLabel };
           }
           return cat;
         });
-        return [...updated];
+        return [...updated]; // 返回新数组引用触发重新渲染
       });
     };
     
-    // 🚀 新增：监听自定义分类变更事件
+    // 处理自定义分类变更事件
     const handleCustomCategoryChange = (event: CustomEvent) => {
       const { categoryId, newLabel } = event.detail;
       console.log('🔄 收到自定义分类变更事件:', categoryId, newLabel);
@@ -700,12 +726,32 @@ export function DashboardSidebar() {
       });
     };
     
-    window.addEventListener('forceCategoryUpdate', handleForceUpdate as EventListener);
+    // 🚀 添加对原有强制更新事件的兼容性处理
+    const handleForceUpdate = (event: CustomEvent) => {
+      const { categoryId, newName } = event.detail;
+      if (categoryId && newName) {
+        console.log('🔄 收到原有强制更新事件:', categoryId, newName);
+        setPredefinedCategories(prev => {
+          const updated = prev.map(cat => {
+            if (cat.id === categoryId) {
+              return { ...cat, label: newName };
+            }
+            return cat;
+          });
+          return [...updated];
+        });
+      }
+    };
+    
+    // 注册事件监听器
+    window.addEventListener('forceCategoryUpdate', handleForceCategoryUpdate as EventListener);
     window.addEventListener('customCategoryChanged', handleCustomCategoryChange as EventListener);
+    window.addEventListener('forceCategoryUpdate', handleForceUpdate as EventListener);
     
     return () => {
-      window.removeEventListener('forceCategoryUpdate', handleForceUpdate as EventListener);
+      window.removeEventListener('forceCategoryUpdate', handleForceCategoryUpdate as EventListener);
       window.removeEventListener('customCategoryChanged', handleCustomCategoryChange as EventListener);
+      window.removeEventListener('forceCategoryUpdate', handleForceUpdate as EventListener);
     };
   }, []);
 
@@ -749,73 +795,60 @@ export function DashboardSidebar() {
     
     console.log('💾 保存分类编辑完成:', categoryId);
     
-    // 🚀 基于Zustand最佳实践的状态更新策略
+    // 🚀 基于React最佳实践的立即状态更新策略
+    // 不再依赖延迟的事件监听，而是直接同步更新状态
     const updateCategoryDisplay = () => {
-      console.log('⚡ 使用Zustand状态更新分类显示');
+      console.log('⚡ 立即更新分类显示状态');
       
-      // 直接从store获取最新状态
+      // 检查预定义分类
       const { predefinedCategoryNames } = useAppStore.getState();
       const latestName = predefinedCategoryNames[categoryId];
       
-      if (latestName) {
-        console.log('✅ 从store获取最新分类名称:', categoryId, '→', latestName);
+      // 检查自定义分类
+      let customCategoryName = null;
+      try {
+        const customCategories = JSON.parse(localStorage.getItem('custom_categories') || '[]');
+        const customCategory = customCategories.find((cat: any) => cat.id === categoryId);
+        customCategoryName = customCategory?.label;
+      } catch (error) {
+        console.warn('解析自定义分类失败:', error);
+      }
+      
+      // 使用最新的名称（优先使用预定义分类的名称）
+      const finalName = latestName || customCategoryName;
+      
+      if (finalName) {
+        console.log('✅ 获取到最新分类名称:', categoryId, '→', finalName);
         
-        // 遵循Zustand最佳实践：使用函数式更新确保状态一致性
+        // 🚀 React状态管理最佳实践：使用函数式更新确保状态一致性
         setPredefinedCategories(prev => {
           const updated = prev.map(cat => {
             if (cat.id === categoryId) {
-              console.log('🎯 更新分类显示:', cat.label, '→', latestName);
-              return { ...cat, label: latestName };
+              console.log('🎯 更新分类显示:', cat.label, '→', finalName);
+              return { ...cat, label: finalName };
             }
             return cat;
           });
-          return updated; // 返回新数组引用
+          return updated; // 返回新数组引用触发重新渲染
         });
       } else {
-        console.warn('⚠️ Store中未找到分类名称，检查自定义分类');
-        // 检查自定义分类
-        try {
-          const customCategories = JSON.parse(localStorage.getItem('custom_categories') || '[]');
-          const customCategory = customCategories.find((cat: any) => cat.id === categoryId);
-          
-          if (customCategory?.label) {
-            console.log('✅ 从自定义分类获取名称:', categoryId, '→', customCategory.label);
-            setPredefinedCategories(prev => 
-              prev.map(cat => 
-                cat.id === categoryId ? { ...cat, label: customCategory.label } : cat
-              )
-            );
-          } else {
-            console.warn('⚠️ 自定义分类中也未找到，使用备用方案');
-            // 最后的备用方案：触发完整更新
-            setTimeout(() => {
-              window.dispatchEvent(new CustomEvent('categoryOrderChanged'));
-            }, 100);
-          }
-        } catch (error) {
-          console.error('❌ 解析自定义分类失败:', error);
-          // 备用方案：触发完整更新
-          setTimeout(() => {
-            window.dispatchEvent(new CustomEvent('categoryOrderChanged'));
-          }, 100);
-        }
+        console.warn('⚠️ 未找到分类名称，使用备用方案');
+        // 备用方案：触发完整更新
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('categoryOrderChanged'));
+        }, 100);
       }
     };
     
     // 立即执行更新
     updateCategoryDisplay();
     
-    // 🔄 额外保障：使用Zustand订阅确保状态变化被捕获
-    const timeoutId = setTimeout(() => {
-      console.log('🔄 额外保障：检查状态是否已更新');
-      const { predefinedCategoryNames } = useAppStore.getState();
-      if (predefinedCategoryNames[categoryId]) {
-        updateCategoryDisplay();
-      }
-    }, 150);
-    
-    // 清理超时
-    return () => clearTimeout(timeoutId);
+    // 🚀 React useEffect最佳实践：确保异步状态变化被捕获
+    // 添加短暂延迟以捕获可能的异步状态更新
+    setTimeout(() => {
+      console.log('🔄 延迟验证：检查状态是否已更新');
+      updateCategoryDisplay();
+    }, 100);
   };
 
   const handleCancelEdit = () => {

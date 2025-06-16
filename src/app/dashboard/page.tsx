@@ -11,6 +11,7 @@ import { CreateReportDialog } from '@/components/upload/CreateReportDialog';
 import { DashboardSidebar } from '@/components/sidebar/DashboardSidebar';
 import { Button } from '@/components/ui/button';
 import { Upload, Settings, FileText } from 'lucide-react';
+import { safeTextContent } from '@/lib/htmlUtils';
 
 export default function DashboardPage() {
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
@@ -418,18 +419,11 @@ export default function DashboardPage() {
           🗑️
         </button>
       </div>
-      <p style={{ 
-        fontSize: '0.75rem', 
-        color: theme === 'dark' ? '#94a3b8' : '#64748b',
-        marginBottom: '0.5rem',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        display: '-webkit-box',
-        WebkitLineClamp: 2,
-        WebkitBoxOrient: 'vertical'
-      }}>
-        {report.description}
-      </p>
+      {report.description && (
+        <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+          {safeTextContent(report.description, 120)}
+        </p>
+      )}
       <div style={{ 
         display: 'flex', 
         alignItems: 'center', 
