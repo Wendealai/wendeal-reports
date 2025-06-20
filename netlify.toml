@@ -15,11 +15,14 @@
 [functions]
   # Context7最佳实践：优化函数性能
   node_bundler = "esbuild"
-  external_node_modules = ["@prisma/client"]
+  external_node_modules = ["@prisma/client", "prisma"]
+  # 函数超时时间
+  timeout = 10
 
 [dev]
   command = "npm run dev"
   port = 3000
+  functions = "netlify/functions"
 
 # Context7最佳实践：环境变量配置说明
 # 在Netlify UI中配置以下环境变量：
@@ -30,14 +33,29 @@
 # NEXTAUTH_URL = "https://your-site-name.netlify.app"
 # NEXTAUTH_SECRET = [生成32字符随机密钥]
 # DEFAULT_USER_ID = "cmbusc9x00000x2w0fqyu591k"
-# NODE_ENV = "production"
 
-# 重定向规则
+# Context7修复：正确的API重定向规则
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  from = "/api/auth/*"
+  to = "/.netlify/functions/auth-login"
   status = 200
 
+[[redirects]]
+  from = "/api/categories/*"
+  to = "/.netlify/functions/categories"
+  status = 200
+
+[[redirects]]
+  from = "/api/reports/*"
+  to = "/.netlify/functions/reports"
+  status = 200
+
+[[redirects]]
+  from = "/api/init/*"
+  to = "/.netlify/functions/init-db"
+  status = 200
+
+# Context7修复：SPA回退规则（必须放在最后）
 [[redirects]]
   from = "/*"
   to = "/index.html"
