@@ -7,7 +7,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { ReportEditDialog } from './ReportEditDialog';
 import { safeTextContent } from '@/lib/htmlUtils';
-import { PDFViewer } from '@/components/pdf/PDFViewer';
+
 
 interface ReportViewerProps {
   report: Report;
@@ -403,21 +403,7 @@ export function ReportViewer({ report }: ReportViewerProps) {
       }}>
         <div style={{ padding: 0, height: '100%' }}>
           {(() => {
-            // 检查是否是PDF文件
-            const isPDF = (report as any).fileType === 'pdf' || 
-                         report.filePath?.startsWith('blob:') ||
-                         report.filePath?.toLowerCase().includes('.pdf');
-            
-            if (isPDF && report.filePath) {
-              return (
-                <PDFViewer
-                  file={report.filePath}
-                  style={{ height: '100%', borderRadius: '0.5rem' }}
-                />
-              );
-            }
-            
-            // HTML文件使用iframe显示
+            // 加载状态显示
             if (isLoading) {
               return (
                 <div style={{ 
@@ -442,6 +428,7 @@ export function ReportViewer({ report }: ReportViewerProps) {
               );
             }
             
+            // 所有文件都使用iframe显示（包括HTML和PDF）
             return (
               <iframe
                 ref={iframeRef}
