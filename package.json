@@ -15,11 +15,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/wendeal/wendeal-reports.git"
+    "url": "https://github.com/Wendealai/wendeal-reports.git"
   },
-  "homepage": "https://github.com/wendeal/wendeal-reports#readme",
+  "homepage": "https://github.com/Wendealai/wendeal-reports#readme",
   "bugs": {
-    "url": "https://github.com/wendeal/wendeal-reports/issues"
+    "url": "https://github.com/Wendealai/wendeal-reports/issues"
   },
   "private": false,
   "scripts": {
