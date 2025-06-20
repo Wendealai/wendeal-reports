@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { debugCreateReport, testDatabaseConnection, validateDatabaseSchema, initializeDatabase } from '@/lib/prisma'
+import { testDatabaseConnection } from '@/lib/prisma'
 import { reportsApi } from '@/lib/api-client'
 
 // 默认用户ID（用于简化的单用户系统）
@@ -56,38 +56,6 @@ function classifyDatabaseError(error: any) {
   }
 }
 
-// Context7最佳实践：确保数据库已初始化的辅助函数
-async function ensureDatabaseInitialized() {
-  try {
-    console.log('🔍 [API] Checking if database is initialized...')
-    
-    // 检查默认用户是否存在
-    const { prisma } = await import('@/lib/prisma')
-    const user = await prisma.user.findUnique({
-      where: { id: DEFAULT_USER_ID }
-    })
-    
-    if (!user) {
-      console.log('📦 [API] Database not initialized, initializing...')
-      const initResult = await initializeDatabase()
-      if (!initResult.success) {
-        throw new Error(`数据库初始化失败: ${initResult.message}`)
-      }
-      console.log('✅ [API] Database initialized successfully')
-    } else {
-      console.log('✅ [API] Database already initialized')
-    }
-    
-    return { success: true }
-  } catch (error) {
-    console.error('❌ [API] Database initialization check failed:', error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : '未知错误' 
-    }
-  }
-}
-
 // 获取报告列表
 export async function GET(request: NextRequest) {
   try {
@@ -107,14 +75,8 @@ export async function GET(request: NextRequest) {
     console.log('✅ [API] Database connection verified')
     
     // 确保数据库已初始化
-    const initCheck = await ensureDatabaseInitialized()
-    if (!initCheck.success) {
-      return NextResponse.json({
-        error: '数据库初始化失败',
-        message: initCheck.error,
-        code: 'DATABASE_INIT_ERROR'
-      }, { status: 500 })
-    }
+    const { ensureDatabaseInitialized } = await import('@/lib/prisma')
+    await ensureDatabaseInitialized()
     
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
@@ -170,114 +132,72 @@ export async function POST(request: NextRequest) {
     console.log('✅ [API] Database connection verified')
     
     console.log('🔍 [API] Step 2: Ensuring database is initialized...')
-    const initCheck = await ensureDatabaseInitialized()
-    if (!initCheck.success) {
-      console.error('❌ [API] Database initialization failed:', initCheck.error)
-      return NextResponse.json({
-        error: '数据库初始化失败',
-        message: initCheck.error,
-        code: 'DATABASE_INIT_ERROR',
-        step: 'database_init'
-      }, { status: 500 })
-    }
+    const { ensureDatabaseInitialized } = await import('@/lib/prisma')
+    await ensureDatabaseInitialized()
     console.log('✅ [API] Database initialization verified')
-    
-    console.log('🔍 [API] Step 3: Validating database schema...')
-    const schemaValidation = await validateDatabaseSchema()
-    if (!schemaValidation.valid) {
-      console.error('❌ [API] Database schema invalid:', schemaValidation.message)
-      return NextResponse.json({
-        error: '数据库模式错误',
-        message: schemaValidation.message,
-        code: 'SCHEMA_ERROR',
-        step: 'schema_validation',
-        details: schemaValidation
-      }, { status: 500 })
-    }
-    console.log('✅ [API] Database schema validated')
 
-    console.log('📥 [API] Step 4: Parsing request body...')
+    console.log('📥 [API] Step 3: Parsing request body...')
     const body = await request.json()
     console.log('📋 [API] Request body received:', {
       title: body.title,
-      contentLength: body.content?.length || 0,
       categoryId: body.categoryId,
-      tags: body.tags,
-      status: body.status
+      hasContent: !!body.content,
+      contentLength: body.content?.length || 0
     })
 
-    // 验证必需字段
-    if (!body.title || !body.content) {
-      console.error('❌ [API] Missing required fields:', { 
-        hasTitle: !!body.title, 
-        hasContent: !!body.content 
-      })
+    // Context7最佳实践: 输入验证
+    if (!body.title || typeof body.title !== 'string') {
       return NextResponse.json({
-        error: '缺少必需字段',
-        message: '标题和内容是必需的',
+        error: '验证失败',
+        message: '报告标题是必需的',
         code: 'VALIDATION_ERROR',
-        step: 'field_validation'
+        step: 'input_validation'
       }, { status: 400 })
     }
 
-    console.log('💾 [API] Step 5: Creating report using debug function...')
-    
-    // 使用专门的调试创建函数
-    const report = await debugCreateReport({
-      title: body.title,
+    if (!body.content || typeof body.content !== 'string') {
+      return NextResponse.json({
+        error: '验证失败',
+        message: '报告内容是必需的',
+        code: 'VALIDATION_ERROR',
+        step: 'input_validation'
+      }, { status: 400 })
+    }
+
+    console.log('✅ [API] Input validation passed')
+
+    // Context7最佳实践: 使用API客户端创建报告
+    console.log('💾 [API] Step 4: Creating report via API client...')
+    const response = await reportsApi.create({
+      title: body.title.trim(),
       content: body.content,
-      description: body.description || '',
-      status: body.status || 'published',
-      categoryId: body.categoryId || null,
-      tags: body.tags || []
+      description: body.description?.trim() || '',
+      categoryId: body.categoryId || 'predefined-uncategorized',
+      tags: body.tags || [],
+      status: body.status || 'draft',
+      userId: DEFAULT_USER_ID
     })
 
-    console.log('✅ [API] Report created successfully:', {
-      id: report.id,
-      title: report.title,
-      category: report.category?.name
+    console.log('🎉 [API] Report created successfully:', {
+      id: response.report?.id,
+      title: response.report?.title
     })
 
     return NextResponse.json({
       success: true,
-      message: '报告创建成功',
-      report: {
-        id: report.id,
-        title: report.title,
-        content: report.content,
-        description: report.description,
-        status: report.status,
-        categoryId: report.categoryId,
-        tags: body.tags || [],
-        createdAt: report.createdAt,
-        updatedAt: report.updatedAt
-      }
-    })
+      message: response.message || '报告创建成功',
+      report: response.report
+    }, { status: 201 })
 
   } catch (error) {
     console.error('❌ [API] POST reports failed:', error)
     const classifiedError = classifyDatabaseError(error)
     
-    // 详细的错误响应
-    const errorResponse = {
+    return NextResponse.json({
       error: '创建报告失败',
       message: classifiedError.userMessage,
       code: classifiedError.type,
-      step: 'report_creation',
-      timestamp: new Date().toISOString()
-    }
-    
-    // 开发环境添加详细信息
-    if (process.env.NODE_ENV === 'development') {
-      (errorResponse as any).details = {
-        originalError: classifiedError.details,
-        stack: error instanceof Error ? error.stack : undefined,
-        errorType: error instanceof Error ? error.constructor.name : typeof error
-      }
-    }
-    
-    console.error('📤 [API] Sending error response:', errorResponse)
-    
-    return NextResponse.json(errorResponse, { status: 500 })
+      details: process.env.NODE_ENV === 'development' ? classifiedError.details : undefined
+    }, { status: 500 })
   }
 } 

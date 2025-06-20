@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build:netlify"
+  command = "npm run build"
   publish = ".next"
 
 [build.environment]
@@ -9,11 +9,11 @@
   PRISMA_CLI_BINARY_TARGETS = "native,rhel-openssl-1.0.x"
 
 # Context7推荐：预构建脚本确保数据库就绪
-[[build.plugins]]
-  package = "@netlify/plugin-nextjs"
+[[plugins]]
+package = "@netlify/plugin-nextjs"
 
 [functions]
-  # Context7最佳实践：优化函数性能
+  # Context7推荐：优化函数性能
   node_bundler = "esbuild"
   external_node_modules = ["@prisma/client", "prisma"]
   # 函数超时时间
@@ -34,28 +34,13 @@
 # NEXTAUTH_SECRET = [生成32字符随机密钥]
 # DEFAULT_USER_ID = "cmbusc9x00000x2w0fqyu591k"
 
-# Context7修复：正确的API重定向规则
+# Context7修复：正确的重定向规则
 [[redirects]]
-  from = "/api/auth/*"
-  to = "/.netlify/functions/auth-login"
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
   status = 200
 
-[[redirects]]
-  from = "/api/categories/*"
-  to = "/.netlify/functions/categories"
-  status = 200
-
-[[redirects]]
-  from = "/api/reports/*"
-  to = "/.netlify/functions/reports"
-  status = 200
-
-[[redirects]]
-  from = "/api/init/*"
-  to = "/.netlify/functions/init-db"
-  status = 200
-
-# Context7修复：SPA回退规则（必须放在最后）
+# Context7最佳实践：SPA回退规则
 [[redirects]]
   from = "/*"
   to = "/index.html"
