@@ -1,14 +1,10 @@
 [build]
-  command = "npm ci && npm run build"
+  command = "npm run build:netlify"
   publish = ".next"
-  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "18"
-  NPM_VERSION = "9"
-  DATABASE_URL = "file:./dev.db"
-  JWT_SECRET = "netlify-jwt-secret-key-12345"
-  NODE_ENV = "production"
+  NPM_FLAGS = "--production=false"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
@@ -17,6 +13,13 @@
   command = "npm run dev"
   port = 3000
 
+# 环境变量（在Netlify UI中配置）
+# DATABASE_URL = "file:./dev.db"
+# JWT_SECRET = "your-secure-jwt-secret-here"
+# NEXTAUTH_URL = "your-netlify-site-url"
+# NEXTAUTH_SECRET = "your-nextauth-secret"
+
+# 重定向规则
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
