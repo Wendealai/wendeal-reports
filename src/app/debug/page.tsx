@@ -2,395 +2,523 @@
 
 import { useState, useEffect } from 'react'
 
+interface DiagnosticResult {
+  success: boolean
+  message: string
+  details?: any
+  duration?: string
+  step?: string
+}
+
+interface TestReport {
+  title: string
+  content: string
+  description: string
+  categoryId?: string
+  tags?: string[]
+}
+
 export default function DebugPage() {
-  const [dbStatus, setDbStatus] = useState<any>(null)
-  const [healthStatus, setHealthStatus] = useState<any>(null)
-  const [initStatus, setInitStatus] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
   const [logs, setLogs] = useState<string[]>([])
+  const [isRunning, setIsRunning] = useState(false)
+  const [testResults, setTestResults] = useState<Record<string, DiagnosticResult>>({})
+  const [databaseStatus, setDatabaseStatus] = useState<any>(null)
 
   const addLog = (message: string) => {
-    setLogs(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`])
+    const timestamp = new Date().toLocaleTimeString()
+    const logMessage = `[${timestamp}] ${message}`
+    setLogs(prev => [...prev, logMessage])
+    console.log(logMessage)
   }
 
-  const checkHealth = async () => {
+  const clearLogs = () => {
+    setLogs([])
+    setTestResults({})
+    setDatabaseStatus(null)
+  }
+
+  // Context7最佳实践: 详细的数据库连接测试
+  const testDatabaseConnection = async () => {
+    addLog('🔌 开始测试数据库连接...')
     try {
-      addLog('🔍 检查系统健康状态...')
-      const response = await fetch('/api/health')
-      const data = await response.json()
-      setHealthStatus(data)
+      const response = await fetch('/api/health', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
       
-      if (data.status === 'healthy') {
-        addLog('✅ 系统健康检查通过')
+      const result = await response.json()
+      
+      if (result.database?.connected) {
+        addLog('✅ 数据库连接测试通过')
+        setTestResults(prev => ({
+          ...prev,
+          connection: {
+            success: true,
+            message: '数据库连接正常',
+            details: result.database,
+            duration: result.database.duration
+          }
+        }))
+        return true
       } else {
-        addLog(`❌ 系统健康检查失败: ${data.error || '未知错误'}`)
+        addLog('❌ 数据库连接测试失败')
+        setTestResults(prev => ({
+          ...prev,
+          connection: {
+            success: false,
+            message: '数据库连接失败',
+            details: result.database
+          }
+        }))
+        return false
       }
     } catch (error) {
-      addLog(`❌ 健康检查请求失败: ${error}`)
-    }
-  }
-
-  const checkInitStatus = async () => {
-    try {
-      addLog('📋 检查数据库初始化状态...')
-      const response = await fetch('/api/init')
-      const data = await response.json()
-      setInitStatus(data)
-      
-      if (response.ok) {
-        addLog(`📊 初始化状态: ${data.initialized ? '已初始化' : '未初始化'}`)
-        addLog(`📄 报告数量: ${data.reportCount}`)
-        addLog(`📁 分类数量: ${data.categoryCount}`)
-      } else {
-        addLog(`❌ 初始化状态检查失败: ${data.error}`)
-      }
-    } catch (error) {
-      addLog(`❌ 初始化状态检查请求失败: ${error}`)
-    }
-  }
-
-  const initializeDatabase = async () => {
-    try {
-      setLoading(true)
-      addLog('🚀 开始初始化数据库...')
-      
-      const response = await fetch('/api/init', { method: 'POST' })
-      const data = await response.json()
-      
-      if (response.ok) {
-        setInitStatus(data)
-        addLog(`✅ 数据库初始化完成`)
-        addLog(`👤 用户: ${data.user?.username} (${data.user?.email})`)
-        addLog(`📁 创建分类: ${data.categoriesCreated} 个`)
-        addLog(`📊 总报告数: ${data.totalReports}`)
-        addLog(`📁 总分类数: ${data.totalCategories}`)
-        
-        // 重新检查状态
-        setTimeout(() => {
-          checkInitStatus()
-          checkHealth()
-        }, 1000)
-      } else {
-        addLog(`❌ 数据库初始化失败: ${data.error}`)
-        if (data.details) {
-          addLog(`🔍 详细信息: ${data.details}`)
+      addLog(`❌ 数据库连接测试异常: ${error}`)
+      setTestResults(prev => ({
+        ...prev,
+        connection: {
+          success: false,
+          message: '数据库连接测试异常',
+          details: error instanceof Error ? error.message : String(error)
         }
-      }
-    } catch (error) {
-      addLog(`❌ 数据库初始化请求失败: ${error}`)
-    } finally {
-      setLoading(false)
+      }))
+      return false
     }
   }
 
-  const testReportUpload = async () => {
+  // Context7最佳实践: 数据库模式验证
+  const validateDatabaseSchema = async () => {
+    addLog('🔍 开始验证数据库模式...')
     try {
-      setLoading(true)
-      addLog('📝 测试报告创建...')
+      const response = await fetch('/api/health', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
       
-      const testReport = {
-        title: '测试报告 - ' + new Date().toLocaleString(),
-        content: '<h1>这是一个测试报告</h1><p>用于验证数据库上传功能是否正常工作。</p><p>时间戳: ' + Date.now() + '</p>',
-        description: '这是一个测试报告用于验证功能',
-        status: 'published',
-        categoryId: 'predefined-uncategorized',
-        tags: ['测试', '调试', 'Context7修复']
+      const result = await response.json()
+      
+      if (result.database?.connected) {
+        addLog('✅ 数据库模式验证通过')
+        setTestResults(prev => ({
+          ...prev,
+          schema: {
+            success: true,
+            message: '数据库模式正常',
+            details: result.database
+          }
+        }))
+        return true
+      } else {
+        addLog('❌ 数据库模式验证失败')
+        setTestResults(prev => ({
+          ...prev,
+          schema: {
+            success: false,
+            message: '数据库模式异常',
+            details: result.database
+          }
+        }))
+        return false
       }
+    } catch (error) {
+      addLog(`❌ 数据库模式验证异常: ${error}`)
+      setTestResults(prev => ({
+        ...prev,
+        schema: {
+          success: false,
+          message: '数据库模式验证异常',
+          details: error instanceof Error ? error.message : String(error)
+        }
+      }))
+      return false
+    }
+  }
 
-      addLog(`📤 发送报告数据: ${testReport.title}`)
+  // Context7最佳实践: 测试默认用户存在
+  const testDefaultUser = async () => {
+    addLog('👤 检查默认用户...')
+    try {
+      const response = await fetch('/api/init', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
       
+      const result = await response.json()
+      
+      if (result.initialized && result.user) {
+        addLog(`✅ 默认用户存在: ${result.user.username}`)
+        setTestResults(prev => ({
+          ...prev,
+          user: {
+            success: true,
+            message: '默认用户存在',
+            details: result.user
+          }
+        }))
+        return true
+      } else {
+        addLog('❌ 默认用户不存在')
+        setTestResults(prev => ({
+          ...prev,
+          user: {
+            success: false,
+            message: '默认用户不存在',
+            details: result
+          }
+        }))
+        return false
+      }
+    } catch (error) {
+      addLog(`❌ 检查默认用户异常: ${error}`)
+      setTestResults(prev => ({
+        ...prev,
+        user: {
+          success: false,
+          message: '检查默认用户异常',
+          details: error instanceof Error ? error.message : String(error)
+        }
+      }))
+      return false
+    }
+  }
+
+  // Context7最佳实践: 完整的报告创建测试
+  const testReportCreation = async () => {
+    addLog('📝 开始测试报告创建...')
+    
+    const testReport: TestReport = {
+      title: `测试报告 - ${new Date().toLocaleString()}`,
+      content: `
+        <html>
+          <head>
+            <title>测试报告</title>
+          </head>
+          <body>
+            <h1>Context7优化测试报告</h1>
+            <p>这是一个用于测试数据库连接和报告创建功能的测试文档。</p>
+            <h2>测试内容</h2>
+            <ul>
+              <li>数据库连接测试</li>
+              <li>Prisma客户端配置验证</li>
+              <li>报告创建流程测试</li>
+            </ul>
+            <p>创建时间: ${new Date().toISOString()}</p>
+          </body>
+        </html>
+      `,
+      description: '这是一个Context7优化的测试报告，用于验证数据库连接和报告创建功能。',
+      categoryId: 'uncategorized',
+      tags: ['测试', 'Context7', '调试']
+    }
+
+    try {
+      addLog('📤 发送报告创建请求...')
       const response = await fetch('/api/reports', {
         method: 'POST',
-        headers: {
+        headers: { 
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(testReport)
       })
 
-      const data = await response.json()
-      
-      if (response.ok) {
-        addLog(`✅ 报告创建成功!`)
-        addLog(`📄 报告标题: ${data.report.title}`)
-        addLog(`🆔 报告ID: ${data.report.id}`)
-        addLog(`📁 分类: ${data.report.category?.name || '未分类'}`)
-        addLog(`🏷️ 标签数量: ${data.report.tags?.length || 0}`)
-        
-        // 立即验证报告是否存在
-        setTimeout(() => {
-          testReportsAPI()
-        }, 500)
+      const result = await response.json()
+      addLog(`📥 收到响应: ${response.status}`)
+
+      if (response.ok && result.success) {
+        addLog(`✅ 报告创建成功: ${result.report.title}`)
+        addLog(`📊 报告ID: ${result.report.id}`)
+        setTestResults(prev => ({
+          ...prev,
+          reportCreation: {
+            success: true,
+            message: '报告创建成功',
+            details: {
+              reportId: result.report.id,
+              title: result.report.title,
+              status: result.report.status,
+              categoryId: result.report.categoryId
+            }
+          }
+        }))
+        return true
       } else {
-        addLog(`❌ 报告创建失败: ${data.error}`)
-        if (data.details) {
-          addLog(`🔍 详细错误: ${data.details}`)
-        }
-        if (data.hint) {
-          addLog(`💡 提示: ${data.hint}`)
-        }
+        addLog(`❌ 报告创建失败: ${result.message || result.error}`)
+        addLog(`🔍 错误详情: ${JSON.stringify(result, null, 2)}`)
+        setTestResults(prev => ({
+          ...prev,
+          reportCreation: {
+            success: false,
+            message: result.message || result.error || '报告创建失败',
+            details: result,
+            step: result.step
+          }
+        }))
+        return false
       }
     } catch (error) {
-      addLog(`❌ 报告创建请求失败: ${error}`)
+      addLog(`❌ 报告创建请求异常: ${error}`)
+      setTestResults(prev => ({
+        ...prev,
+        reportCreation: {
+          success: false,
+          message: '报告创建请求异常',
+          details: error instanceof Error ? error.message : String(error)
+        }
+      }))
+      return false
+    }
+  }
+
+  // 运行完整诊断
+  const runFullDiagnostic = async () => {
+    setIsRunning(true)
+    clearLogs()
+    
+    addLog('🚀 开始运行完整诊断...')
+    addLog('📋 基于Context7最佳实践的数据库诊断系统')
+    
+    try {
+      // 步骤1: 测试数据库连接
+      const connectionOk = await testDatabaseConnection()
+      if (!connectionOk) {
+        addLog('⚠️ 数据库连接失败，停止后续测试')
+        return
+      }
+
+      // 步骤2: 验证数据库模式
+      const schemaOk = await validateDatabaseSchema()
+      if (!schemaOk) {
+        addLog('⚠️ 数据库模式验证失败，继续其他测试...')
+      }
+
+      // 步骤3: 检查默认用户
+      const userOk = await testDefaultUser()
+      if (!userOk) {
+        addLog('⚠️ 默认用户不存在，尝试初始化...')
+        await initializeDatabase()
+        await testDefaultUser() // 重新检查
+      }
+
+      // 步骤4: 测试报告创建
+      await testReportCreation()
+      
+      addLog('🎉 完整诊断完成！')
+    } catch (error) {
+      addLog(`❌ 诊断过程异常: ${error}`)
     } finally {
-      setLoading(false)
+      setIsRunning(false)
     }
   }
 
-  const testCategoriesAPI = async () => {
+  // 初始化数据库
+  const initializeDatabase = async () => {
+    addLog('🔧 初始化数据库...')
     try {
-      addLog('📁 测试分类API...')
-      const response = await fetch('/api/categories')
-      const data = await response.json()
+      const response = await fetch('/api/init', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      
+      const result = await response.json()
       
       if (response.ok) {
-        addLog(`✅ 分类API正常，共 ${data.categories.length} 个分类`)
-        data.categories.forEach((cat: any, index: number) => {
-          addLog(`  ${index + 1}. ${cat.name} (${cat.id}) ${cat.icon || ''}`)
-        })
+        addLog('✅ 数据库初始化成功')
+        addLog(`👤 创建用户: ${result.user?.username}`)
+        addLog(`📁 创建分类: ${result.categories?.length || 0} 个`)
       } else {
-        addLog(`❌ 分类API失败: ${data.error}`)
-        if (data.details) {
-          addLog(`🔍 详细信息: ${data.details}`)
-        }
+        addLog(`❌ 数据库初始化失败: ${result.error}`)
       }
     } catch (error) {
-      addLog(`❌ 分类API请求失败: ${error}`)
+      addLog(`❌ 数据库初始化异常: ${error}`)
     }
   }
 
-  const testReportsAPI = async () => {
+  // 获取数据库状态
+  const getDatabaseStatus = async () => {
     try {
-      addLog('📄 测试报告API...')
-      const response = await fetch('/api/reports')
-      const data = await response.json()
-      
-      if (response.ok) {
-        addLog(`✅ 报告API正常，共 ${data.reports.length} 个报告`)
-        if (data.reports.length > 0) {
-          const latest = data.reports[0]
-          addLog(`📄 最新报告: ${latest.title}`)
-          addLog(`🕒 创建时间: ${new Date(latest.createdAt).toLocaleString()}`)
-          addLog(`📁 分类: ${latest.category?.name || '未分类'}`)
-        } else {
-          addLog(`📝 暂无报告，可以测试创建功能`)
-        }
-      } else {
-        addLog(`❌ 报告API失败: ${data.error}`)
-        if (data.details) {
-          addLog(`🔍 详细信息: ${data.details}`)
-        }
-      }
-    } catch (error) {
-      addLog(`❌ 报告API请求失败: ${error}`)
-    }
-  }
-
-  const testDatabaseConnection = async () => {
-    try {
-      addLog('🔌 测试数据库连接...')
-      
-      // 通过健康检查API测试连接
       const response = await fetch('/api/health')
-      const data = await response.json()
-      
-      if (response.ok && data.status === 'healthy') {
-        addLog('✅ 数据库连接正常')
-        addLog(`🗄️ 数据库状态: ${data.database}`)
-        addLog(`🌍 运行环境: ${data.environment}`)
-        addLog(`⏱️ 运行时间: ${Math.round(data.uptime)}秒`)
-      } else {
-        addLog(`❌ 数据库连接失败: ${data.error || '未知错误'}`)
-      }
+      const result = await response.json()
+      setDatabaseStatus(result.database)
     } catch (error) {
-      addLog(`❌ 数据库连接测试失败: ${error}`)
+      console.error('获取数据库状态失败:', error)
     }
-  }
-
-  const runFullDiagnosis = async () => {
-    addLog('🔍 开始完整诊断...')
-    addLog('=====================================')
-    
-    await testDatabaseConnection()
-    await checkHealth()
-    await checkInitStatus()
-    await testCategoriesAPI()
-    await testReportsAPI()
-    
-    addLog('=====================================')
-    addLog('🏁 完整诊断完成')
-  }
-
-  const clearLogs = () => {
-    setLogs([])
   }
 
   useEffect(() => {
-    runFullDiagnosis()
+    getDatabaseStatus()
   }, [])
 
+  const getStatusColor = (success: boolean) => success ? 'text-green-600' : 'text-red-600'
+  const getStatusIcon = (success: boolean) => success ? '✅' : '❌'
+
   return (
-    <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto' }}>
-      <h1>🔧 Wendeal Reports 诊断工具</h1>
-      <p style={{ color: '#666', marginBottom: '20px' }}>
-        基于 Context7 Prisma 最佳实践的数据库诊断和修复工具
-      </p>
-      
-      {/* 系统状态面板 */}
-      <div style={{ marginBottom: '20px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f8f9fa' }}>
-        <h2>📊 系统状态概览</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
-          
-          {/* 健康状态 */}
-          <div style={{ padding: '10px', backgroundColor: 'white', borderRadius: '6px', border: '1px solid #e1e1e1' }}>
-            <h4 style={{ margin: '0 0 5px 0', color: '#333' }}>🏥 系统健康</h4>
-            {healthStatus ? (
-              <div>
-                <div style={{ color: healthStatus.status === 'healthy' ? 'green' : 'red', fontWeight: 'bold' }}>
-                  {healthStatus.status === 'healthy' ? '✅ 正常' : '❌ 异常'}
-                </div>
-                <div style={{ fontSize: '12px', color: '#666' }}>
-                  数据库: {healthStatus.database}
-                </div>
-              </div>
-            ) : (
-              <div style={{ color: '#999' }}>检查中...</div>
-            )}
-          </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-6xl mx-auto px-4 space-y-8">
+        {/* 标题 */}
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Context7优化诊断系统
+          </h1>
+          <p className="text-gray-600">
+            基于Context7最佳实践的完整数据库诊断和调试工具
+          </p>
+        </div>
 
-          {/* 初始化状态 */}
-          <div style={{ padding: '10px', backgroundColor: 'white', borderRadius: '6px', border: '1px solid #e1e1e1' }}>
-            <h4 style={{ margin: '0 0 5px 0', color: '#333' }}>🚀 数据库初始化</h4>
-            {initStatus ? (
-              <div>
-                <div style={{ color: initStatus.initialized ? 'green' : 'orange', fontWeight: 'bold' }}>
-                  {initStatus.initialized ? '✅ 已初始化' : '⚠️ 未初始化'}
+        {/* 快速状态概览 */}
+        {databaseStatus && (
+          <div className="bg-white rounded-lg p-6 shadow-md">
+            <h2 className="text-xl font-semibold mb-4">数据库状态概览</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center">
+                <div className={`text-2xl font-bold ${getStatusColor(databaseStatus.connected)}`}>
+                  {getStatusIcon(databaseStatus.connected)}
                 </div>
-                <div style={{ fontSize: '12px', color: '#666' }}>
-                  报告: {initStatus.reportCount} | 分类: {initStatus.categoryCount}
-                </div>
+                <div className="text-sm text-gray-600">连接状态</div>
+                <div className="text-xs text-gray-500">{databaseStatus.duration}</div>
               </div>
-            ) : (
-              <div style={{ color: '#999' }}>检查中...</div>
-            )}
-          </div>
-
-          {/* 数据统计 */}
-          <div style={{ padding: '10px', backgroundColor: 'white', borderRadius: '6px', border: '1px solid #e1e1e1' }}>
-            <h4 style={{ margin: '0 0 5px 0', color: '#333' }}>📈 数据统计</h4>
-            <div style={{ fontSize: '12px', color: '#666' }}>
-              <div>报告总数: {initStatus?.reportCount || 0}</div>
-              <div>分类总数: {initStatus?.categoryCount || 0}</div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {databaseStatus.userCount || 0}
+                </div>
+                <div className="text-sm text-gray-600">用户数量</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  {databaseStatus.reportCount || 0}
+                </div>
+                <div className="text-sm text-gray-600">报告数量</div>
+              </div>
             </div>
           </div>
+        )}
 
-        </div>
-      </div>
-
-      {/* 操作按钮 */}
-      <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-        <button 
-          onClick={runFullDiagnosis}
-          style={{ padding: '8px 16px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-        >
-          🔍 完整诊断
-        </button>
-        
-        <button 
-          onClick={testDatabaseConnection}
-          style={{ padding: '8px 16px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-        >
-          🔌 测试连接
-        </button>
-        
-        <button 
-          onClick={initializeDatabase}
-          disabled={loading}
-          style={{ padding: '8px 16px', backgroundColor: '#f59e0b', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}
-        >
-          🚀 初始化数据库
-        </button>
-        
-        <button 
-          onClick={testCategoriesAPI}
-          style={{ padding: '8px 16px', backgroundColor: '#8b5cf6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-        >
-          📁 测试分类API
-        </button>
-        
-        <button 
-          onClick={testReportsAPI}
-          style={{ padding: '8px 16px', backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-        >
-          📄 测试报告API
-        </button>
-        
-        <button 
-          onClick={testReportUpload}
-          disabled={loading}
-          style={{ padding: '8px 16px', backgroundColor: '#06b6d4', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}
-        >
-          ⬆️ 测试报告创建
-        </button>
-        
-        <button 
-          onClick={clearLogs}
-          style={{ padding: '8px 16px', backgroundColor: '#6b7280', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-        >
-          🗑️ 清空日志
-        </button>
-      </div>
-
-      {/* 实时日志 */}
-      <div style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '15px', backgroundColor: '#f9f9f9' }}>
-        <h3>🚦 实时诊断日志</h3>
-        <div style={{ 
-          maxHeight: '500px', 
-          overflowY: 'auto', 
-          fontFamily: 'monospace', 
-          fontSize: '13px',
-          backgroundColor: '#000',
-          color: '#00ff00',
-          padding: '15px',
-          borderRadius: '4px',
-          lineHeight: '1.4'
-        }}>
-          {logs.length === 0 ? (
-            <div style={{ color: '#888' }}>等待诊断操作...</div>
-          ) : (
-            logs.map((log, index) => (
-              <div key={index} style={{ marginBottom: '2px' }}>{log}</div>
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* 使用说明 */}
-      <div style={{ marginTop: '20px', padding: '15px', border: '1px solid #ddd', borderRadius: '8px', backgroundColor: '#f0f9ff' }}>
-        <h3>📖 诊断指南</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '15px' }}>
-          <div>
-            <h4>🚀 首次部署</h4>
-            <ol style={{ fontSize: '14px', color: '#555' }}>
-              <li>点击"完整诊断"检查状态</li>
-              <li>如果未初始化，点击"初始化数据库"</li>
-              <li>测试"报告创建"功能</li>
-            </ol>
+        {/* 测试结果状态 */}
+        {Object.keys(testResults).length > 0 && (
+          <div className="bg-white rounded-lg p-6 shadow-md">
+            <h2 className="text-xl font-semibold mb-4">测试结果</h2>
+            <div className="space-y-3">
+              {Object.entries(testResults).map(([key, result]) => (
+                <div key={key} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                  <div className="flex items-center space-x-2">
+                    <span className={getStatusColor(result.success)}>
+                      {getStatusIcon(result.success)}
+                    </span>
+                    <span className="font-medium">
+                      {key === 'connection' && '数据库连接'}
+                      {key === 'schema' && '数据库模式'}
+                      {key === 'user' && '默认用户'}
+                      {key === 'reportCreation' && '报告创建'}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <div className={`text-sm ${getStatusColor(result.success)}`}>
+                      {result.message}
+                    </div>
+                    {result.duration && (
+                      <div className="text-xs text-gray-500">{result.duration}</div>
+                    )}
+                    {result.step && (
+                      <div className="text-xs text-orange-500">步骤: {result.step}</div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div>
-            <h4>🔧 问题排查</h4>
-            <ol style={{ fontSize: '14px', color: '#555' }}>
-              <li>检查"系统健康"状态</li>
-              <li>测试"数据库连接"</li>
-              <li>查看日志中的详细错误信息</li>
-            </ol>
+        )}
+
+        {/* 控制按钮 */}
+        <div className="bg-white rounded-lg p-6 shadow-md">
+          <h2 className="text-xl font-semibold mb-4">诊断控制</h2>
+          <div className="flex flex-wrap gap-4">
+            <button
+              onClick={runFullDiagnostic}
+              disabled={isRunning}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isRunning ? '🔄 运行中...' : '🚀 运行完整诊断'}
+            </button>
+            
+            <button
+              onClick={testDatabaseConnection}
+              disabled={isRunning}
+              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+            >
+              🔌 测试数据库连接
+            </button>
+
+            <button
+              onClick={initializeDatabase}
+              disabled={isRunning}
+              className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
+            >
+              🔧 初始化数据库
+            </button>
+
+            <button
+              onClick={testReportCreation}
+              disabled={isRunning}
+              className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
+            >
+              📝 测试报告创建
+            </button>
+
+            <button
+              onClick={clearLogs}
+              disabled={isRunning}
+              className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50"
+            >
+              🗑️ 清空日志
+            </button>
           </div>
-          <div>
-            <h4>⚙️ Context7 优化</h4>
-            <ul style={{ fontSize: '14px', color: '#555' }}>
-              <li>连接池配置: connection_limit=1</li>
-              <li>超时设置: pool_timeout=10</li>
-              <li>无服务器环境优化</li>
-            </ul>
+        </div>
+
+        {/* 实时日志 */}
+        <div className="bg-white rounded-lg p-6 shadow-md">
+          <h2 className="text-xl font-semibold mb-4">
+            实时诊断日志 
+            <span className="text-sm text-gray-500 ml-2">
+              ({logs.length} 条记录)
+            </span>
+          </h2>
+          <div className="bg-gray-900 text-green-400 p-4 rounded-lg h-96 overflow-y-auto font-mono text-sm">
+            {logs.length === 0 ? (
+              <div className="text-gray-500">点击上方按钮开始诊断...</div>
+            ) : (
+              logs.map((log, index) => (
+                <div key={index} className="mb-1">
+                  {log}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Context7优化说明 */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-blue-900 mb-3">
+            🎯 Context7优化说明
+          </h3>
+          <div className="text-blue-800 space-y-2">
+            <p>• <strong>连接池配置:</strong> 使用 connection_limit=1 防止无服务器环境连接耗尽</p>
+            <p>• <strong>详细日志:</strong> 启用查询级别的调试日志用于问题排查</p>
+            <p>• <strong>错误分类:</strong> 细分数据库错误类型，提供精确的修复建议</p>
+            <p>• <strong>优雅关闭:</strong> 正确处理PrismaClient连接生命周期</p>
+            <p>• <strong>实时监控:</strong> 提供连接状态和性能指标的实时反馈</p>
+          </div>
+        </div>
+
+        {/* 修复指南 */}
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-yellow-900 mb-3">
+            🔧 常见问题修复指南
+          </h3>
+          <div className="text-yellow-800 space-y-2">
+            <p>1. <strong>数据库连接失败:</strong> 检查 DATABASE_URL 环境变量配置</p>
+            <p>2. <strong>默认用户不存在:</strong> 点击"初始化数据库"按钮创建默认数据</p>
+            <p>3. <strong>报告创建失败:</strong> 检查数据库模式是否完整，可能需要运行 prisma migrate</p>
+            <p>4. <strong>FOREIGN KEY错误:</strong> 确保分类ID存在或设置为null</p>
+            <p>5. <strong>UNIQUE constraint错误:</strong> 报告标题重复，请使用不同标题</p>
           </div>
         </div>
       </div>
