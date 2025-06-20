@@ -14,8 +14,8 @@ export interface Report {
   fileSize?: number;
   wordCount?: number;
   priority?: 'low' | 'medium' | 'high';
-  // PDF相关字段
-  fileType?: 'html' | 'pdf';
+  // 文件类型
+  fileType?: 'html';
   pageCount?: number;
   author?: string;
 }

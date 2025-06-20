@@ -428,7 +428,7 @@ export function ReportViewer({ report }: ReportViewerProps) {
               );
             }
             
-            // 所有文件都使用iframe显示（包括HTML和PDF）
+            // 所有文件都使用iframe显示
             return (
               <iframe
                 ref={iframeRef}
