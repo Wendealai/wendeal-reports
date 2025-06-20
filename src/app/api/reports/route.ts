@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { debugCreateReport, testDatabaseConnection, validateDatabaseSchema } from '@/lib/prisma'
+import { debugCreateReport, testDatabaseConnection, validateDatabaseSchema, initializeDatabase } from '@/lib/prisma'
 import { reportsApi } from '@/lib/api-client'
 
 // 默认用户ID（用于简化的单用户系统）
@@ -56,6 +56,38 @@ function classifyDatabaseError(error: any) {
   }
 }
 
+// Context7最佳实践：确保数据库已初始化的辅助函数
+async function ensureDatabaseInitialized() {
+  try {
+    console.log('🔍 [API] Checking if database is initialized...')
+    
+    // 检查默认用户是否存在
+    const { prisma } = await import('@/lib/prisma')
+    const user = await prisma.user.findUnique({
+      where: { id: DEFAULT_USER_ID }
+    })
+    
+    if (!user) {
+      console.log('📦 [API] Database not initialized, initializing...')
+      const initResult = await initializeDatabase()
+      if (!initResult.success) {
+        throw new Error(`数据库初始化失败: ${initResult.message}`)
+      }
+      console.log('✅ [API] Database initialized successfully')
+    } else {
+      console.log('✅ [API] Database already initialized')
+    }
+    
+    return { success: true }
+  } catch (error) {
+    console.error('❌ [API] Database initialization check failed:', error)
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : '未知错误' 
+    }
+  }
+}
+
 // 获取报告列表
 export async function GET(request: NextRequest) {
   try {
@@ -73,6 +105,16 @@ export async function GET(request: NextRequest) {
     }
     
     console.log('✅ [API] Database connection verified')
+    
+    // 确保数据库已初始化
+    const initCheck = await ensureDatabaseInitialized()
+    if (!initCheck.success) {
+      return NextResponse.json({
+        error: '数据库初始化失败',
+        message: initCheck.error,
+        code: 'DATABASE_INIT_ERROR'
+      }, { status: 500 })
+    }
     
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
@@ -127,7 +169,20 @@ export async function POST(request: NextRequest) {
     }
     console.log('✅ [API] Database connection verified')
     
-    console.log('🔍 [API] Step 2: Validating database schema...')
+    console.log('🔍 [API] Step 2: Ensuring database is initialized...')
+    const initCheck = await ensureDatabaseInitialized()
+    if (!initCheck.success) {
+      console.error('❌ [API] Database initialization failed:', initCheck.error)
+      return NextResponse.json({
+        error: '数据库初始化失败',
+        message: initCheck.error,
+        code: 'DATABASE_INIT_ERROR',
+        step: 'database_init'
+      }, { status: 500 })
+    }
+    console.log('✅ [API] Database initialization verified')
+    
+    console.log('🔍 [API] Step 3: Validating database schema...')
     const schemaValidation = await validateDatabaseSchema()
     if (!schemaValidation.valid) {
       console.error('❌ [API] Database schema invalid:', schemaValidation.message)
@@ -141,7 +196,7 @@ export async function POST(request: NextRequest) {
     }
     console.log('✅ [API] Database schema validated')
 
-    console.log('📥 [API] Step 3: Parsing request body...')
+    console.log('📥 [API] Step 4: Parsing request body...')
     const body = await request.json()
     console.log('📋 [API] Request body received:', {
       title: body.title,
@@ -165,7 +220,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    console.log('💾 [API] Step 4: Creating report using debug function...')
+    console.log('💾 [API] Step 5: Creating report using debug function...')
     
     // 使用专门的调试创建函数
     const report = await debugCreateReport({
