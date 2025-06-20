@@ -1,11 +1,14 @@
 [build]
-  command = "npm run build"
+  command = "npm ci && npm run build"
   publish = ".next"
   functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "18"
   NPM_VERSION = "9"
+  DATABASE_URL = "file:./dev.db"
+  JWT_SECRET = "netlify-jwt-secret-key-12345"
+  NODE_ENV = "production"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
