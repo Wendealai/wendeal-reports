@@ -15,12 +15,26 @@ import {
 import { useAppStore } from '@/store/useAppStore';
 import { extractDescriptionFromHtml } from '@/lib/htmlUtils';
 import type { Report } from '@/types';
-import { 
-  extractPDFMetadata, 
-  validatePDFFile, 
-  extractPDFTags, 
-  formatFileSize 
-} from '@/lib/pdfUtils';
+// 简化的PDF处理函数
+const validatePDFFile = (file: File): string | null => {
+  if (file.size > 50 * 1024 * 1024) { // 50MB limit for PDF
+    return '文件大小不能超过 50MB';
+  }
+  return null;
+};
+
+const extractPDFTags = (content: string, keywords: string): string[] => {
+  const tags = keywords ? keywords.split(',').map(tag => tag.trim()).filter(Boolean) : [];
+  return tags.slice(0, 10); // 限制标签数量
+};
+
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
 
 interface UploadFile {
   id: string;
@@ -165,23 +179,16 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
   };
 
   const extractPDFMetadataForUpload = async (file: File) => {
-    try {
-      const metadata = await extractPDFMetadata(file);
-      const tags = extractPDFTags(metadata.textContent, metadata.keywords);
-      
-      return {
-        title: metadata.title,
-        description: metadata.description,
-        tags,
-        wordCount: metadata.wordCount,
-        pageCount: metadata.pageCount,
-        author: metadata.author,
-        textContent: metadata.textContent
-      };
-    } catch (error) {
-      console.error('PDF元数据提取失败:', error);
-      throw error;
-    }
+    // 简化的PDF元数据提取
+    return {
+      title: file.name.replace('.pdf', ''),
+      description: `PDF文件: ${file.name}`,
+      tags: ['PDF'],
+      wordCount: 0,
+      pageCount: 0,
+      author: '',
+      textContent: ''
+    };
   };
 
   const processFiles = useCallback(async (fileList: FileList) => {

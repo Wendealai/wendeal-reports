@@ -1,6 +1,6 @@
 /**
- * PDF 预览组件 - Fallback版本
- * 用于解决构建时的兼容性问题
+ * PDF 预览组件 - 简化版本
+ * 不依赖任何PDF库，使用浏览器原生支持
  */
 
 import React from 'react';
@@ -12,8 +12,22 @@ interface PDFViewerProps {
 }
 
 export function PDFViewer({ file, className, style }: PDFViewerProps) {
-  // 简单的fallback实现
-  const fileUrl = typeof file === 'string' ? file : URL.createObjectURL(file);
+  // 获取文件URL
+  const fileUrl = React.useMemo(() => {
+    if (typeof file === 'string') {
+      return file;
+    }
+    return URL.createObjectURL(file);
+  }, [file]);
+
+  // 清理URL对象
+  React.useEffect(() => {
+    return () => {
+      if (typeof file !== 'string' && fileUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(fileUrl);
+      }
+    };
+  }, [file, fileUrl]);
   
   return (
     <div 
