@@ -1,0 +1,149 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 用户表
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联关系
+  reports       Report[]
+  categories    Category[]
+  searchHistory SearchHistory[]
+  savedSearches SavedSearch[]
+
+  @@map("users")
+}
+
+// 分类表
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  color       String?
+  icon        String?
+  parentId    String?
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 关联关系
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryHierarchy")
+  reports  Report[]
+
+  @@map("categories")
+}
+
+// 标签表
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  color     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联关系
+  reportTags ReportTag[]
+
+  @@map("tags")
+}
+
+// 报告表
+model Report {
+  id          String    @id @default(cuid())
+  title       String
+  content     String
+  description String?
+  summary     String?
+  status      String    @default("draft") // draft, published, archived
+  priority    String    @default("medium") // low, medium, high, urgent
+  categoryId  String?
+  userId      String
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // 关联关系
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category   Category?   @relation(fields: [categoryId], references: [id])
+  reportTags ReportTag[]
+  files      File[]
+
+  @@map("reports")
+}
+
+// 报告标签关联表（多对多）
+model ReportTag {
+  id       String @id @default(cuid())
+  reportId String
+  tagId    String
+
+  // 关联关系
+  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([reportId, tagId])
+  @@map("report_tags")
+}
+
+// 搜索历史表
+model SearchHistory {
+  id        String   @id @default(cuid())
+  query     String
+  userId    String
+  createdAt DateTime @default(now())
+
+  // 关联关系
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("search_history")
+}
+
+// 保存的搜索表
+model SavedSearch {
+  id        String   @id @default(cuid())
+  name      String
+  query     String
+  filters   String? // JSON格式存储过滤条件
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联关系
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("saved_searches")
+}
+
+// 文件存储表
+model File {
+  id        String   @id @default(cuid())
+  filename  String
+  originalName String
+  mimeType  String
+  size      Int
+  path      String
+  reportId  String?
+  createdAt DateTime @default(now())
+
+  // 关联关系
+  report Report? @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@map("files")
+}

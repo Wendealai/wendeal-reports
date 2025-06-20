@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分类名称持久化测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f8fafc;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1e293b;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+        .test-section h3 {
+            color: #3b82f6;
+            margin-top: 0;
+        }
+        .category-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+        }
+        .category-name {
+            font-weight: 500;
+        }
+        .edit-input {
+            padding: 6px 10px;
+            border: 1px solid #3b82f6;
+            border-radius: 4px;
+            outline: none;
+        }
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin: 0 2px;
+        }
+        .btn-edit { background: #3b82f6; color: white; }
+        .btn-save { background: #10b981; color: white; }
+        .btn-cancel { background: #ef4444; color: white; }
+        .btn-test { background: #8b5cf6; color: white; padding: 10px 20px; }
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        .status.success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .status.error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .status.info { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+        .data-display {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 分类名称持久化测试</h1>
+        
+        <div class="test-section">
+            <h3>📋 当前分类列表</h3>
+            <div id="category-list"></div>
+            <button class="btn btn-test" onclick="refreshCategories()">🔄 刷新分类列表</button>
+        </div>
+
+        <div class="test-section">
+            <h3>💾 数据存储状态</h3>
+            <h4>LocalStorage 数据：</h4>
+            <div id="localStorage-data" class="data-display"></div>
+            <h4>数据库状态：</h4>
+            <div id="database-data" class="data-display"></div>
+            <button class="btn btn-test" onclick="checkPersistence()">🔍 检查持久化状态</button>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 测试步骤</h3>
+            <ol>
+                <li>修改任意分类名称并保存</li>
+                <li>检查localStorage和数据库是否同步更新</li>
+                <li>刷新页面测试持久化效果</li>
+                <li>验证修改是否在刷新后依然生效</li>
+            </ol>
+            <button class="btn btn-test" onclick="runAutoTest()">🤖 运行自动测试</button>
+            <button class="btn btn-test" onclick="testRefresh()">🔄 测试页面刷新</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 测试日志</h3>
+            <div id="test-log" class="data-display" style="height: 200px; overflow-y: auto;"></div>
+            <button class="btn btn-test" onclick="clearLog()">🗑️ 清空日志</button>
+        </div>
+    </div>
+
+    <script>
+        let categories = {};
+        let editingId = null;
+
+        // 日志函数
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('test-log');
+            const colorMap = {
+                info: '#3b82f6',
+                success: '#10b981', 
+                error: '#ef4444',
+                warning: '#f59e0b'
+            };
+            logDiv.innerHTML += `<span style="color: ${colorMap[type] || '#6b7280'}">[${timestamp}] ${message}</span>\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // 初始化分类数据
+        function initializeCategories() {
+            const existing = localStorage.getItem('predefined_category_names');
+            if (!existing || existing === '{}') {
+                log('🏗️ 首次访问，初始化分类名称...', 'info');
+                const initialCategories = {
+                    'uncategorized': '📁 未分类',
+                    'tech-research': '💻 技术研究',
+                    'market-analysis': '📈 市场分析',
+                    'product-review': '🔍 产品评测',
+                    'industry-insights': '🔬 行业洞察'
+                };
+                localStorage.setItem('predefined_category_names', JSON.stringify(initialCategories));
+                categories = initialCategories;
+                log('✅ 分类名称初始化完成', 'success');
+            } else {
+                categories = JSON.parse(existing);
+                log('📊 读取现有分类名称完成', 'info');
+            }
+        }
+
+        // 渲染分类列表
+        function renderCategories() {
+            const listDiv = document.getElementById('category-list');
+            listDiv.innerHTML = '';
+
+            Object.entries(categories).forEach(([id, name]) => {
+                const div = document.createElement('div');
+                div.className = 'category-item';
+                
+                if (editingId === id) {
+                    // 编辑模式
+                    div.innerHTML = `
+                        <input type="text" class="edit-input" id="edit-${id}" value="${name.replace(/^[^\\s]*\\s/, '').trim()}" />
+                        <div>
+                            <button class="btn btn-save" onclick="saveEdit('${id}')">💾 保存</button>
+                            <button class="btn btn-cancel" onclick="cancelEdit()">❌ 取消</button>
+                        </div>
+                    `;
+                    setTimeout(() => {
+                        const input = document.getElementById(`edit-${id}`);
+                        if (input) {
+                            input.focus();
+                            input.select();
+                        }
+                    }, 100);
+                } else {
+                    // 普通模式
+                    div.innerHTML = `
+                        <span class="category-name">${name}</span>
+                        <button class="btn btn-edit" onclick="startEdit('${id}', '${name}')">✏️ 编辑</button>
+                    `;
+                }
+                
+                listDiv.appendChild(div);
+            });
+        }
+
+        // 开始编辑
+        function startEdit(id, name) {
+            editingId = id;
+            log(`✏️ 开始编辑分类: ${id}`, 'info');
+            renderCategories();
+        }
+
+        // 保存编辑
+        async function saveEdit(id) {
+            const input = document.getElementById(`edit-${id}`);
+            const newName = input.value.trim();
+            
+            if (!newName) {
+                showStatus('❌ 分类名称不能为空', 'error');
+                return;
+            }
+
+            const emoji = categories[id].split(' ')[0];
+            const fullName = `${emoji} ${newName}`;
+            
+            log(`💾 保存分类编辑: ${id} → "${fullName}"`, 'info');
+
+            try {
+                // 更新localStorage
+                categories[id] = fullName;
+                localStorage.setItem('predefined_category_names', JSON.stringify(categories));
+                log(`✅ localStorage已更新`, 'success');
+
+                // 同步到数据库
+                const response = await fetch('/api/categories/predefined', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        categoryId: id,
+                        name: newName,
+                        icon: emoji,
+                        color: getCategoryColor(id)
+                    }),
+                });
+
+                if (response.ok) {
+                    log(`✅ 数据库同步成功: ${id}`, 'success');
+                    showStatus(`✅ 分类"${fullName}"保存成功`, 'success');
+                } else {
+                    log(`⚠️ 数据库同步失败: ${response.status}`, 'warning');
+                    showStatus(`⚠️ 数据库同步失败，但localStorage已更新`, 'warning');
+                }
+
+                editingId = null;
+                renderCategories();
+                updateDataDisplay();
+
+            } catch (error) {
+                log(`❌ 保存过程出错: ${error.message}`, 'error');
+                showStatus(`❌ 保存失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 取消编辑
+        function cancelEdit() {
+            editingId = null;
+            log('❌ 取消编辑', 'info');
+            renderCategories();
+        }
+
+        // 获取分类颜色
+        function getCategoryColor(id) {
+            const colorMap = {
+                'uncategorized': '#6B7280',
+                'tech-research': '#3B82F6',
+                'market-analysis': '#10B981',
+                'product-review': '#F59E0B',
+                'industry-insights': '#8B5CF6'
+            };
+            return colorMap[id] || '#6B7280';
+        }
+
+        // 刷新分类列表
+        function refreshCategories() {
+            log('🔄 刷新分类列表...', 'info');
+            initializeCategories();
+            renderCategories();
+            updateDataDisplay();
+        }
+
+        // 检查持久化状态
+        async function checkPersistence() {
+            log('🔍 检查持久化状态...', 'info');
+            
+            // 检查localStorage
+            const localData = localStorage.getItem('predefined_category_names');
+            log(`📱 localStorage: ${localData ? '有数据' : '无数据'}`, localData ? 'success' : 'error');
+
+            // 检查数据库
+            try {
+                const response = await fetch('/api/categories');
+                if (response.ok) {
+                    const data = await response.json();
+                    const predefinedCategories = data.categories.filter(cat => cat.id.startsWith('predefined-'));
+                    log(`🗄️ 数据库: 找到 ${predefinedCategories.length} 个预定义分类`, 'success');
+                    
+                    // 显示数据库中的分类
+                    predefinedCategories.forEach(cat => {
+                        log(`   - ${cat.id}: ${cat.name}`, 'info');
+                    });
+                } else {
+                    log(`❌ 数据库检查失败: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ 数据库连接失败: ${error.message}`, 'error');
+            }
+
+            updateDataDisplay();
+        }
+
+        // 更新数据显示
+        async function updateDataDisplay() {
+            // 更新localStorage显示
+            const localData = localStorage.getItem('predefined_category_names');
+            const localDiv = document.getElementById('localStorage-data');
+            if (localData) {
+                localDiv.textContent = JSON.stringify(JSON.parse(localData), null, 2);
+            } else {
+                localDiv.textContent = '无数据';
+            }
+
+            // 更新数据库显示
+            const dbDiv = document.getElementById('database-data');
+            try {
+                const response = await fetch('/api/categories');
+                if (response.ok) {
+                    const data = await response.json();
+                    const predefinedCategories = data.categories.filter(cat => cat.id.startsWith('predefined-'));
+                    const dbData = {};
+                    predefinedCategories.forEach(cat => {
+                        const frontendId = cat.id.replace('predefined-', '');
+                        dbData[frontendId] = `${cat.icon || ''} ${cat.name}`.trim();
+                    });
+                    dbDiv.textContent = JSON.stringify(dbData, null, 2);
+                } else {
+                    dbDiv.textContent = `数据库连接失败: ${response.status}`;
+                }
+            } catch (error) {
+                dbDiv.textContent = `数据库连接失败: ${error.message}`;
+            }
+        }
+
+        // 显示状态消息
+        function showStatus(message, type) {
+            const existing = document.querySelector('.status');
+            if (existing) existing.remove();
+
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.textContent = message;
+            document.querySelector('.container').insertBefore(div, document.querySelector('.test-section'));
+
+            setTimeout(() => div.remove(), 3000);
+        }
+
+        // 运行自动测试
+        async function runAutoTest() {
+            log('🤖 开始自动测试...', 'info');
+            
+            // 测试1: 修改一个分类名称
+            const testId = 'tech-research';
+            const originalName = categories[testId];
+            const testName = `💻 测试名称${Date.now()}`;
+            
+            log(`测试1: 修改分类 ${testId}`, 'info');
+            categories[testId] = testName;
+            localStorage.setItem('predefined_category_names', JSON.stringify(categories));
+            
+            // 同步到数据库
+            try {
+                const response = await fetch('/api/categories/predefined', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        categoryId: testId,
+                        name: testName.replace('💻 ', ''),
+                        icon: '💻',
+                        color: '#3B82F6'
+                    }),
+                });
+                
+                if (response.ok) {
+                    log('✅ 自动测试保存成功', 'success');
+                } else {
+                    log('❌ 自动测试保存失败', 'error');
+                }
+            } catch (error) {
+                log(`❌ 自动测试出错: ${error.message}`, 'error');
+            }
+
+            renderCategories();
+            updateDataDisplay();
+            
+            // 3秒后恢复原名称
+            setTimeout(async () => {
+                log('🔄 恢复原分类名称...', 'info');
+                categories[testId] = originalName;
+                localStorage.setItem('predefined_category_names', JSON.stringify(categories));
+                
+                try {
+                    await fetch('/api/categories/predefined', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            categoryId: testId,
+                            name: originalName.replace('💻 ', ''),
+                            icon: '💻',
+                            color: '#3B82F6'
+                        }),
+                    });
+                    log('✅ 分类名称已恢复', 'success');
+                } catch (error) {
+                    log(`❌ 恢复失败: ${error.message}`, 'error');
+                }
+                
+                renderCategories();
+                updateDataDisplay();
+            }, 3000);
+        }
+
+        // 测试页面刷新
+        function testRefresh() {
+            showStatus('🔄 即将刷新页面测试持久化...', 'info');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        }
+
+        // 清空日志
+        function clearLog() {
+            document.getElementById('test-log').innerHTML = '';
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('load', function() {
+            log('🚀 分类持久化测试工具加载完成', 'success');
+            initializeCategories();
+            renderCategories();
+            updateDataDisplay();
+            checkPersistence();
+        });
+    </script>
+</body>
+</html> 

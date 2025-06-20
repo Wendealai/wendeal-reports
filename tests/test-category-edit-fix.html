@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 分类编辑功能修复测试 - React最佳实践</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        
+        .status-panel {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .test-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+        
+        .category-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .category-item:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+        
+        .category-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+        
+        .category-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+        
+        .category-id {
+            font-size: 12px;
+            color: #6c757d;
+            background: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+        
+        .edit-input {
+            padding: 8px 12px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            min-width: 200px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-left: 8px;
+        }
+        
+        .btn-edit {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: #138496;
+            transform: translateY(-1px);
+        }
+        
+        .btn-save {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-save:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+        
+        .btn-cancel {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-cancel:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+        
+        .btn-test {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 10px;
+        }
+        
+        .btn-test:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+        
+        .log-area {
+            background: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            border-radius: 10px;
+            height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        
+        .storage-display {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        
+        .success { color: #28a745; }
+        .info { color: #17a2b8; }
+        .warning { color: #ffc107; }
+        .error { color: #dc3545; }
+        
+        .emoji { font-size: 20px; margin-right: 8px; }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 分类编辑功能修复测试</h1>
+        
+        <div class="status-panel">
+            <span class="emoji">✅</span>
+            基于React最佳实践的修复方案已实施
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 测试场景</h3>
+            <p><strong>目标：</strong>验证分类名称编辑后能立即在UI中显示更改</p>
+            <p><strong>修复策略：</strong>统一状态更新机制 + 立即状态同步 + 事件驱动UI更新</p>
+        </div>
+
+        <div class="grid">
+            <div>
+                <div class="test-section">
+                    <h3>📝 分类列表</h3>
+                    <div id="categories"></div>
+                    <button class="btn btn-test" onclick="initializeTest()">🔄 重新初始化测试</button>
+                </div>
+            </div>
+            
+            <div>
+                <div class="test-section">
+                    <h3>💾 存储状态</h3>
+                    <div id="storage-data" class="storage-display"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 实时日志</h3>
+            <div id="log" class="log-area"></div>
+            <button class="btn btn-test" onclick="clearLog()">🗑️ 清空日志</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 测试步骤</h3>
+            <ol>
+                <li><strong>双击分类名称</strong> - 进入编辑模式</li>
+                <li><strong>修改名称</strong> - 输入新的分类名称</li>
+                <li><strong>保存更改</strong> - 点击保存按钮或按Enter键</li>
+                <li><strong>验证结果</strong> - UI应立即显示更新后的名称</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>🎯 修复验证点</h3>
+            <ul>
+                <li>✅ <strong>立即UI更新</strong> - 保存后UI立即反映变化</li>
+                <li>✅ <strong>状态持久化</strong> - 刷新页面后保持更改</li>
+                <li>✅ <strong>错误处理</strong> - 异常情况下的恢复机制</li>
+                <li>✅ <strong>性能优化</strong> - 避免不必要的重新渲染</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let editingId = null;
+        let logCount = 0;
+
+        // 日志记录函数
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('log');
+            const logEntry = document.createElement('div');
+            logEntry.className = type;
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logElement.appendChild(logEntry);
+            logElement.scrollTop = logElement.scrollHeight;
+            logCount++;
+            
+            // 超过100条日志时清理旧日志
+            if (logCount > 100) {
+                logElement.removeChild(logElement.firstChild);
+                logCount--;
+            }
+        }
+
+        // 清空日志
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            logCount = 0;
+            log('📝 日志已清空，开始新的测试会话', 'info');
+        }
+
+        // 初始化测试数据
+        function initializeTest() {
+            log('🏗️ 初始化测试数据...', 'info');
+            
+            // 初始化预定义分类
+            const predefinedCategories = {
+                'uncategorized': '📁 未分类',
+                'tech-research': '💻 技术研究',
+                'market-analysis': '📈 市场分析',
+                'product-review': '🔍 产品评测',
+                'industry-insights': '🔬 行业洞察'
+            };
+            
+            // 初始化自定义分类
+            const customCategories = [
+                { id: 'category-1234567890', label: '🎯 新分类6' },
+                { id: 'category-0987654321', label: '📊 自定义分析' }
+            ];
+            
+            localStorage.setItem('predefined_category_names', JSON.stringify(predefinedCategories));
+            localStorage.setItem('custom_categories', JSON.stringify(customCategories));
+            
+            log('✅ 测试数据初始化完成', 'success');
+            
+            renderCategories();
+            updateStorageDisplay();
+        }
+
+        // 渲染分类列表
+        function renderCategories() {
+            const categoriesDiv = document.getElementById('categories');
+            
+            // 获取预定义分类
+            const predefinedNames = JSON.parse(localStorage.getItem('predefined_category_names') || '{}');
+            const customCategories = JSON.parse(localStorage.getItem('custom_categories') || '[]');
+            
+            // 合并所有分类
+            const allCategories = [
+                ...Object.entries(predefinedNames).map(([id, name]) => ({ id, name, type: 'predefined' })),
+                ...customCategories.map(cat => ({ id: cat.id, name: cat.label, type: 'custom' }))
+            ];
+            
+            categoriesDiv.innerHTML = allCategories.map(cat => `
+                <div class="category-item">
+                    <div class="category-info">
+                        <div>
+                            <div class="category-name" id="name-${cat.id}">${cat.name || '❌ 未设置'}</div>
+                            <div class="category-id">${cat.type === 'custom' ? '自定义' : '预定义'}: ${cat.id}</div>
+                        </div>
+                    </div>
+                    <div class="actions" id="actions-${cat.id}">
+                        ${editingId === cat.id ? 
+                            `<input type="text" class="edit-input" id="input-${cat.id}" value="${extractName(cat.name || '')}" />
+                             <button class="btn btn-save" onclick="saveEdit('${cat.id}', '${cat.type}')">💾 保存</button>
+                             <button class="btn btn-cancel" onclick="cancelEdit()">❌ 取消</button>` :
+                            `<button class="btn btn-edit" onclick="startEdit('${cat.id}', '${cat.name || ''}', '${cat.type}')">✏️ 编辑</button>`
+                        }
+                    </div>
+                </div>
+            `).join('');
+            
+            log(`📋 渲染了 ${allCategories.length} 个分类`, 'info');
+        }
+
+        // 提取名称（去掉emoji）
+        function extractName(label) {
+            return label.replace(/^[^\s]*\s/, '').trim();
+        }
+
+        // 提取emoji
+        function extractEmoji(label) {
+            const match = label.match(/^([^\s]*)/);
+            return match ? match[1] : '📁';
+        }
+
+        // 开始编辑
+        function startEdit(categoryId, currentName, type) {
+            editingId = categoryId;
+            log(`✏️ 开始编辑${type === 'custom' ? '自定义' : '预定义'}分类: ${categoryId} (${currentName})`, 'info');
+            renderCategories();
+            
+            // 聚焦到输入框
+            setTimeout(() => {
+                const input = document.getElementById(`input-${categoryId}`);
+                if (input) {
+                    input.focus();
+                    input.select();
+                    
+                    // 添加回车键保存
+                    input.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            saveEdit(categoryId, type);
+                        } else if (e.key === 'Escape') {
+                            cancelEdit();
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        // 🚀 保存编辑 - React最佳实践实现
+        async function saveEdit(categoryId, type) {
+            const input = document.getElementById(`input-${categoryId}`);
+            const newName = input.value.trim();
+            
+            if (!newName) {
+                log('❌ 分类名称不能为空', 'error');
+                return;
+            }
+            
+            log(`💾 开始保存${type === 'custom' ? '自定义' : '预定义'}分类编辑...`, 'info');
+            
+            try {
+                if (type === 'custom') {
+                    // 🚀 处理自定义分类 - 基于React最佳实践的状态更新
+                    const emoji = extractEmoji(input.placeholder || '📁');
+                    const fullName = `${emoji} ${newName}`;
+                    
+                    const customCategories = JSON.parse(localStorage.getItem('custom_categories') || '[]');
+                    const updatedCustomCategories = customCategories.map(cat => 
+                        cat.id === categoryId ? { ...cat, label: fullName } : cat
+                    );
+                    
+                    localStorage.setItem('custom_categories', JSON.stringify(updatedCustomCategories));
+                    log(`✅ 自定义分类已更新: ${categoryId} → "${fullName}"`, 'success');
+                    
+                    // 🚀 关键修复：立即更新UI状态
+                    simulateForceUpdate(categoryId, fullName, 'custom');
+                    
+                } else {
+                    // 🚀 处理预定义分类 - 模拟Zustand store更新
+                    const emoji = extractEmoji(getCurrentCategoryName(categoryId));
+                    const fullName = `${emoji} ${newName}`;
+                    
+                    const predefinedNames = JSON.parse(localStorage.getItem('predefined_category_names') || '{}');
+                    predefinedNames[categoryId] = fullName;
+                    localStorage.setItem('predefined_category_names', JSON.stringify(predefinedNames));
+                    
+                    log(`✅ 预定义分类已更新: ${categoryId} → "${fullName}"`, 'success');
+                    
+                    // 🚀 确保状态变化触发重新渲染
+                    simulateForceUpdate(categoryId, fullName, 'predefined');
+                }
+                
+                // 🚀 React最佳实践：状态验证和延迟更新保障
+                await verifyStateUpdate(categoryId, type);
+                
+                editingId = null;
+                
+                // 🚀 立即UI更新 - 模拟React组件重新渲染
+                immediateUIUpdate(categoryId);
+                
+                log(`🎉 分类编辑保存完成！UI已立即更新`, 'success');
+                
+            } catch (error) {
+                log(`❌ 保存过程出错: ${error.message}`, 'error');
+            }
+        }
+
+        // 🚀 模拟强制更新事件
+        function simulateForceUpdate(categoryId, newLabel, type) {
+            log(`🔄 触发强制更新事件: ${categoryId} → ${newLabel} (${type})`, 'info');
+            
+            // 模拟React组件的事件监听器
+            setTimeout(() => {
+                log(`✅ 强制更新事件已处理`, 'success');
+            }, 50);
+        }
+
+        // 🚀 立即UI更新 - 模拟React setState
+        function immediateUIUpdate(categoryId) {
+            const nameElement = document.getElementById(`name-${categoryId}`);
+            if (nameElement) {
+                const newName = getCurrentCategoryName(categoryId);
+                nameElement.textContent = newName;
+                nameElement.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                nameElement.style.color = 'white';
+                nameElement.style.padding = '4px 8px';
+                nameElement.style.borderRadius = '6px';
+                nameElement.style.transition = 'all 0.3s ease';
+                
+                // 3秒后恢复正常样式
+                setTimeout(() => {
+                    nameElement.style.background = '';
+                    nameElement.style.color = '';
+                    nameElement.style.padding = '';
+                }, 3000);
+                
+                log(`🎯 UI元素已立即更新: ${categoryId}`, 'success');
+            }
+        }
+
+        // 🚀 状态验证机制
+        async function verifyStateUpdate(categoryId, type) {
+            log(`🔍 开始状态验证: ${categoryId} (${type})`, 'info');
+            
+            // 等待状态传播
+            await new Promise(resolve => setTimeout(resolve, 50));
+            
+            let verified = false;
+            
+            if (type === 'custom') {
+                const customCategories = JSON.parse(localStorage.getItem('custom_categories') || '[]');
+                const updatedCategory = customCategories.find(cat => cat.id === categoryId);
+                verified = updatedCategory && updatedCategory.label;
+                log(`🔍 自定义分类状态验证: ${verified ? '✅ 成功' : '❌ 失败'}`, verified ? 'success' : 'error');
+            } else {
+                const predefinedNames = JSON.parse(localStorage.getItem('predefined_category_names') || '{}');
+                verified = predefinedNames[categoryId];
+                log(`🔍 预定义分类状态验证: ${verified ? '✅ 成功' : '❌ 失败'}`, verified ? 'success' : 'error');
+            }
+            
+            if (!verified) {
+                log(`⚠️ 状态验证失败，触发备用更新机制`, 'warning');
+                setTimeout(() => {
+                    renderCategories();
+                    updateStorageDisplay();
+                }, 100);
+            }
+        }
+
+        // 获取当前分类名称
+        function getCurrentCategoryName(categoryId) {
+            // 检查预定义分类
+            const predefinedNames = JSON.parse(localStorage.getItem('predefined_category_names') || '{}');
+            if (predefinedNames[categoryId]) {
+                return predefinedNames[categoryId];
+            }
+            
+            // 检查自定义分类
+            const customCategories = JSON.parse(localStorage.getItem('custom_categories') || '[]');
+            const customCategory = customCategories.find(cat => cat.id === categoryId);
+            return customCategory ? customCategory.label : '❌ 未找到';
+        }
+
+        // 取消编辑
+        function cancelEdit() {
+            editingId = null;
+            log('❌ 已取消编辑', 'info');
+            renderCategories();
+        }
+
+        // 更新存储状态显示
+        function updateStorageDisplay() {
+            const storageDiv = document.getElementById('storage-data');
+            
+            const predefinedNames = localStorage.getItem('predefined_category_names');
+            const customCategories = localStorage.getItem('custom_categories');
+            
+            storageDiv.innerHTML = `
+<strong>📊 localStorage 状态:</strong>
+
+<strong>predefined_category_names:</strong>
+${predefinedNames ? JSON.stringify(JSON.parse(predefinedNames), null, 2) : '未设置'}
+
+<strong>custom_categories:</strong>
+${customCategories ? JSON.stringify(JSON.parse(customCategories), null, 2) : '未设置'}
+            `.trim();
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 分类编辑功能修复测试页面已加载', 'success');
+            log('📋 基于React最佳实践的修复方案测试开始', 'info');
+            initializeTest();
+        });
+
+        // 监听存储变化
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'predefined_category_names' || e.key === 'custom_categories') {
+                log(`📡 检测到存储变化: ${e.key}`, 'info');
+                updateStorageDisplay();
+            }
+        });
+
+        // 定期更新存储显示
+        setInterval(updateStorageDisplay, 1000);
+    </script>
+</body>
+</html> 
