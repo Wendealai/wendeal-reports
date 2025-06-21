@@ -204,14 +204,14 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
           : f
       ));
 
-      // 处理HTML文件
-      console.log('Processing HTML file...');
+        // 处理HTML文件
+        console.log('Processing HTML file...');
       const content = await readFileContent(uploadFile.file);
-      console.log('File content read, length:', content.length);
-      
+        console.log('File content read, length:', content.length);
+        
       const metadata = extractMetadata(content, uploadFile.name);
       const filePath = `data:text/html;charset=utf-8,${encodeURIComponent(content)}`;
-      console.log('HTML metadata extracted:', metadata);
+        console.log('HTML metadata extracted:', metadata);
       
       // 更新进度
       setFiles(prev => prev.map(f => 

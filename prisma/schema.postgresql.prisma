@@ -1,20 +1,19 @@
-// This is your Prisma schema file,
+// This is your Prisma schema file for PostgreSQL (Neon) production
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
-  // Context7关键修复：启用适配器支持
+  // Context7关键修复：启用Neon适配器
   previewFeatures = ["driverAdapters"]
   // Context7关键修复：Netlify Node.js 18+需要的binaryTargets
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
-  // Context7修复：支持SQLite本地开发和PostgreSQL生产
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-  // Context7注意：SQLite不支持directUrl，仅PostgreSQL需要
-  // directUrl = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Context7最佳实践：直接连接用于迁移
+  directUrl = env("DIRECT_URL")
 }
 
 // 用户表
@@ -157,4 +156,4 @@ model File {
   report Report? @relation(fields: [reportId], references: [id], onDelete: Cascade)
 
   @@map("files")
-}
+} 

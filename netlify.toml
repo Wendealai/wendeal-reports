@@ -1,14 +1,17 @@
 [build]
-  command = "npm run build"
+  command = "npx prisma generate && npm run build"
   publish = ".next"
 
 [build.environment]
   NODE_VERSION = "18"
   NPM_FLAGS = "--production=false"
-  # Context7关键修复：Netlify环境数据库配置
-  DATABASE_URL = "file:/tmp/dev.db?connection_limit=1&pool_timeout=10&socket_timeout=10"
+  # Context7关键修复：移除SQLite配置，使用Neon PostgreSQL
+  # 这些环境变量将在Netlify UI中配置，而非硬编码
+  # DATABASE_URL = 从Netlify环境变量获取（Neon连接池版本）
+  # DIRECT_URL = 从Netlify环境变量获取（Neon直接连接版本）
+  
   # Context7最佳实践：为无服务器环境设置Prisma配置
-  PRISMA_CLI_BINARY_TARGETS = "native,rhel-openssl-1.0.x"
+  PRISMA_CLI_BINARY_TARGETS = "native,rhel-openssl-3.0.x"
 
 # Context7推荐：预构建脚本确保数据库就绪
 [[plugins]]
@@ -18,23 +21,25 @@ package = "@netlify/plugin-nextjs"
   # Context7推荐：优化函数性能
   node_bundler = "esbuild"
   external_node_modules = ["@prisma/client", "prisma"]
-  # 函数超时时间
-  timeout = 10
+  # 函数超时时间（Neon可能需要更长时间）
+  timeout = 15
 
 [dev]
   command = "npm run dev"
   port = 3000
   functions = "netlify/functions"
 
-# Context7最佳实践：环境变量配置说明
+# Context7最佳实践：Neon数据库环境变量配置说明
 # 在Netlify UI中配置以下环境变量：
 # ================================================
 # 
-# DATABASE_URL = "file:/tmp/dev.db?connection_limit=1&pool_timeout=10"
+# DATABASE_URL = "postgresql://username:password@ep-xxx-pooler.region.aws.neon.tech/database?sslmode=require&connection_limit=1&pool_timeout=15"
+# DIRECT_URL = "postgresql://username:password@ep-xxx.region.aws.neon.tech/database?sslmode=require"
 # JWT_SECRET = [生成32字符随机密钥]
 # NEXTAUTH_URL = "https://your-site-name.netlify.app"
 # NEXTAUTH_SECRET = [生成32字符随机密钥]
 # DEFAULT_USER_ID = "cmbusc9x00000x2w0fqyu591k"
+# NODE_ENV = "production"
 
 # Context7修复：正确的重定向规则
 [[redirects]]
