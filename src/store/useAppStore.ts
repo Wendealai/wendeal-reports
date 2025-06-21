@@ -375,73 +375,77 @@ export const useAppStore = create<AppState>()((set, get) => ({
   
   // 添加新报告（直接使用数据库）
   addReport: async (report: Omit<Report, 'id' | 'createdAt' | 'updatedAt'>) => {
-    logger.debug('Adding report to database...', report);
+    logger.debug('🚀 [Store] Adding report to database...', {
+      title: report.title,
+      category: report.category,
+      contentLength: report.content?.length
+    });
     
     try {
-      // 强制使用数据库API创建报告
-      logger.debug('Creating report in database...');
+      // Context7修复：映射前端分类ID到数据库分类ID
+      let categoryId = 'predefined-uncategorized'; // 默认分类
       
-      // 如果有分类，先确保分类存在，然后使用数据库
-      let categoryId = report.category || 'uncategorized';
-      
-      if (report.category && report.category !== 'uncategorized') {
-        logger.debug('Ensuring category exists', { category: report.category });
+      if (report.category) {
+        // Context7关键修复：前端分类ID映射到数据库分类ID
+        const categoryMapping: Record<string, string> = {
+          'uncategorized': 'predefined-uncategorized',
+          'tech-research': 'predefined-technical',
+          'market-analysis': 'predefined-business',
+          'product-review': 'predefined-general',
+          'industry-insights': 'predefined-business',
+          'general': 'predefined-general',
+          'technical': 'predefined-technical',
+          'business': 'predefined-business'
+        };
         
-        // 如果是自定义分类（以category-开头），直接使用ID
-        if (report.category.startsWith('category-')) {
-          logger.debug('Using custom category ID:', report.category);
+        // 如果是预定义分类，使用映射
+        if (categoryMapping[report.category]) {
+          categoryId = categoryMapping[report.category];
+          logger.debug('✅ [Store] Mapped category:', { from: report.category, to: categoryId });
+        }
+        // 如果是已存在的数据库分类ID（以predefined-或category-开头），直接使用
+        else if (report.category.startsWith('predefined-') || report.category.startsWith('category-')) {
           categoryId = report.category;
-        } else {
-          // 定义分类映射（预定义分类）
-          const categoryDefinitions = {
-            'tech-research': { name: '技术研究', icon: '💻', color: '#3B82F6' },
-            'market-analysis': { name: '市场分析', icon: '📈', color: '#10B981' },
-            'product-review': { name: '产品评测', icon: '🔍', color: '#F59E0B' },
-            'industry-insights': { name: '行业洞察', icon: '🔬', color: '#8B5CF6' }
-          };
-          
-          const categoryDef = categoryDefinitions[report.category as keyof typeof categoryDefinitions];
-          if (categoryDef) {
-            try {
-              const categoryResponse = await categoriesApi.create(categoryDef);
-              categoryId = categoryResponse.category.id;
-              logger.debug('Category created/found:', categoryId);
-            } catch (error) {
-              // 可能已存在，尝试获取
-              logger.debug('Category might exist, continuing with original ID');
-              categoryId = report.category;
-            }
-          } else {
-            // 未知分类，使用原始ID
-            logger.debug('Unknown category, using original ID:', report.category);
-            categoryId = report.category;
-          }
+          logger.debug('✅ [Store] Using existing category ID:', { categoryId });
+        }
+        // 其他情况，使用默认分类
+        else {
+          logger.warn('⚠️ [Store] Unknown category, using default:', { category: report.category });
         }
       }
       
-      // 准备API数据，确保包含所有必需字段
+      // Context7最佳实践：准备API数据，确保包含所有必需字段
       const apiData = {
-        title: report.title,
+        title: report.title.trim(),
         content: report.content || '',
-        description: report.description || '',
+        description: report.description?.trim() || '',
         status: 'published' as const,
         categoryId: categoryId,
         tags: report.tags || [],
       };
       
-      logger.debug('Sending API data:', apiData);
+      logger.debug('📤 [Store] Sending API data:', {
+        title: apiData.title,
+        categoryId: apiData.categoryId,
+        tagsCount: apiData.tags.length,
+        contentLength: apiData.content.length
+      });
       
       const response = await reportsApi.create(apiData);
-      logger.debug('API response:', response);
+      logger.debug('✅ [Store] API response received:', {
+        id: response.report?.id,
+        title: response.report?.title,
+        categoryId: response.report?.categoryId
+      });
 
-      // 更新本地状态（作为缓存）
+      // Context7最佳实践：更新本地状态（作为缓存）
       const { reports } = get();
       const newReport: Report = {
         id: response.report.id,
         title: response.report.title,
         description: response.report.description || response.report.content?.substring(0, 200) || '',
-        category: response.report.categoryId || 'uncategorized',
-        tags: response.report.tags || [],
+        category: response.report.categoryId || 'predefined-uncategorized',
+        tags: Array.isArray(response.report.tags) ? response.report.tags.map((tag: any) => tag.name || tag) : [],
         content: response.report.content || '',
         filePath: report.filePath || '',
         createdAt: new Date(response.report.createdAt),
@@ -449,13 +453,15 @@ export const useAppStore = create<AppState>()((set, get) => ({
         isFavorite: false,
         readStatus: 'unread' as const,
         fileSize: report.fileSize || 0,
-        wordCount: report.wordCount || 0
+        wordCount: report.wordCount || 0,
+        fileType: 'html'
       };
       
-      set({ reports: [...reports, newReport] });
-      logger.debug('Report created in database successfully');
+      const updatedReports = [...reports, newReport];
+      set({ reports: updatedReports });
+      logger.debug('✅ [Store] Report created successfully:', { id: newReport.id });
       
-      // 重新加载分类数据以更新导航栏
+      // Context7推荐：重新加载分类数据以更新导航栏
       try {
         const categoriesResponse = await categoriesApi.getAll();
         const transformedCategories: Category[] = (categoriesResponse.categories || []).map((apiCategory: any) => ({
@@ -467,15 +473,26 @@ export const useAppStore = create<AppState>()((set, get) => ({
           reportCount: 0,
         }));
         set({ categories: transformedCategories });
-        logger.debug('Categories refreshed after report creation');
+        logger.debug('✅ [Store] Categories refreshed after report creation');
       } catch (categoryError) {
-        logger.warn('Failed to refresh categories:', categoryError);
+        logger.warn('⚠️ [Store] Failed to refresh categories:', { error: categoryError });
       }
       
       return newReport;
     } catch (error) {
-      logger.error('Failed to create report in database:', error);
-      throw new Error(`数据库操作失败: ${error instanceof Error ? error.message : '未知错误'}`);
+      logger.error('❌ [Store] Failed to create report:', { error });
+      
+      // Context7最佳实践：提供详细的错误信息
+      const errorMessage = error instanceof Error ? error.message : '未知错误';
+      if (errorMessage.includes('UNIQUE constraint') || errorMessage.includes('duplicate')) {
+        throw new Error('报告标题已存在，请使用不同的标题');
+      } else if (errorMessage.includes('FOREIGN KEY') || errorMessage.includes('category')) {
+        throw new Error('分类不存在，请选择有效的分类');
+      } else if (errorMessage.includes('Database connection')) {
+        throw new Error('数据库连接失败，请检查网络连接');
+      } else {
+        throw new Error(`创建报告失败: ${errorMessage}`);
+      }
     }
   },
   
