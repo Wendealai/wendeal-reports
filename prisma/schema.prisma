@@ -3,6 +3,8 @@
 
 generator client {
   provider = "prisma-client-js"
+  // Context7关键修复：Netlify Node.js 18+需要的binaryTargets
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {

@@ -5,6 +5,8 @@
 [build.environment]
   NODE_VERSION = "18"
   NPM_FLAGS = "--production=false"
+  # Context7关键修复：Netlify环境数据库配置
+  DATABASE_URL = "file:/tmp/dev.db?connection_limit=1&pool_timeout=10&socket_timeout=10"
   # Context7最佳实践：为无服务器环境设置Prisma配置
   PRISMA_CLI_BINARY_TARGETS = "native,rhel-openssl-1.0.x"
 
