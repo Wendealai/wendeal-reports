@@ -20,11 +20,17 @@ interface UploadFile {
   file: File;
   name: string;
   size: number;
-  status: 'pending' | 'uploading' | 'success' | 'error';
+  status: 'pending' | 'uploading' | 'success' | 'error' | 'retrying';
   progress: number;
   error?: string;
   preview?: string;
   categoryId?: string;
+  uploadedBytes?: number;
+  totalBytes?: number;
+  startTime?: number;
+  estimatedTimeRemaining?: number;
+  retryCount?: number;
+  uploadSpeed?: number;
 }
 
 interface FileUploadProps {
@@ -38,6 +44,13 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [defaultCategory, setDefaultCategory] = useState('uncategorized');
   const [availableCategories, setAvailableCategories] = useState<Array<{id: string, label: string}>>([]);
+  const [uploadQueue, setUploadQueue] = useState<UploadFile[]>([]);
+  const [isProcessingQueue, setIsProcessingQueue] = useState(false);
+  const [batchSettings, setBatchSettings] = useState({
+    maxConcurrent: 3,
+    pauseOnError: false,
+    autoRetry: true
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   console.log('FileUpload component rendered!', { files: files.length, isUploading, isDragOver });
@@ -106,15 +119,39 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
   const generateId = () => Math.random().toString(36).substr(2, 9);
 
   const validateFile = (file: File): string | null => {
-    // 检查是否是HTML文件
-    if (file.type.includes('text/html') || file.name.endsWith('.html')) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit for HTML
-        return 'HTML 文件大小不能超过 10MB';
-      }
-      return null;
+    // 文件大小检查
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      return `文件大小 ${(file.size / 1024 / 1024).toFixed(2)}MB 超过限制 10MB`;
     }
-    
-    return '只支持 HTML 文件';
+
+    // 文件类型检查
+    const allowedTypes = ['text/html', 'application/xhtml+xml'];
+    const allowedExtensions = ['.html', '.htm', '.xhtml'];
+
+    const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+    const isValidExtension = allowedExtensions.includes(extension);
+    const isValidMimeType = allowedTypes.some(type => file.type === type || file.type.includes('html'));
+
+    if (!isValidExtension) {
+      return `不支持的文件扩展名 ${extension}。支持的格式: ${allowedExtensions.join(', ')}`;
+    }
+
+    if (!isValidMimeType && file.type) {
+      return `不支持的文件类型 ${file.type}。支持的类型: ${allowedTypes.join(', ')}`;
+    }
+
+    // 文件名检查
+    if (file.name.length > 255) {
+      return '文件名过长，请使用较短的文件名';
+    }
+
+    // 检查文件名中的特殊字符
+    const invalidChars = /[<>:"/\\|?*]/;
+    if (invalidChars.test(file.name)) {
+      return '文件名包含无效字符，请重命名后重试';
+    }
+
+    return null;
   };
 
   const processFiles = useCallback(async (fileList: FileList) => {
@@ -146,13 +183,25 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
     setFiles(prev => [...prev, ...newFiles]);
   }, [defaultCategory]);
 
-  const uploadFile = async (uploadFile: UploadFile) => {
+  const uploadFile = async (uploadFile: UploadFile, retryCount = 0) => {
+    const startTime = Date.now();
+
     try {
-      console.log('Starting upload for file:', uploadFile.name);
-      
-      setFiles(prev => prev.map(f => 
-        f.id === uploadFile.id 
-          ? { ...f, status: 'uploading', progress: 10 }
+      console.log('Starting upload for file:', uploadFile.name, 'Retry:', retryCount);
+
+      // Initialize upload state with timing info
+      setFiles(prev => prev.map(f =>
+        f.id === uploadFile.id
+          ? {
+              ...f,
+              status: retryCount > 0 ? 'retrying' : 'uploading',
+              progress: 0,
+              startTime,
+              totalBytes: uploadFile.file.size,
+              uploadedBytes: 0,
+              retryCount,
+              uploadSpeed: 0
+            }
           : f
       ));
 
@@ -160,31 +209,89 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
       formData.append('file', uploadFile.file);
       formData.append('categoryId', uploadFile.categoryId || 'uncategorized');
 
-      const response = await fetch('/api/reports', {
-        method: 'POST',
-        body: formData,
+      // Create XMLHttpRequest for progress tracking
+      const xhr = new XMLHttpRequest();
+
+      // Track upload progress
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          const progress = Math.round((event.loaded / event.total) * 100);
+          const elapsed = Date.now() - startTime;
+          const uploadSpeed = event.loaded / (elapsed / 1000); // bytes per second
+          const remainingBytes = event.total - event.loaded;
+          const estimatedTimeRemaining = remainingBytes / uploadSpeed;
+
+          setFiles(prev => prev.map(f =>
+            f.id === uploadFile.id
+              ? {
+                  ...f,
+                  progress,
+                  uploadedBytes: event.loaded,
+                  uploadSpeed,
+                  estimatedTimeRemaining: estimatedTimeRemaining > 0 ? estimatedTimeRemaining : 0
+                }
+              : f
+          ));
+        }
       });
 
-      setFiles(prev => prev.map(f => f.id === uploadFile.id ? { ...f, progress: 80 } : f));
+      // Handle upload completion
+      const uploadPromise = new Promise<any>((resolve, reject) => {
+        xhr.onload = () => {
+          console.log('📡 XHR Response received:', {
+            status: xhr.status,
+            statusText: xhr.statusText,
+            responseLength: xhr.responseText.length,
+            responsePreview: xhr.responseText.substring(0, 200)
+          });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '上传失败');
-      }
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const result = JSON.parse(xhr.responseText);
+              console.log('✅ Upload successful, parsed result:', result);
+              resolve(result);
+            } catch (e) {
+              console.error('❌ Failed to parse response as JSON:', e);
+              console.error('Response text:', xhr.responseText);
+              reject(new Error('Invalid response format'));
+            }
+          } else {
+            console.error('❌ HTTP error response:', xhr.status, xhr.statusText);
+            try {
+              const errorData = JSON.parse(xhr.responseText);
+              reject(new Error(errorData.error || `HTTP ${xhr.status}: 上传失败`));
+            } catch (e) {
+              reject(new Error(`HTTP ${xhr.status}: 上传失败`));
+            }
+          }
+        };
 
-      const result = await response.json();
-      
+        xhr.onerror = () => reject(new Error('网络错误'));
+        xhr.ontimeout = () => reject(new Error('上传超时'));
+
+        xhr.open('POST', '/api/reports');
+        xhr.timeout = 300000; // 5 minutes timeout
+        xhr.send(formData);
+      });
+
+      const result = await uploadPromise;
+
       console.log('Report created on server:', result.report);
 
       if (result.report) {
         useAppStore.setState((state) => ({ reports: [result.report, ...state.reports] }));
       }
-      
+
       window.dispatchEvent(new CustomEvent('forceReportUpdate'));
 
-      setFiles(prev => prev.map(f => 
-        f.id === uploadFile.id 
-          ? { ...f, status: 'success', progress: 100 }
+      setFiles(prev => prev.map(f =>
+        f.id === uploadFile.id
+          ? {
+              ...f,
+              status: 'success',
+              progress: 100,
+              estimatedTimeRemaining: 0
+            }
           : f
       ));
 
@@ -192,12 +299,31 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
 
     } catch (error) {
       console.error('Upload file error:', error);
-      setFiles(prev => prev.map(f => 
-        f.id === uploadFile.id 
-          ? { 
-              ...f, 
-              status: 'error', 
-              error: error instanceof Error ? error.message : '上传失败'
+
+      // Implement retry logic for network errors
+      const isRetryableError = error instanceof Error && (
+        error.message.includes('网络错误') ||
+        error.message.includes('上传超时') ||
+        error.message.includes('fetch')
+      );
+
+      if (isRetryableError && retryCount < 3) {
+        console.log(`Retrying upload for ${uploadFile.name}, attempt ${retryCount + 1}`);
+
+        // Wait before retry with exponential backoff
+        const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
+        await new Promise(resolve => setTimeout(resolve, delay));
+
+        return uploadFile(uploadFile, retryCount + 1);
+      }
+
+      setFiles(prev => prev.map(f =>
+        f.id === uploadFile.id
+          ? {
+              ...f,
+              status: 'error',
+              error: error instanceof Error ? error.message : '上传失败',
+              estimatedTimeRemaining: 0
             }
           : f
       ));
@@ -206,18 +332,81 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
 
   const handleUploadAll = async () => {
     setIsUploading(true);
+    setIsProcessingQueue(true);
+
     const pendingFiles = files.filter(f => f.status === 'pending');
-    
-    for (const file of pendingFiles) {
-      await uploadFile(file);
-    }
-    
+    setUploadQueue(pendingFiles);
+
+    await processBatchUpload(pendingFiles);
+
     setIsUploading(false);
+    setIsProcessingQueue(false);
+    setUploadQueue([]);
     onUploadComplete?.();
+  };
+
+  const processBatchUpload = async (filesToUpload: UploadFile[]) => {
+    const { maxConcurrent, pauseOnError, autoRetry } = batchSettings;
+    const chunks = [];
+
+    // Split files into chunks for concurrent processing
+    for (let i = 0; i < filesToUpload.length; i += maxConcurrent) {
+      chunks.push(filesToUpload.slice(i, i + maxConcurrent));
+    }
+
+    for (const chunk of chunks) {
+      const uploadPromises = chunk.map(async (file) => {
+        try {
+          await uploadFile(file, 0);
+        } catch (error) {
+          console.error(`Failed to upload ${file.name}:`, error);
+
+          if (pauseOnError) {
+            throw error; // Stop processing if pauseOnError is true
+          }
+
+          if (autoRetry) {
+            // Add to retry queue
+            setTimeout(() => {
+              retryFile(file.id);
+            }, 2000);
+          }
+        }
+      });
+
+      try {
+        await Promise.all(uploadPromises);
+      } catch (error) {
+        if (pauseOnError) {
+          console.error('Batch upload paused due to error:', error);
+          break;
+        }
+      }
+    }
+  };
+
+  const pauseUpload = () => {
+    setIsProcessingQueue(false);
+    // Cancel ongoing uploads would require more complex state management
+  };
+
+  const resumeUpload = () => {
+    const remainingFiles = files.filter(f => f.status === 'pending');
+    if (remainingFiles.length > 0) {
+      setIsProcessingQueue(true);
+      processBatchUpload(remainingFiles);
+    }
   };
 
   const removeFile = (id: string) => {
     setFiles(prev => prev.filter(f => f.id !== id));
+  };
+
+  const retryFile = async (id: string) => {
+    const file = files.find(f => f.id === id);
+    if (file && file.status === 'error') {
+      await uploadFile(file, 0);
+    }
   };
 
   const clearAll = () => {
@@ -314,6 +503,8 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
         return <Clock style={{ width: '16px', height: '16px', color: '#6b7280' }} />;
       case 'uploading':
         return <Loader2 style={{ width: '16px', height: '16px', color: '#3b82f6', animation: 'spin 1s linear infinite' }} />;
+      case 'retrying':
+        return <Loader2 style={{ width: '16px', height: '16px', color: '#f59e0b', animation: 'spin 1s linear infinite' }} />;
       case 'success':
         return <CheckCircle style={{ width: '16px', height: '16px', color: '#10b981' }} />;
       case 'error':
@@ -327,6 +518,16 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const formatTime = (seconds: number) => {
+    if (seconds < 60) return `${Math.round(seconds)}秒`;
+    if (seconds < 3600) return `${Math.round(seconds / 60)}分钟`;
+    return `${Math.round(seconds / 3600)}小时`;
+  };
+
+  const formatSpeed = (bytesPerSecond: number) => {
+    return `${formatFileSize(bytesPerSecond)}/s`;
   };
 
   return (
@@ -471,7 +672,7 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
             }}>
               待上传文件 ({files.length})
             </h3>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               <button
                 style={{
                   padding: '6px 12px',
@@ -487,6 +688,54 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
               >
                 清空
               </button>
+
+              {/* Batch Settings */}
+              <select
+                value={batchSettings.maxConcurrent}
+                onChange={(e) => setBatchSettings(prev => ({ ...prev, maxConcurrent: parseInt(e.target.value) }))}
+                style={{
+                  padding: '6px 8px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  backgroundColor: '#ffffff',
+                  color: '#374151'
+                }}
+                disabled={isUploading}
+              >
+                <option value={1}>单个上传</option>
+                <option value={2}>并发2个</option>
+                <option value={3}>并发3个</option>
+                <option value={5}>并发5个</option>
+              </select>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: '#374151' }}>
+                <input
+                  type="checkbox"
+                  checked={batchSettings.autoRetry}
+                  onChange={(e) => setBatchSettings(prev => ({ ...prev, autoRetry: e.target.checked }))}
+                  disabled={isUploading}
+                />
+                自动重试
+              </label>
+
+              {isProcessingQueue && (
+                <button
+                  style={{
+                    padding: '6px 12px',
+                    backgroundColor: '#f59e0b',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    color: 'white',
+                    cursor: 'pointer'
+                  }}
+                  onClick={pauseUpload}
+                >
+                  暂停
+                </button>
+              )}
+
               <button
                 style={{
                   padding: '6px 12px',
@@ -506,12 +755,12 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
                 {isUploading ? (
                   <>
                     <Loader2 style={{ width: '14px', height: '14px', animation: 'spin 1s linear infinite' }} />
-                    上传中...
+                    批量上传中... ({files.filter(f => f.status === 'success').length}/{files.length})
                   </>
                 ) : (
                   <>
                     <Upload style={{ width: '14px', height: '14px' }} />
-                    上传全部
+                    批量上传 ({files.filter(f => f.status === 'pending').length}个)
                   </>
                 )}
               </button>
@@ -561,20 +810,33 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
                       borderRadius: '4px',
                       fontSize: '11px',
                       fontWeight: '500',
-                      backgroundColor: 
+                      backgroundColor:
                         file.status === 'success' ? '#dcfce7' :
                         file.status === 'error' ? '#fef2f2' :
-                        file.status === 'uploading' ? '#f0f9ff' : '#f9fafb',
+                        file.status === 'uploading' ? '#f0f9ff' :
+                        file.status === 'retrying' ? '#fef3c7' : '#f9fafb',
                       color:
                         file.status === 'success' ? '#166534' :
                         file.status === 'error' ? '#dc2626' :
-                        file.status === 'uploading' ? '#1d4ed8' : '#374151'
+                        file.status === 'uploading' ? '#1d4ed8' :
+                        file.status === 'retrying' ? '#d97706' : '#374151'
                     }}>
                       {file.status === 'pending' && '待上传'}
-                      {file.status === 'uploading' && '上传中'}
+                      {file.status === 'uploading' && `上传中 ${file.progress}%`}
+                      {file.status === 'retrying' && `重试中 ${file.retryCount ? `(${file.retryCount}/3)` : ''}`}
                       {file.status === 'success' && '已完成'}
                       {file.status === 'error' && '失败'}
                     </span>
+
+                    {/* Upload speed and time remaining */}
+                    {(file.status === 'uploading' || file.status === 'retrying') && file.uploadSpeed && (
+                      <span style={{ fontSize: '11px', color: '#6b7280' }}>
+                        {formatSpeed(file.uploadSpeed)}
+                        {file.estimatedTimeRemaining && file.estimatedTimeRemaining > 1 && (
+                          <> • 剩余 {formatTime(file.estimatedTimeRemaining)}</>
+                        )}
+                      </span>
+                    )}
                   </div>
 
                   {/* 分类选择器 */}
@@ -601,31 +863,71 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
                     </select>
                   )}
                   
-                  {file.status === 'uploading' && (
-                    <div style={{
-                      width: '100%',
-                      height: '4px',
-                      backgroundColor: '#f3f4f6',
-                      borderRadius: '2px',
-                      overflow: 'hidden',
-                      marginTop: '4px'
-                    }}>
+                  {(file.status === 'uploading' || file.status === 'retrying') && (
+                    <div style={{ marginTop: '8px' }}>
                       <div style={{
-                        width: `${file.progress}%`,
-                        height: '100%',
-                        backgroundColor: '#3b82f6',
-                        transition: 'width 0.3s'
-                      }} />
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '4px'
+                      }}>
+                        <span style={{ fontSize: '12px', color: '#6b7280' }}>
+                          {file.uploadedBytes && file.totalBytes ?
+                            `${formatFileSize(file.uploadedBytes)} / ${formatFileSize(file.totalBytes)}` :
+                            `${file.progress}%`
+                          }
+                        </span>
+                        {file.status === 'retrying' && (
+                          <span style={{ fontSize: '11px', color: '#d97706' }}>
+                            重试 {file.retryCount || 0}/3
+                          </span>
+                        )}
+                      </div>
+                      <div style={{
+                        width: '100%',
+                        height: '6px',
+                        backgroundColor: '#f3f4f6',
+                        borderRadius: '3px',
+                        overflow: 'hidden'
+                      }}>
+                        <div style={{
+                          width: `${file.progress}%`,
+                          height: '100%',
+                          backgroundColor: file.status === 'retrying' ? '#f59e0b' : '#3b82f6',
+                          transition: 'width 0.3s ease-in-out',
+                          borderRadius: '3px'
+                        }} />
+                      </div>
                     </div>
                   )}
                   {file.error && (
-                    <p style={{ 
-                      fontSize: '12px',
-                      color: '#dc2626',
-                      margin: '4px 0 0 0'
-                    }}>
-                      {file.error}
-                    </p>
+                    <div style={{ marginTop: '8px' }}>
+                      <p style={{
+                        fontSize: '12px',
+                        color: '#dc2626',
+                        margin: '0 0 8px 0'
+                      }}>
+                        {file.error}
+                      </p>
+                      <button
+                        style={{
+                          padding: '4px 8px',
+                          backgroundColor: '#fef2f2',
+                          border: '1px solid #fecaca',
+                          borderRadius: '4px',
+                          fontSize: '11px',
+                          color: '#dc2626',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
+                        onClick={() => retryFile(file.id)}
+                      >
+                        <Loader2 style={{ width: '12px', height: '12px' }} />
+                        重试上传
+                      </button>
+                    </div>
                   )}
                 </div>
 

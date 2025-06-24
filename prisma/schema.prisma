@@ -85,6 +85,18 @@ model Report {
   reportTags ReportTag[]
   files      File[]
 
+  // 性能优化索引
+  @@index([status])
+  @@index([priority])
+  @@index([categoryId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([updatedAt])
+  @@index([publishedAt])
+  @@index([status, priority])
+  @@index([categoryId, status])
+  @@index([userId, status])
+  @@index([createdAt, status])
   @@map("reports")
 }
 
@@ -142,8 +154,22 @@ model File {
   reportId  String?
   createdAt DateTime @default(now())
 
+  // 压缩和优化相关字段
+  originalSize    Int?     // 原始文件大小
+  compressedSize  Int?     // 压缩后大小
+  isCompressed    Boolean  @default(false) // 是否已压缩
+  compressionRatio Float?  // 压缩比率
+  optimizationInfo Json?   // 优化信息 (JSON格式)
+
   // 关联关系
   report Report? @relation(fields: [reportId], references: [id], onDelete: Cascade)
 
+  // 性能优化索引
+  @@index([reportId])
+  @@index([mimeType])
+  @@index([createdAt])
+  @@index([isCompressed])
+  @@index([size])
+  @@index([filename])
   @@map("files")
 }

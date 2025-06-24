@@ -23,6 +23,24 @@ export const createReportSchema = z.object({
   tags: z.array(z.string()).optional(),
 })
 
+// 文件上传相关验证
+export const createReportWithFileSchema = z.object({
+  title: z.string().min(1, '标题不能为空').max(200, '标题最多200个字符'),
+  content: z.string().min(1, '内容不能为空'),
+  description: z.string().optional(),
+  summary: z.string().optional(),
+  status: z.enum(['draft', 'published', 'archived']).default('draft'),
+  priority: z.enum(['low', 'medium', 'high', 'urgent']).default('medium'),
+  categoryId: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  // 文件相关字段
+  filePath: z.string().optional(),
+  fileSize: z.number().min(0, '文件大小不能为负数').optional(),
+  fileName: z.string().optional(),
+  originalName: z.string().optional(),
+  mimeType: z.string().optional(),
+})
+
 export const updateReportSchema = createReportSchema.partial()
 
 // 分类相关验证
@@ -68,10 +86,11 @@ export const saveSearchSchema = z.object({
 export type RegisterInput = z.infer<typeof registerSchema>
 export type LoginInput = z.infer<typeof loginSchema>
 export type CreateReportInput = z.infer<typeof createReportSchema>
+export type CreateReportWithFileInput = z.infer<typeof createReportWithFileSchema>
 export type UpdateReportInput = z.infer<typeof updateReportSchema>
 export type CreateCategoryInput = z.infer<typeof createCategorySchema>
 export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>
 export type CreateTagInput = z.infer<typeof createTagSchema>
 export type UpdateTagInput = z.infer<typeof updateTagSchema>
 export type SearchInput = z.infer<typeof searchSchema>
-export type SaveSearchInput = z.infer<typeof saveSearchSchema> 
+export type SaveSearchInput = z.infer<typeof saveSearchSchema>
