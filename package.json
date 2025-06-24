@@ -32,7 +32,12 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "clean": "rm -rf .next out",
-    "export": "next build && next export"
+    "export": "next build && next export",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:deploy": "prisma db push && node scripts/deploy-setup.js",
+    "netlify:build": "npm run db:generate && next build",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@codemirror/lang-css": "^6.3.1",

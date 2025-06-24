@@ -1,11 +1,30 @@
 import type { Context, Config } from "@netlify/functions";
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
+import { optimizeFileContent, formatBytes, formatCompressionRatio } from '../../src/lib/file-optimization';
+import { validateFile } from '../../src/lib/file-validation';
+import { cacheManager } from '../../src/lib/performance';
 
-const prisma = new PrismaClient();
+// 初始化 Prisma 客户端
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: Netlify.env.get('DATABASE_URL'),
+    },
+  },
+});
 
 // 默认用户ID（用于简化的单用户系统）
 const DEFAULT_USER_ID = 'cmbusc9x00000x2w0fqyu591k';
+
+// 预定义分类ID映射
+const PREDEFINED_CATEGORY_ID_MAP = {
+  'uncategorized': 'predefined-uncategorized',
+  'tech-research': 'predefined-tech-research',
+  'market-analysis': 'predefined-market-analysis',
+  'product-review': 'predefined-product-review',
+  'industry-insights': 'predefined-industry-insights',
+};
 
 // 报告创建验证Schema
 const createReportSchema = z.object({
@@ -121,11 +140,174 @@ async function getReports(request: Request) {
   }
 }
 
-// 创建新报告
+// 创建新报告（支持文件上传）
 async function createReport(request: Request) {
   try {
+    const contentType = request.headers.get('content-type') || '';
+
+    if (contentType.includes('multipart/form-data')) {
+      // 处理文件上传
+      return await createReportFromFile(request);
+    } else {
+      // 处理JSON数据
+      return await createReportFromJSON(request);
+    }
+  } catch (error) {
+    console.error('Create report error:', error);
+    return new Response(JSON.stringify({ error: '创建报告失败' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+// 从文件创建报告
+async function createReportFromFile(request: Request) {
+  try {
+    const formData = await request.formData();
+    const file = formData.get('file') as File | null;
+    const categoryIdFromFrontend = formData.get('categoryId') as string | null;
+
+    if (!file) {
+      return new Response(JSON.stringify({ error: '没有提供文件' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // 读取文件内容
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+
+    // 综合文件验证
+    const validationResult = validateFile(file, fileBuffer, {
+      maxFileSize: 10 * 1024 * 1024, // 10MB
+      allowedMimeTypes: ['text/html', 'application/xhtml+xml'],
+      allowedExtensions: ['.html', '.htm', '.xhtml'],
+      checkContent: true,
+      strictMode: false,
+      allowExternalResources: true,
+      allowScripts: true
+    });
+
+    if (!validationResult.isValid) {
+      return new Response(JSON.stringify({
+        error: '文件验证失败',
+        details: validationResult.errors,
+        warnings: validationResult.warnings,
+        fileInfo: validationResult.fileInfo
+      }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    // 提取元数据
+    const htmlContent = fileBuffer.toString('utf-8');
+    const titleMatch = htmlContent.match(/<title>(.*?)<\/title>/);
+    const title = titleMatch ? titleMatch[1] : file.name.replace(/\.html$/i, '');
+
+    const pMatch = htmlContent.match(/<p>(.*?)<\/p>/);
+    let description = pMatch ? pMatch[1].substring(0, 200) : '';
+    if (!description) {
+      const bodyMatch = htmlContent.match(/<body[^>]*>([\s\S]*?)<\/body>/);
+      if (bodyMatch) {
+        description = bodyMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 200);
+      }
+    }
+
+    // 优化和压缩文件内容
+    const optimizationResult = optimizeFileContent(htmlContent, {
+      enableCompression: true,
+      compressionLevel: 6,
+      minSizeForCompression: 1024,
+      enableHtmlMinification: true,
+      removeComments: true,
+      removeWhitespace: true
+    });
+
+    // 映射分类ID
+    const categoryId = categoryIdFromFrontend && PREDEFINED_CATEGORY_ID_MAP[categoryIdFromFrontend as keyof typeof PREDEFINED_CATEGORY_ID_MAP]
+      ? PREDEFINED_CATEGORY_ID_MAP[categoryIdFromFrontend as keyof typeof PREDEFINED_CATEGORY_ID_MAP]
+      : PREDEFINED_CATEGORY_ID_MAP['uncategorized'];
+
+    // 验证数据
+    const reportData = {
+      title,
+      description,
+      content: optimizationResult.isCompressed ? htmlContent : optimizationResult.optimizedContent,
+      status: 'draft' as const,
+      priority: 'medium' as const,
+      categoryId,
+    };
+
+    // 使用事务创建报告
+    const result = await prisma.$transaction(async (tx) => {
+      const report = await tx.report.create({
+        data: {
+          ...reportData,
+          userId: DEFAULT_USER_ID,
+        },
+        include: {
+          category: {
+            select: { id: true, name: true, color: true, icon: true },
+          },
+        },
+      });
+
+      // 创建文件记录
+      await tx.file.create({
+        data: {
+          filename: file.name,
+          originalName: file.name,
+          mimeType: 'text/html',
+          size: optimizationResult.compressedSize,
+          path: `/virtual/${report.id}`, // 虚拟路径，因为Netlify不支持文件存储
+          reportId: report.id,
+          originalSize: optimizationResult.originalSize,
+          compressedSize: optimizationResult.compressedSize,
+          isCompressed: optimizationResult.isCompressed,
+          compressionRatio: optimizationResult.compressionRatio,
+          optimizationInfo: {
+            compressionEnabled: true,
+            minificationEnabled: true,
+            compressionLevel: 6,
+            optimizedAt: new Date().toISOString(),
+            savings: {
+              bytes: optimizationResult.originalSize - optimizationResult.compressedSize,
+              percentage: optimizationResult.compressionRatio
+            }
+          }
+        },
+      });
+
+      return report;
+    });
+
+    // 清理缓存
+    cacheManager.invalidateReportCache(result.id);
+
+    return new Response(JSON.stringify({
+      message: '报告创建成功',
+      report: result,
+      optimization: {
+        originalSize: formatBytes(optimizationResult.originalSize),
+        compressedSize: formatBytes(optimizationResult.compressedSize),
+        compressionRatio: formatCompressionRatio(optimizationResult.compressionRatio),
+        isCompressed: optimizationResult.isCompressed
+      }
+    }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+
+  } catch (error) {
+    console.error('Create report from file error:', error);
+    return new Response(JSON.stringify({ error: '从文件创建报告失败' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+// 从JSON创建报告
+async function createReportFromJSON(request: Request) {
+  try {
     const body = await request.json();
-    
+
     // 验证输入数据
     const validatedData = createReportSchema.parse(body);
     const { tags, ...reportData } = validatedData;
