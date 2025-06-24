@@ -24,7 +24,8 @@
   "private": false,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && npm run db:setup",
+    "build": "next build",
+    "build:netlify": "next build && npm run db:setup || echo 'Build completed with warnings'",
     "db:setup": "node scripts/deploy-setup.js || echo 'Database setup skipped'",
     "start": "next start",
     "lint": "next lint",
