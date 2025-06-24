@@ -36,7 +36,7 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:deploy": "prisma db push && node scripts/deploy-setup.js",
-    "netlify:build": "npm run db:generate && next build",
+    "netlify:build": "node scripts/netlify-build.js",
     "postinstall": "prisma generate"
   },
   "dependencies": {

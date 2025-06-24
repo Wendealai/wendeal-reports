@@ -6,13 +6,20 @@ import { validateFile } from '../../src/lib/file-validation';
 import { cacheManager } from '../../src/lib/performance';
 
 // 初始化 Prisma 客户端
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: Netlify.env.get('DATABASE_URL'),
-    },
-  },
-});
+let prisma: PrismaClient;
+
+function getPrismaClient() {
+  if (!prisma) {
+    prisma = new PrismaClient({
+      datasources: {
+        db: {
+          url: process.env.DATABASE_URL,
+        },
+      },
+    });
+  }
+  return prisma;
+}
 
 // 默认用户ID（用于简化的单用户系统）
 const DEFAULT_USER_ID = 'cmbusc9x00000x2w0fqyu591k';
@@ -40,6 +47,8 @@ const createReportSchema = z.object({
 
 // 获取报告列表
 async function getReports(request: Request) {
+  const prisma = getPrismaClient();
+
   try {
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -163,6 +172,8 @@ async function createReport(request: Request) {
 
 // 从文件创建报告
 async function createReportFromFile(request: Request) {
+  const prisma = getPrismaClient();
+
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
@@ -305,6 +316,8 @@ async function createReportFromFile(request: Request) {
 
 // 从JSON创建报告
 async function createReportFromJSON(request: Request) {
+  const prisma = getPrismaClient();
+
   try {
     const body = await request.json();
 
@@ -422,6 +435,8 @@ async function createReportFromJSON(request: Request) {
 }
 
 export default async (req: Request, context: Context) => {
+  const prisma = getPrismaClient();
+
   try {
     switch (req.method) {
       case 'GET':

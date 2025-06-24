@@ -8,11 +8,17 @@
 const { PrismaClient } = require('@prisma/client');
 
 async function setupDatabase() {
+  // 检查是否有有效的数据库连接
+  if (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes('placeholder')) {
+    console.log('ℹ️  跳过数据库设置（无有效数据库连接）');
+    return;
+  }
+
   const prisma = new PrismaClient();
-  
+
   try {
     console.log('🚀 开始设置数据库...');
-    
+
     // 检查数据库连接
     await prisma.$connect();
     console.log('✅ 数据库连接成功');
