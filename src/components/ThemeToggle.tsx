@@ -13,7 +13,7 @@ export function ThemeToggle() {
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
-    logger.debug('Toggling theme from', theme, 'to', newTheme);
+    logger.debug('Toggling theme', { from: theme, to: newTheme });
     setTheme(newTheme);
   };
 

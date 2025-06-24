@@ -1,70 +1,119 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="这是一个测试报告，用于验证上传功能是否正常工作。">
-    <meta name="keywords" content="测试,上传,报告,验证">
-    <title>测试报告 - 上传功能验证</title>
+    <title>测试文档上传</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
             line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
         }
         h1 {
-            color: #333;
-            border-bottom: 2px solid #007bff;
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
             padding-bottom: 10px;
+        }
+        p {
+            margin-bottom: 16px;
+        }
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .section {
+            margin-bottom: 30px;
         }
         .highlight {
             background-color: #f8f9fa;
             padding: 15px;
-            border-left: 4px solid #007bff;
-            margin: 20px 0;
+            border-left: 4px solid #4caf50;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
         }
     </style>
 </head>
 <body>
-    <h1>测试报告 - 上传功能验证</h1>
-    
-    <div class="highlight">
-        <strong>报告摘要：</strong>这是一个专门用于测试Wendeal Reports系统上传功能的测试文档。
+    <div class="content">
+        <h1>测试文档上传功能</h1>
+        
+        <div class="section">
+            <h2>文档概述</h2>
+            <p>这是一个用于测试文档上传功能的HTML文件。该文件将被上传到系统中，并测试系统是否能够正确处理HTML文件并将其保存到数据库。</p>
+            
+            <div class="highlight">
+                <p><strong>重要提示：</strong>本文档仅用于测试目的，不包含实际业务内容。</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>测试内容</h2>
+            <p>本文档包含以下测试内容：</p>
+            <ul>
+                <li>基本HTML结构</li>
+                <li>标题和段落</li>
+                <li>列表和表格</li>
+                <li>样式和格式</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2>测试数据</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>名称</th>
+                        <th>描述</th>
+                        <th>状态</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>001</td>
+                        <td>测试项目1</td>
+                        <td>这是测试项目1的描述</td>
+                        <td>活跃</td>
+                    </tr>
+                    <tr>
+                        <td>002</td>
+                        <td>测试项目2</td>
+                        <td>这是测试项目2的描述</td>
+                        <td>已完成</td>
+                    </tr>
+                    <tr>
+                        <td>003</td>
+                        <td>测试项目3</td>
+                        <td>这是测试项目3的描述</td>
+                        <td>待处理</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section">
+            <h2>结论</h2>
+            <p>如果您能看到这个文档被成功上传并显示在系统中，说明文档上传功能工作正常。</p>
+            <p>测试完成后，请记得清理测试数据。</p>
+        </div>
     </div>
-    
-    <h2>测试目标</h2>
-    <p>验证以下功能是否正常工作：</p>
-    <ul>
-        <li>HTML文件上传</li>
-        <li>元数据提取（标题、描述、关键词）</li>
-        <li>分类归档</li>
-        <li>报告列表更新</li>
-        <li>界面实时刷新</li>
-    </ul>
-    
-    <h2>测试内容</h2>
-    <p>本文档包含了丰富的HTML结构，包括标题、段落、列表、样式等元素，用于测试系统的内容解析能力。</p>
-    
-    <h3>技术特性</h3>
-    <p>系统应该能够正确提取以下信息：</p>
-    <ol>
-        <li><strong>标题：</strong>从title标签或h1标签提取</li>
-        <li><strong>描述：</strong>从meta description或首段提取</li>
-        <li><strong>关键词：</strong>从meta keywords提取</li>
-        <li><strong>字数统计：</strong>计算文档的字符数量</li>
-    </ol>
-    
-    <h2>预期结果</h2>
-    <div class="highlight">
-        <p>上传成功后，应该在左侧导航栏看到对应分类的报告数量增加，并且能够在三列看板中看到新添加的报告卡片。</p>
-    </div>
-    
-    <h2>测试数据</h2>
-    <p>这个文档包含了足够的文本内容来测试字数统计功能。文档结构清晰，包含多级标题和丰富的内容格式。</p>
-    
-    <p><em>测试时间：2024年6月13日</em></p>
-    <p><strong>测试状态：待验证</strong></p>
 </body>
-</html> 
+</html>

@@ -30,7 +30,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     }
     
     // 调试输出
-    logger.debug('Theme applied:', theme, 'HTML classes:', root.className);
+    logger.debug('Theme applied', { theme, htmlClasses: root.className });
   }, [theme]);
 
   return <>{children}</>;

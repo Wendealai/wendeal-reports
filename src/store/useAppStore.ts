@@ -385,7 +385,7 @@ export const useAppStore = create<AppState>()((set, get) => ({
       let categoryId = report.category || 'uncategorized';
       
       if (report.category && report.category !== 'uncategorized') {
-        logger.debug('Ensuring category exists:', report.category);
+        logger.debug('Ensuring category exists', { category: report.category });
         
         // 如果是自定义分类（以category-开头），直接使用ID
         if (report.category.startsWith('category-')) {

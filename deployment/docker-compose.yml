@@ -1,0 +1,157 @@
+version: '3.8'
+
+services:
+  wendeal-reports:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=development
+    container_name: wendeal-reports-app
+    ports:
+      - "${PORT:-7575}:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - DATABASE_URL=file:/app/data/wendeal.db
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-this-in-production}
+      - NEXT_TELEMETRY_DISABLED=1
+      - APP_NAME=${APP_NAME:-Wendeal Reports}
+      - APP_URL=${APP_URL:-http://localhost:7575}
+      - MAX_FILE_SIZE=${MAX_FILE_SIZE:-10485760}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      # 持久化数据库文件
+      - wendeal_data:/app/data
+      # 持久化上传文件
+      - wendeal_uploads:/app/public/uploads
+      # 持久化日志文件
+      - wendeal_logs:/app/logs
+      # 开发模式下挂载源代码（可选，用于热重载）
+      - ${PWD}/src:/app/src:${MOUNT_MODE:-ro}
+      - ${PWD}/public:/app/public:${MOUNT_MODE:-ro}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - db-backup
+    networks:
+      - wendeal-network
+    labels:
+      - "com.wendeal.service=reports"
+      - "com.wendeal.version=2.0.0"
+      - "traefik.enable=true"
+      - "traefik.http.routers.wendeal.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.services.wendeal.loadbalancer.server.port=3000"
+
+  # 数据库备份服务
+  db-backup:
+    image: alpine:latest
+    container_name: wendeal-backup
+    volumes:
+      - wendeal_data:/data:ro
+      - wendeal_backups:/backups
+    environment:
+      - BACKUP_SCHEDULE=${BACKUP_SCHEDULE:-0 2 * * *}
+    command: >
+      sh -c "
+        apk add --no-cache dcron &&
+        echo '${BACKUP_SCHEDULE:-0 2 * * *} cp /data/wendeal.db /backups/wendeal-backup-$$(date +%Y%m%d-%H%M%S).db && find /backups -name \"wendeal-backup-*.db\" -mtime +7 -delete' | crontab - &&
+        crond -f
+      "
+    restart: unless-stopped
+    networks:
+      - wendeal-network
+    labels:
+      - "com.wendeal.service=backup"
+
+  # Nginx反向代理（可选）
+  nginx:
+    image: nginx:alpine
+    container_name: wendeal-nginx
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - wendeal_logs:/var/log/nginx
+    depends_on:
+      - wendeal-reports
+    restart: unless-stopped
+    networks:
+      - wendeal-network
+    labels:
+      - "com.wendeal.service=proxy"
+    profiles:
+      - nginx
+      - production
+
+  # Redis缓存（可选）
+  redis:
+    image: redis:7-alpine
+    container_name: wendeal-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - wendeal_redis:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-}
+    restart: unless-stopped
+    networks:
+      - wendeal-network
+    labels:
+      - "com.wendeal.service=cache"
+    profiles:
+      - redis
+      - production
+
+  # 监控服务（可选）
+  watchtower:
+    image: containrrr/watchtower
+    container_name: wendeal-watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=${WATCHTOWER_INTERVAL:-3600}
+      - WATCHTOWER_INCLUDE_STOPPED=true
+      - WATCHTOWER_REVIVE_STOPPED=false
+    restart: unless-stopped
+    networks:
+      - wendeal-network
+    labels:
+      - "com.wendeal.service=monitor"
+    profiles:
+      - watchtower
+      - production
+
+volumes:
+  wendeal_data:
+    driver: local
+    labels:
+      - "com.wendeal.volume=database"
+  wendeal_uploads:
+    driver: local
+    labels:
+      - "com.wendeal.volume=uploads"
+  wendeal_logs:
+    driver: local
+    labels:
+      - "com.wendeal.volume=logs"
+  wendeal_backups:
+    driver: local
+    labels:
+      - "com.wendeal.volume=backups"
+  wendeal_redis:
+    driver: local
+    labels:
+      - "com.wendeal.volume=cache"
+
+networks:
+  wendeal-network:
+    driver: bridge
+    labels:
+      - "com.wendeal.network=main" 

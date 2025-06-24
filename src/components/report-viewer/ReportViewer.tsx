@@ -2,12 +2,12 @@
 
 import { Report } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Star, Clock, FileText, ExternalLink, ArrowLeft, Edit, StarOff, Trash2 } from 'lucide-react';
+import { Star, Clock, FileText, ExternalLink, ArrowLeft, Edit, StarOff, Trash2, CheckCircle, BookOpen } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { ReportEditDialog } from './ReportEditDialog';
 import { safeTextContent } from '@/lib/htmlUtils';
-import { PDFViewer } from '@/components/pdf/PDFViewer';
+import { FileReplaceDialog } from './FileReplaceDialog';
 
 interface ReportViewerProps {
   report: Report;
@@ -19,6 +19,8 @@ export function ReportViewer({ report }: ReportViewerProps) {
   const [contentBlobUrl, setContentBlobUrl] = useState<string>('');
   const { setSelectedReport, theme, toggleFavorite, deleteReport } = useAppStore();
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [showReplaceDialog, setShowReplaceDialog] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // 创建内容的Blob URL
   useEffect(() => {
@@ -172,7 +174,7 @@ export function ReportViewer({ report }: ReportViewerProps) {
   const getStatusIcon = (status: Report['readStatus']) => {
     switch (status) {
       case 'completed':
-        return <Star style={{ width: '1rem', height: '1rem', color: '#10b981' }} />;
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
       case 'reading':
         return <Clock style={{ width: '1rem', height: '1rem', color: '#f59e0b' }} />;
       default:
@@ -192,42 +194,56 @@ export function ReportViewer({ report }: ReportViewerProps) {
   };
 
   const formatDate = (date: Date | string | number) => {
+    if (!date) return '未知日期';
     try {
-      let validDate: Date;
-      
-      if (date instanceof Date) {
-        validDate = date;
-      } else if (typeof date === 'string' || typeof date === 'number') {
-        validDate = new Date(date);
-      } else {
-        console.warn('Invalid date input:', date);
-        return '日期无效';
-      }
-      
-      if (isNaN(validDate.getTime())) {
-        console.warn('Invalid date value:', date);
-        return '日期无效';
-      }
-      
       return new Intl.DateTimeFormat('zh-CN', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
-      }).format(validDate);
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(new Date(date));
     } catch (error) {
-      console.error('Error formatting date:', error, 'Input:', date);
-      return '日期格式错误';
+      console.error('日期格式化失败:', error);
+      return '无效日期';
     }
   };
 
   const handleOpenInNewTab = () => {
-    if (contentBlobUrl) {
-      window.open(contentBlobUrl, '_blank');
-    } else if (report.filePath) {
-      // 如果没有contentBlobUrl但有filePath，直接打开filePath
+    if (report.filePath && report.filePath.startsWith('data:')) {
       window.open(report.filePath, '_blank');
-    } else {
-      console.warn('No content URL available');
+      return;
+    }
+
+    if (report.content) {
+      const fullHtml = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${report.title}</title>
+    <style>
+      body { font-family: sans-serif; line-height: 1.6; padding: 2rem; max-width: 800px; margin: 0 auto; }
+      h1, h2, h3 { color: #333; }
+      pre { background-color: #f4f4f4; padding: 1rem; border-radius: 5px; white-space: pre-wrap; word-wrap: break-word; }
+      code { font-family: monospace; }
+      table { border-collapse: collapse; width: 100%; margin-bottom: 1rem; }
+      th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+      th { background-color: #f2f2f2; }
+      blockquote { border-left: 4px solid #ccc; padding-left: 1rem; color: #666; }
+    </style>
+</head>
+<body>
+    <h1>${report.title}</h1>
+    <div>${report.content}</div>
+</body>
+</html>`;
+      const blob = new Blob([fullHtml], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    } else if (report.filePath) {
+      // 假定是相对路径
+      window.open(report.filePath, '_blank');
     }
   };
 
@@ -244,15 +260,41 @@ export function ReportViewer({ report }: ReportViewerProps) {
   };
 
   const handleDelete = () => {
-    if (window.confirm(`确定要删除报告 "${report.title}" 吗？此操作无法撤销。`)) {
-      setSelectedReport(null);
-      deleteReport(report.id);
-    }
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = () => {
+    deleteReport(report.id);
+    setSelectedReport(null);
+    setShowDeleteConfirm(false);
   };
 
   const handleIframeLoad = () => {
     setIsLoading(false);
   };
+
+  if (!report) {
+    return <div>报告加载失败或不存在。</div>;
+  }
+
+  const {
+    id,
+    title,
+    content,
+    description,
+    category: categoryId,
+    tags,
+    createdAt,
+    updatedAt,
+    isFavorite,
+    readStatus,
+    filePath,
+    wordCount,
+  } = report;
+
+  const isHtmlContent =
+    (content && content.trim().startsWith('<')) ||
+    (filePath && (filePath.startsWith('data:text/html') || filePath.endsWith('.html')));
 
   return (
     <div style={{ 
@@ -402,62 +444,36 @@ export function ReportViewer({ report }: ReportViewerProps) {
         backgroundColor: theme === 'dark' ? '#1e293b' : '#ffffff'
       }}>
         <div style={{ padding: 0, height: '100%' }}>
-          {(() => {
-            // 检查是否是PDF文件
-            const isPDF = (report as any).fileType === 'pdf' || 
-                         report.filePath?.startsWith('blob:') ||
-                         report.filePath?.toLowerCase().includes('.pdf');
-            
-            if (isPDF && report.filePath) {
-              return (
-                <PDFViewer
-                  file={report.filePath}
-                  style={{ height: '100%', borderRadius: '0.5rem' }}
-                />
-              );
-            }
-            
-            // HTML文件使用iframe显示
-            if (isLoading) {
-              return (
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  height: '100%' 
-                }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{
-                      width: '2rem',
-                      height: '2rem',
-                      border: `2px solid ${theme === 'dark' ? '#334155' : '#e2e8f0'}`,
-                      borderTop: `2px solid ${theme === 'dark' ? '#60a5fa' : '#2563eb'}`,
-                      borderRadius: '50%',
-                      animation: 'spin 1s linear infinite',
-                      margin: '0 auto 1rem auto'
-                    }} />
-                    <p style={{ color: theme === 'dark' ? '#94a3b8' : '#64748b' }}>加载报告中...</p>
-                  </div>
-                </div>
-              );
-            }
-            
-            return (
-              <iframe
-                ref={iframeRef}
-                src={contentBlobUrl}
-                style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  border: 0, 
-                  borderRadius: '0.5rem' 
-                }}
-                title={report.title}
-                onLoad={handleIframeLoad}
-                onLoadStart={() => setIsLoading(true)}
-              />
-            );
-          })()}
+          {isHtmlContent ? (
+            <iframe
+              ref={iframeRef}
+              srcDoc={content || ''}
+              src={filePath || ''}
+              title={title}
+              style={{ 
+                width: '100%', 
+                height: '100%', 
+                border: 0, 
+                borderRadius: '0.5rem' 
+              }}
+              onLoad={handleIframeLoad}
+              onLoadStart={() => setIsLoading(true)}
+              sandbox="allow-same-origin allow-scripts"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center bg-muted/20">
+              <div className="text-center">
+                <FileText className="mx-auto h-12 w-12 text-muted-foreground" />
+                <h3 className="mt-4 text-lg font-medium">不支持的预览格式</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  此文件格式无法直接预览，请尝试在新标签页中打开。
+                </p>
+                <Button onClick={handleOpenInNewTab} className="mt-4">
+                  在新标签页中打开
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -475,6 +491,24 @@ export function ReportViewer({ report }: ReportViewerProps) {
           100% { transform: rotate(360deg); }
         }
       `}</style>
+
+      {/* 删除确认对话框 */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-8 rounded-lg">
+            <h2 className="text-xl font-bold mb-4">确认删除</h2>
+            <p>确定要删除报告 "{title}" 吗？此操作无法撤销。</p>
+            <div className="mt-4 flex justify-end">
+              <Button variant="outline" onClick={handleConfirmDelete}>
+                取消
+              </Button>
+              <Button variant="destructive" onClick={handleConfirmDelete}>
+                删除
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

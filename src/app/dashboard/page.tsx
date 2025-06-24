@@ -80,6 +80,20 @@ export default function DashboardPage() {
     loadDashboardData();
   }, [loadData]);
 
+  // 监听文件上传成功事件
+  useEffect(() => {
+    const handleForceUpdate = () => {
+      console.log('🔄 文件上传成功，强制刷新报告列表...');
+      loadData();
+    };
+
+    window.addEventListener('forceReportUpdate', handleForceUpdate);
+
+    return () => {
+      window.removeEventListener('forceReportUpdate', handleForceUpdate);
+    };
+  }, [loadData]);
+
   // 监听分类名称变化
   useEffect(() => {
     const handleCategoryChange = () => {

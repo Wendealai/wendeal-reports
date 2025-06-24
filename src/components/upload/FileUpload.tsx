@@ -3,7 +3,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { 
   Upload, 
-  File, 
+  File as FileIcon,
   X, 
   Check, 
   AlertCircle,
@@ -13,13 +13,7 @@ import {
   Clock
 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
-import { extractDescriptionFromHtml } from '@/lib/htmlUtils';
-import { 
-  extractPDFMetadata, 
-  validatePDFFile, 
-  extractPDFTags, 
-  formatFileSize 
-} from '@/lib/pdfUtils';
+import type { Report } from '@/types';
 
 interface UploadFile {
   id: string;
@@ -45,7 +39,6 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
   const [defaultCategory, setDefaultCategory] = useState('uncategorized');
   const [availableCategories, setAvailableCategories] = useState<Array<{id: string, label: string}>>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { addReport } = useAppStore();
 
   console.log('FileUpload component rendered!', { files: files.length, isUploading, isDragOver });
 
@@ -116,71 +109,12 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
     // 检查是否是HTML文件
     if (file.type.includes('text/html') || file.name.endsWith('.html')) {
       if (file.size > 10 * 1024 * 1024) { // 10MB limit for HTML
-        return '文件大小不能超过 10MB';
+        return 'HTML 文件大小不能超过 10MB';
       }
       return null;
     }
     
-    // 检查是否是PDF文件
-    if (file.type.includes('application/pdf') || file.name.toLowerCase().endsWith('.pdf')) {
-      return validatePDFFile(file);
-    }
-    
-    return '只支持 HTML 和 PDF 文件';
-  };
-
-  const readFileContent = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target?.result as string);
-      reader.onerror = (e) => reject(e);
-      reader.readAsText(file, 'UTF-8');
-    });
-  };
-
-  const extractMetadata = (content: string, filename: string) => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(content, 'text/html');
-    
-    const title = doc.querySelector('title')?.textContent || 
-                  doc.querySelector('h1')?.textContent || 
-                  filename.replace('.html', '');
-    
-    // 使用新的描述提取函数
-    const description = extractDescriptionFromHtml(content, 200);
-    
-    const keywords = doc.querySelector('meta[name="keywords"]')?.getAttribute('content') || '';
-    const tags = keywords ? keywords.split(',').map(tag => tag.trim()).filter(Boolean) : [];
-    
-    const textContent = doc.body?.textContent || '';
-    const wordCount = textContent.trim().split(/\s+/).length;
-    
-    return {
-      title: title.trim(),
-      description: description.trim(),
-      tags,
-      wordCount
-    };
-  };
-
-  const extractPDFMetadataForUpload = async (file: File) => {
-    try {
-      const metadata = await extractPDFMetadata(file);
-      const tags = extractPDFTags(metadata.textContent, metadata.keywords);
-      
-      return {
-        title: metadata.title,
-        description: metadata.description,
-        tags,
-        wordCount: metadata.wordCount,
-        pageCount: metadata.pageCount,
-        author: metadata.author,
-        textContent: metadata.textContent
-      };
-    } catch (error) {
-      console.error('PDF元数据提取失败:', error);
-      throw error;
-    }
+    return '只支持 HTML 文件';
   };
 
   const processFiles = useCallback(async (fileList: FileList) => {
@@ -216,87 +150,38 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
     try {
       console.log('Starting upload for file:', uploadFile.name);
       
-      // 更新状态为上传中
       setFiles(prev => prev.map(f => 
         f.id === uploadFile.id 
-          ? { ...f, status: 'uploading', progress: 20 }
+          ? { ...f, status: 'uploading', progress: 10 }
           : f
       ));
 
-      let metadata: any;
-      let content: string;
-      let filePath: string;
+      const formData = new FormData();
+      formData.append('file', uploadFile.file);
+      formData.append('categoryId', uploadFile.categoryId || 'uncategorized');
 
-      // 检查文件类型并处理
-      const isPDF = uploadFile.file.type.includes('application/pdf') || 
-                    uploadFile.file.name.toLowerCase().endsWith('.pdf');
-
-      if (isPDF) {
-        // 处理PDF文件
-        console.log('Processing PDF file...');
-        metadata = await extractPDFMetadataForUpload(uploadFile.file);
-        content = metadata.textContent; // PDF的文本内容
-        filePath = URL.createObjectURL(uploadFile.file); // PDF文件的blob URL
-        
-        console.log('PDF metadata extracted:', {
-          title: metadata.title,
-          pageCount: metadata.pageCount,
-          wordCount: metadata.wordCount
-        });
-      } else {
-        // 处理HTML文件
-        console.log('Processing HTML file...');
-        content = await readFileContent(uploadFile.file);
-        console.log('File content read, length:', content.length);
-        
-        metadata = extractMetadata(content, uploadFile.name);
-        filePath = `data:text/html;charset=utf-8,${encodeURIComponent(content)}`;
-        console.log('HTML metadata extracted:', metadata);
-      }
-      
-      // 更新进度
-      setFiles(prev => prev.map(f => 
-        f.id === uploadFile.id 
-          ? { ...f, progress: 80 }
-          : f
-      ));
-
-      // 创建新的报告对象
-      const newReport = {
-        id: generateId(),
-        title: metadata.title || uploadFile.name.replace(/\.(html|pdf)$/i, '') || 'Untitled',
-        description: metadata.description || '',
-        category: uploadFile.categoryId || 'uncategorized',
-        tags: metadata.tags || [],
-        content: content || (isPDF ? '这是一个PDF文档' : '<p>Empty content</p>'),
-        filePath: filePath,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isFavorite: false,
-        readStatus: 'unread' as const,
-        fileSize: uploadFile.size,
-        wordCount: metadata.wordCount || 0,
-        // PDF特有字段
-        ...(isPDF && {
-          fileType: 'pdf',
-          pageCount: metadata.pageCount,
-          author: metadata.author
-        })
-      };
-
-      console.log('Creating new report:', {
-        id: newReport.id,
-        title: newReport.title,
-        category: newReport.category,
-        fileSize: newReport.fileSize,
-        fileType: isPDF ? 'pdf' : 'html'
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        body: formData,
       });
 
-      // 异步添加到报告列表
-      const addedReport = await addReport(newReport);
-      console.log('Report added to store:', addedReport);
+      setFiles(prev => prev.map(f => f.id === uploadFile.id ? { ...f, progress: 80 } : f));
 
-      // 更新状态为成功
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '上传失败');
+      }
+
+      const result = await response.json();
+      
+      console.log('Report created on server:', result.report);
+
+      if (result.report) {
+        useAppStore.setState((state) => ({ reports: [result.report, ...state.reports] }));
+      }
+      
+      window.dispatchEvent(new CustomEvent('forceReportUpdate'));
+
       setFiles(prev => prev.map(f => 
         f.id === uploadFile.id 
           ? { ...f, status: 'success', progress: 100 }
@@ -516,7 +401,7 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
             marginBottom: '8px',
             color: '#111827'
           }}>
-            拖拽 HTML 或 PDF 文件到这里，或者
+            拖拽 HTML 文件到这里，或者
           </p>
           <button
             style={{
@@ -547,7 +432,7 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
               (e.target as HTMLElement).style.borderColor = '#d1d5db';
             }}
           >
-            <File style={{ width: '16px', height: '16px' }} />
+            <FileIcon style={{ width: '16px', height: '16px' }} />
             选择文件
           </button>
         </div>
@@ -556,7 +441,7 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
           color: '#6b7280',
           margin: '0'
         }}>
-          支持 .html 和 .pdf 文件，HTML最大 10MB，PDF最大 50MB
+          仅支持 .html 文件，最大 10MB
         </p>
       </div>
 
@@ -564,7 +449,7 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
         ref={fileInputRef}
         type="file"
         multiple
-        accept=".html,.pdf,text/html,application/pdf"
+        accept=".html,text/html"
         onChange={handleFileInput}
         style={{ display: 'none' }}
       />
