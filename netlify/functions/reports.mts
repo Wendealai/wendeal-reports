@@ -1,7 +1,8 @@
 import type { Context, Config } from "@netlify/functions";
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-import { optimizeFileContent, formatBytes, formatCompressionRatio } from '../../src/lib/file-optimization';
+// 使用简化版本避免构建时依赖问题
+import { optimizeFileContent, formatBytes, formatCompressionRatio } from '../../src/lib/file-optimization-simple';
 import { validateFile } from '../../src/lib/file-validation';
 import { cacheManager } from '../../src/lib/performance';
 
@@ -225,7 +226,7 @@ async function createReportFromFile(request: Request) {
 
     // 优化和压缩文件内容
     const optimizationResult = optimizeFileContent(htmlContent, {
-      enableCompression: true,
+      enableCompression: false, // 在Netlify函数中禁用复杂压缩
       compressionLevel: 6,
       minSizeForCompression: 1024,
       enableHtmlMinification: true,

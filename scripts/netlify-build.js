@@ -29,10 +29,26 @@ try {
   // 步骤 1: 生成 Prisma 客户端
   console.log('📦 生成 Prisma 客户端...');
   execSync('npx prisma generate', { stdio: 'inherit' });
-  
+
   // 步骤 2: 构建 Next.js 应用
   console.log('🏗️  构建 Next.js 应用...');
-  execSync('npx next build', { stdio: 'inherit' });
+
+  // 设置构建环境变量
+  const buildEnv = {
+    ...process.env,
+    NODE_ENV: 'production',
+    NEXT_TELEMETRY_DISABLED: '1',
+    // 确保有占位符数据库URL
+    DATABASE_URL: process.env.DATABASE_URL || 'postgresql://placeholder:placeholder@placeholder.neon.tech/placeholder?sslmode=require',
+    DIRECT_URL: process.env.DIRECT_URL || process.env.DATABASE_URL || 'postgresql://placeholder:placeholder@placeholder.neon.tech/placeholder?sslmode=require'
+  };
+
+  execSync('npx next build', {
+    stdio: 'inherit',
+    env: buildEnv,
+    timeout: 600000, // 10分钟超时
+    maxBuffer: 1024 * 1024 * 10 // 10MB buffer
+  });
   
   // 步骤 3: 如果有真实的数据库连接，运行数据库设置
   if (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('placeholder')) {
@@ -67,6 +83,24 @@ try {
   
 } catch (error) {
   console.error('❌ 构建失败:', error.message);
+
+  // 输出更详细的错误信息
+  if (error.stdout) {
+    console.error('标准输出:', error.stdout.toString());
+  }
+  if (error.stderr) {
+    console.error('错误输出:', error.stderr.toString());
+  }
+
+  // 检查是否是特定的错误类型
+  if (error.message.includes('ENOENT')) {
+    console.error('💡 提示: 可能缺少必要的依赖或命令');
+  } else if (error.message.includes('timeout')) {
+    console.error('💡 提示: 构建超时，可能需要优化构建过程');
+  } else if (error.message.includes('memory')) {
+    console.error('💡 提示: 内存不足，尝试减少并发构建');
+  }
+
   process.exit(1);
 }
 
