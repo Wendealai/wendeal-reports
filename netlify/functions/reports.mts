@@ -11,10 +11,25 @@ let prisma: PrismaClient;
 
 function getPrismaClient() {
   if (!prisma) {
+    // 获取数据库 URL，支持多种环境变量来源
+    const databaseUrl = process.env.DATABASE_URL ||
+                       process.env.NEON_DATABASE_URL ||
+                       process.env.POSTGRES_URL ||
+                       process.env.DB_URL;
+
+    console.log('Database URL available:', !!databaseUrl);
+    console.log('Environment variables:', Object.keys(process.env).filter(key =>
+      key.includes('DATABASE') || key.includes('DB') || key.includes('POSTGRES') || key.includes('NEON')
+    ));
+
+    if (!databaseUrl) {
+      throw new Error('No database URL found in environment variables');
+    }
+
     prisma = new PrismaClient({
       datasources: {
         db: {
-          url: process.env.DATABASE_URL,
+          url: databaseUrl,
         },
       },
     });
@@ -436,22 +451,59 @@ async function createReportFromJSON(request: Request) {
 }
 
 export default async (req: Request, context: Context) => {
-  const prisma = getPrismaClient();
-
   try {
-    switch (req.method) {
-      case 'GET':
-        return await getReports(req);
-      case 'POST':
-        return await createReport(req);
-      default:
-        return new Response(JSON.stringify({ error: '方法不允许' }), {
-          status: 405,
-          headers: { 'Content-Type': 'application/json' }
-        });
+    // 检查数据库连接
+    const prisma = getPrismaClient();
+
+    // 设置 CORS 头部
+    const headers = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Content-Type': 'application/json',
+    };
+
+    // 处理 OPTIONS 请求
+    if (req.method === 'OPTIONS') {
+      return new Response(null, { status: 200, headers });
     }
-  } finally {
-    await prisma.$disconnect();
+
+    try {
+      switch (req.method) {
+        case 'GET':
+          return await getReports(req);
+        case 'POST':
+          return await createReport(req);
+        default:
+          return new Response(JSON.stringify({ error: '方法不允许' }), {
+            status: 405,
+            headers
+          });
+      }
+    } finally {
+      await prisma.$disconnect();
+    }
+  } catch (error) {
+    console.error('Function error:', error);
+
+    // 如果是数据库连接错误
+    if (error instanceof Error && error.message.includes('database URL')) {
+      return new Response(JSON.stringify({
+        error: '数据库连接配置错误',
+        details: 'DATABASE_URL 环境变量未设置或无效'
+      }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    return new Response(JSON.stringify({
+      error: '服务器内部错误',
+      details: error instanceof Error ? error.message : '未知错误'
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 };
 
