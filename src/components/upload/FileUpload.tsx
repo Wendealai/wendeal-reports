@@ -183,21 +183,21 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
     setFiles(prev => [...prev, ...newFiles]);
   }, [defaultCategory]);
 
-  const uploadFile = async (uploadFile: UploadFile, retryCount = 0) => {
+  const uploadFile = async (fileToUpload: UploadFile, retryCount = 0) => {
     const startTime = Date.now();
 
     try {
-      console.log('Starting upload for file:', uploadFile.name, 'Retry:', retryCount);
+      console.log('Starting upload for file:', fileToUpload.name, 'Retry:', retryCount);
 
       // Initialize upload state with timing info
       setFiles(prev => prev.map(f =>
-        f.id === uploadFile.id
+        f.id === fileToUpload.id
           ? {
               ...f,
               status: retryCount > 0 ? 'retrying' : 'uploading',
               progress: 0,
               startTime,
-              totalBytes: uploadFile.file.size,
+              totalBytes: fileToUpload.file.size,
               uploadedBytes: 0,
               retryCount,
               uploadSpeed: 0
@@ -206,8 +206,8 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
       ));
 
       const formData = new FormData();
-      formData.append('file', uploadFile.file);
-      formData.append('categoryId', uploadFile.categoryId || 'uncategorized');
+      formData.append('file', fileToUpload.file);
+      formData.append('categoryId', fileToUpload.categoryId || 'uncategorized');
 
       // Create XMLHttpRequest for progress tracking
       const xhr = new XMLHttpRequest();
@@ -222,7 +222,7 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
           const estimatedTimeRemaining = remainingBytes / uploadSpeed;
 
           setFiles(prev => prev.map(f =>
-            f.id === uploadFile.id
+            f.id === fileToUpload.id
               ? {
                   ...f,
                   progress,
@@ -285,7 +285,7 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
       window.dispatchEvent(new CustomEvent('forceReportUpdate'));
 
       setFiles(prev => prev.map(f =>
-        f.id === uploadFile.id
+        f.id === fileToUpload.id
           ? {
               ...f,
               status: 'success',
@@ -295,7 +295,7 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
           : f
       ));
 
-      console.log('Upload completed successfully for:', uploadFile.name);
+      console.log('Upload completed successfully for:', fileToUpload.name);
 
     } catch (error) {
       console.error('Upload file error:', error);
@@ -308,17 +308,17 @@ export function FileUpload({ onUploadComplete, className }: FileUploadProps) {
       );
 
       if (isRetryableError && retryCount < 3) {
-        console.log(`Retrying upload for ${uploadFile.name}, attempt ${retryCount + 1}`);
+        console.log(`Retrying upload for ${fileToUpload.name}, attempt ${retryCount + 1}`);
 
         // Wait before retry with exponential backoff
         const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
         await new Promise(resolve => setTimeout(resolve, delay));
 
-        return uploadFile(uploadFile, retryCount + 1);
+        return uploadFile(fileToUpload, retryCount + 1);
       }
 
       setFiles(prev => prev.map(f =>
-        f.id === uploadFile.id
+        f.id === fileToUpload.id
           ? {
               ...f,
               status: 'error',
