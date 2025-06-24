@@ -5,7 +5,7 @@
  * 用于初始化数据库和创建必要的数据
  */
 
-const { PrismaClient } = require('@prisma/client');
+// Prisma 客户端将在需要时动态加载
 
 async function setupDatabase() {
   // 检查是否有有效的数据库连接
@@ -14,7 +14,14 @@ async function setupDatabase() {
     return;
   }
 
-  const prisma = new PrismaClient();
+  let prisma;
+  try {
+    const { PrismaClient } = require('@prisma/client');
+    prisma = new PrismaClient();
+  } catch (error) {
+    console.log('ℹ️  Prisma 客户端不可用，跳过数据库设置');
+    return;
+  }
 
   try {
     console.log('🚀 开始设置数据库...');
