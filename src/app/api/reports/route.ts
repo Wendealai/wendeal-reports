@@ -4,7 +4,7 @@ import { createReportWithFileSchema } from '@/lib/validations'
 import { writeFile, mkdir, unlink } from 'fs/promises'
 import path from 'path'
 import { ZodError } from 'zod'
-import { optimizeFileContent, formatBytes, formatCompressionRatio } from '@/lib/file-optimization'
+import { optimizeFileContent, formatBytes, formatCompressionRatio } from '@/lib/file-optimization-simple'
 import { validateFile } from '@/lib/file-validation'
 import { optimizedQueries, cacheManager, measureQuery } from '@/lib/performance'
 
