@@ -6,11 +6,11 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// 用户表
+// 用户�?
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
@@ -29,7 +29,7 @@ model User {
   @@map("users")
 }
 
-// 分类表
+// 分类�?
 model Category {
   id          String   @id @default(cuid())
   name        String
@@ -50,7 +50,7 @@ model Category {
   @@map("categories")
 }
 
-// 标签表
+// 标签�?
 model Tag {
   id        String   @id @default(cuid())
   name      String   @unique
@@ -64,7 +64,7 @@ model Tag {
   @@map("tags")
 }
 
-// 报告表
+// 报告�?
 model Report {
   id          String    @id @default(cuid())
   title       String
@@ -114,7 +114,7 @@ model ReportTag {
   @@map("report_tags")
 }
 
-// 搜索历史表
+// 搜索历史�?
 model SearchHistory {
   id        String   @id @default(cuid())
   query     String
@@ -143,7 +143,7 @@ model SavedSearch {
   @@map("saved_searches")
 }
 
-// 文件存储表
+// 文件存储�?
 model File {
   id        String   @id @default(cuid())
   filename  String
@@ -154,10 +154,10 @@ model File {
   reportId  String?
   createdAt DateTime @default(now())
 
-  // 压缩和优化相关字段
+  // 压缩和优化相关字�?
   originalSize    Int?     // 原始文件大小
-  compressedSize  Int?     // 压缩后大小
-  isCompressed    Boolean  @default(false) // 是否已压缩
+  compressedSize  Int?     // 压缩后大�?
+  isCompressed    Boolean  @default(false) // 是否已压�?
   compressionRatio Float?  // 压缩比率
   optimizationInfo Json?   // 优化信息 (JSON格式)
 
