@@ -1,96 +1,107 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Next.js 14 应用架构深度分析</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #fff;
-        }
-        h1, h2, h3 {
-            color: #1a1a1a;
-        }
-        h1 {
-            border-bottom: 3px solid #0070f3;
-            padding-bottom: 10px;
-        }
-        h2 {
-            border-left: 4px solid #0070f3;
-            padding-left: 15px;
-            margin-top: 30px;
-        }
-        code {
-            background: #f4f4f4;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.9em;
-        }
-        pre {
-            background: #f8f8f8;
-            padding: 15px;
-            border-radius: 8px;
-            overflow-x: auto;
-            border-left: 4px solid #0070f3;
-        }
-        .highlight {
-            background: #fff3cd;
-            padding: 10px;
-            border-radius: 6px;
-            border-left: 4px solid #ffc107;
-            margin: 15px 0;
-        }
-        .summary {
-            background: #e7f3ff;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-        ul {
-            padding-left: 20px;
-        }
-        li {
-            margin-bottom: 8px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background: #f8f9fa;
-        }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #fff;
+      }
+      h1,
+      h2,
+      h3 {
+        color: #1a1a1a;
+      }
+      h1 {
+        border-bottom: 3px solid #0070f3;
+        padding-bottom: 10px;
+      }
+      h2 {
+        border-left: 4px solid #0070f3;
+        padding-left: 15px;
+        margin-top: 30px;
+      }
+      code {
+        background: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.9em;
+      }
+      pre {
+        background: #f8f8f8;
+        padding: 15px;
+        border-radius: 8px;
+        overflow-x: auto;
+        border-left: 4px solid #0070f3;
+      }
+      .highlight {
+        background: #fff3cd;
+        padding: 10px;
+        border-radius: 6px;
+        border-left: 4px solid #ffc107;
+        margin: 15px 0;
+      }
+      .summary {
+        background: #e7f3ff;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+      ul {
+        padding-left: 20px;
+      }
+      li {
+        margin-bottom: 8px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+      }
+      th {
+        background: #f8f9fa;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Next.js 14 应用架构深度分析</h1>
-    
+
     <div class="summary">
-        <h3>📋 执行摘要</h3>
-        <p>本报告深入分析了Next.js 14的新特性、架构设计和最佳实践。通过对App Router、Server Components、以及性能优化等核心功能的研究，为现代React应用开发提供指导。</p>
+      <h3>📋 执行摘要</h3>
+      <p>
+        本报告深入分析了Next.js 14的新特性、架构设计和最佳实践。通过对App
+        Router、Server
+        Components、以及性能优化等核心功能的研究，为现代React应用开发提供指导。
+      </p>
     </div>
 
     <h2>🚀 Next.js 14 核心特性</h2>
-    
+
     <h3>App Router (稳定版)</h3>
-    <p>Next.js 14正式稳定了App Router，这是一个基于React Server Components的新路由系统：</p>
-    
+    <p>
+      Next.js 14正式稳定了App Router，这是一个基于React Server
+      Components的新路由系统：
+    </p>
+
     <ul>
-        <li><strong>基于文件夹的路由</strong>：使用文件夹结构定义路由</li>
-        <li><strong>布局支持</strong>：嵌套布局和模板</li>
-        <li><strong>加载状态</strong>：内置loading.js支持</li>
-        <li><strong>错误处理</strong>：error.js和not-found.js</li>
+      <li><strong>基于文件夹的路由</strong>：使用文件夹结构定义路由</li>
+      <li><strong>布局支持</strong>：嵌套布局和模板</li>
+      <li><strong>加载状态</strong>：内置loading.js支持</li>
+      <li><strong>错误处理</strong>：error.js和not-found.js</li>
     </ul>
 
     <pre><code>app/
@@ -105,7 +116,9 @@
         └── page.tsx    # 设置页面</code></pre>
 
     <h3>Server Actions</h3>
-    <p>Server Actions提供了在服务器端执行函数的能力，简化了表单处理和数据变更：</p>
+    <p>
+      Server Actions提供了在服务器端执行函数的能力，简化了表单处理和数据变更：
+    </p>
 
     <pre><code>// app/actions.ts
 'use server'
@@ -132,82 +145,86 @@ export function ReportForm() {
     <h2>🏗️ 架构最佳实践</h2>
 
     <div class="highlight">
-        <strong>💡 关键洞察：</strong> Next.js 14的架构设计强调服务器优先，通过合理使用Client Components和Server Components，可以显著提升应用性能。
+      <strong>💡 关键洞察：</strong> Next.js
+      14的架构设计强调服务器优先，通过合理使用Client Components和Server
+      Components，可以显著提升应用性能。
     </div>
 
     <h3>组件架构设计</h3>
-    
+
     <table>
-        <thead>
-            <tr>
-                <th>组件类型</th>
-                <th>使用场景</th>
-                <th>特点</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Server Components</td>
-                <td>数据获取、静态内容</td>
-                <td>零JavaScript占用、SEO友好</td>
-            </tr>
-            <tr>
-                <td>Client Components</td>
-                <td>交互功能、状态管理</td>
-                <td>支持hooks、事件处理</td>
-            </tr>
-            <tr>
-                <td>混合组件</td>
-                <td>部分交互的页面</td>
-                <td>服务器渲染+客户端水合</td>
-            </tr>
-        </tbody>
+      <thead>
+        <tr>
+          <th>组件类型</th>
+          <th>使用场景</th>
+          <th>特点</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Server Components</td>
+          <td>数据获取、静态内容</td>
+          <td>零JavaScript占用、SEO友好</td>
+        </tr>
+        <tr>
+          <td>Client Components</td>
+          <td>交互功能、状态管理</td>
+          <td>支持hooks、事件处理</td>
+        </tr>
+        <tr>
+          <td>混合组件</td>
+          <td>部分交互的页面</td>
+          <td>服务器渲染+客户端水合</td>
+        </tr>
+      </tbody>
     </table>
 
     <h3>性能优化策略</h3>
-    
+
     <ul>
-        <li><strong>代码分割</strong>：自动按路由分割代码</li>
-        <li><strong>图片优化</strong>：内置Image组件优化</li>
-        <li><strong>字体优化</strong>：自动字体优化</li>
-        <li><strong>缓存策略</strong>：多层缓存机制</li>
+      <li><strong>代码分割</strong>：自动按路由分割代码</li>
+      <li><strong>图片优化</strong>：内置Image组件优化</li>
+      <li><strong>字体优化</strong>：自动字体优化</li>
+      <li><strong>缓存策略</strong>：多层缓存机制</li>
     </ul>
 
     <h2>📊 性能基准测试</h2>
-    
+
     <p>基于实际项目的性能测试结果：</p>
-    
+
     <ul>
-        <li>首次内容绘制 (FCP)：减少30%</li>
-        <li>最大内容绘制 (LCP)：减少25%</li>
-        <li>累积布局偏移 (CLS)：减少40%</li>
-        <li>首次输入延迟 (FID)：减少35%</li>
+      <li>首次内容绘制 (FCP)：减少30%</li>
+      <li>最大内容绘制 (LCP)：减少25%</li>
+      <li>累积布局偏移 (CLS)：减少40%</li>
+      <li>首次输入延迟 (FID)：减少35%</li>
     </ul>
 
     <h2>🔮 未来发展趋势</h2>
-    
+
     <p>Next.js 14为未来的Web开发奠定了基础：</p>
-    
+
     <ul>
-        <li><strong>边缘计算优化</strong>：更好的边缘运行时支持</li>
-        <li><strong>AI集成</strong>：内置AI功能的可能性</li>
-        <li><strong>零配置开发</strong>：进一步简化配置</li>
-        <li><strong>性能监控</strong>：内置性能分析工具</li>
+      <li><strong>边缘计算优化</strong>：更好的边缘运行时支持</li>
+      <li><strong>AI集成</strong>：内置AI功能的可能性</li>
+      <li><strong>零配置开发</strong>：进一步简化配置</li>
+      <li><strong>性能监控</strong>：内置性能分析工具</li>
     </ul>
 
     <h2>📝 总结与建议</h2>
-    
+
     <div class="summary">
-        <h3>核心建议</h3>
-        <ol>
-            <li><strong>拥抱App Router</strong>：逐步迁移到新的路由系统</li>
-            <li><strong>合理使用Server Components</strong>：优先考虑服务器端渲染</li>
-            <li><strong>实施渐进式迁移</strong>：分阶段升级现有项目</li>
-            <li><strong>关注性能指标</strong>：持续监控和优化Core Web Vitals</li>
-        </ol>
+      <h3>核心建议</h3>
+      <ol>
+        <li><strong>拥抱App Router</strong>：逐步迁移到新的路由系统</li>
+        <li>
+          <strong>合理使用Server Components</strong>：优先考虑服务器端渲染
+        </li>
+        <li><strong>实施渐进式迁移</strong>：分阶段升级现有项目</li>
+        <li><strong>关注性能指标</strong>：持续监控和优化Core Web Vitals</li>
+      </ol>
     </div>
 
     <p><em>报告生成时间：2024年12月1日</em></p>
     <p><em>作者：Wendeal Research Team</em></p>
-</body>
-</html> 
+  </body>
+</html>

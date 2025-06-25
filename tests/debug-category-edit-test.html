@@ -1,394 +1,425 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>分类编辑功能测试</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .category {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 15px;
-            margin: 10px 0;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-        .category:hover {
-            background: #e9ecef;
-        }
-        .category-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .category-name {
-            font-weight: 500;
-            font-size: 16px;
-        }
-        .category-id {
-            color: #6c757d;
-            font-size: 12px;
-        }
-        .actions {
-            display: flex;
-            gap: 10px;
-        }
-        button {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-        .edit-btn {
-            background: #007bff;
-            color: white;
-        }
-        .edit-btn:hover {
-            background: #0056b3;
-        }
-        .save-btn {
-            background: #28a745;
-            color: white;
-        }
-        .save-btn:hover {
-            background: #1e7e34;
-        }
-        .cancel-btn {
-            background: #6c757d;
-            color: white;
-        }
-        .cancel-btn:hover {
-            background: #545b62;
-        }
-        .clear-btn {
-            background: #dc3545;
-            color: white;
-            margin-bottom: 20px;
-        }
-        .clear-btn:hover {
-            background: #c82333;
-        }
-        input {
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
-            width: 200px;
-        }
-        .status {
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        .success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .log {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 15px;
-            margin: 20px 0;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        h2 {
-            color: #495057;
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 10px;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .category {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px;
+        margin: 10px 0;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        transition: all 0.2s;
+      }
+      .category:hover {
+        background: #e9ecef;
+      }
+      .category-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .category-name {
+        font-weight: 500;
+        font-size: 16px;
+      }
+      .category-id {
+        color: #6c757d;
+        font-size: 12px;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+      }
+      button {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+      }
+      .edit-btn {
+        background: #007bff;
+        color: white;
+      }
+      .edit-btn:hover {
+        background: #0056b3;
+      }
+      .save-btn {
+        background: #28a745;
+        color: white;
+      }
+      .save-btn:hover {
+        background: #1e7e34;
+      }
+      .cancel-btn {
+        background: #6c757d;
+        color: white;
+      }
+      .cancel-btn:hover {
+        background: #545b62;
+      }
+      .clear-btn {
+        background: #dc3545;
+        color: white;
+        margin-bottom: 20px;
+      }
+      .clear-btn:hover {
+        background: #c82333;
+      }
+      input {
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+        width: 200px;
+      }
+      .status {
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 5px;
+        font-weight: bold;
+      }
+      .success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .info {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+      }
+      .error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      .log {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 15px;
+        margin: 20px 0;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      h1 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      h2 {
+        color: #495057;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>🧪 分类编辑功能测试工具</h1>
-        
-        <button class="clear-btn" onclick="clearAllData()">🗑️ 清除所有localStorage数据</button>
-        
-        <div id="status" class="status info">
-            ℹ️ 准备就绪，点击下方按钮初始化分类数据
-        </div>
-        
-        <h2>📋 分类列表</h2>
-        <div id="categories"></div>
-        
-        <h2>📊 localStorage 数据状态</h2>
-        <div id="localStorage-data" class="log"></div>
-        
-        <h2>📝 操作日志</h2>
-        <div id="log" class="log"></div>
+      <h1>🧪 分类编辑功能测试工具</h1>
+
+      <button class="clear-btn" onclick="clearAllData()">
+        🗑️ 清除所有localStorage数据
+      </button>
+
+      <div id="status" class="status info">
+        ℹ️ 准备就绪，点击下方按钮初始化分类数据
+      </div>
+
+      <h2>📋 分类列表</h2>
+      <div id="categories"></div>
+
+      <h2>📊 localStorage 数据状态</h2>
+      <div id="localStorage-data" class="log"></div>
+
+      <h2>📝 操作日志</h2>
+      <div id="log" class="log"></div>
     </div>
 
     <script>
-        // 全局变量
-        let editingId = null;
-        
-        // 日志函数
-        function log(message, type = 'info') {
-            const logDiv = document.getElementById('log');
-            const timestamp = new Date().toLocaleTimeString();
-            const colorMap = {
-                info: '#0c5460',
-                success: '#155724', 
-                error: '#721c24',
-                warning: '#856404'
-            };
-            logDiv.innerHTML += `<div style="color: ${colorMap[type]};">[${timestamp}] ${message}</div>`;
-            logDiv.scrollTop = logDiv.scrollHeight;
+      // 全局变量
+      let editingId = null;
+
+      // 日志函数
+      function log(message, type = "info") {
+        const logDiv = document.getElementById("log");
+        const timestamp = new Date().toLocaleTimeString();
+        const colorMap = {
+          info: "#0c5460",
+          success: "#155724",
+          error: "#721c24",
+          warning: "#856404",
+        };
+        logDiv.innerHTML += `<div style="color: ${colorMap[type]};">[${timestamp}] ${message}</div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+      }
+
+      // 显示状态
+      function showStatus(message, type = "info") {
+        const statusDiv = document.getElementById("status");
+        statusDiv.textContent = message;
+        statusDiv.className = `status ${type}`;
+      }
+
+      // 初始化分类名称（模拟应用逻辑）
+      function initializeCategoryNames() {
+        const existing = localStorage.getItem("predefined_category_names");
+        if (!existing || existing === "{}") {
+          log("🏗️ 首次访问，初始化分类名称...", "info");
+          const initialNames = {
+            uncategorized: "📁 未分类",
+            "tech-research": "💻 技术研究",
+            "market-analysis": "📈 市场分析",
+            "product-review": "🔍 产品评测",
+            "industry-insights": "🔬 行业洞察",
+          };
+          localStorage.setItem(
+            "predefined_category_names",
+            JSON.stringify(initialNames),
+          );
+          log(
+            "✅ 分类名称初始化完成: " + JSON.stringify(initialNames),
+            "success",
+          );
+          showStatus("✅ 分类名称已初始化", "success");
+          return initialNames;
+        } else {
+          log("📊 读取现有分类名称: " + existing, "info");
+          return JSON.parse(existing);
         }
-        
-        // 显示状态
-        function showStatus(message, type = 'info') {
-            const statusDiv = document.getElementById('status');
-            statusDiv.textContent = message;
-            statusDiv.className = `status ${type}`;
-        }
-        
-        // 初始化分类名称（模拟应用逻辑）
-        function initializeCategoryNames() {
-            const existing = localStorage.getItem('predefined_category_names');
-            if (!existing || existing === '{}') {
-                log('🏗️ 首次访问，初始化分类名称...', 'info');
-                const initialNames = {
-                    'uncategorized': '📁 未分类',
-                    'tech-research': '💻 技术研究', 
-                    'market-analysis': '📈 市场分析',
-                    'product-review': '🔍 产品评测',
-                    'industry-insights': '🔬 行业洞察'
-                };
-                localStorage.setItem('predefined_category_names', JSON.stringify(initialNames));
-                log('✅ 分类名称初始化完成: ' + JSON.stringify(initialNames), 'success');
-                showStatus('✅ 分类名称已初始化', 'success');
-                return initialNames;
-            } else {
-                log('📊 读取现有分类名称: ' + existing, 'info');
-                return JSON.parse(existing);
-            }
-        }
-        
-        // 更新localStorage数据显示
-        function updateLocalStorageDisplay() {
-            const data = localStorage.getItem('predefined_category_names');
-            const dataDiv = document.getElementById('localStorage-data');
-            if (data) {
-                const parsed = JSON.parse(data);
-                dataDiv.innerHTML = `
+      }
+
+      // 更新localStorage数据显示
+      function updateLocalStorageDisplay() {
+        const data = localStorage.getItem("predefined_category_names");
+        const dataDiv = document.getElementById("localStorage-data");
+        if (data) {
+          const parsed = JSON.parse(data);
+          dataDiv.innerHTML = `
                     <strong>predefined_category_names:</strong><br>
                     ${JSON.stringify(parsed, null, 2)}
                 `;
-            } else {
-                dataDiv.innerHTML = '<em>未找到 predefined_category_names 数据</em>';
-            }
+        } else {
+          dataDiv.innerHTML = "<em>未找到 predefined_category_names 数据</em>";
         }
-        
-        // 渲染分类列表
-        function renderCategories() {
-            const names = initializeCategoryNames();
-            const categoriesDiv = document.getElementById('categories');
-            
-            const categories = [
-                { id: 'uncategorized', name: names['uncategorized'] },
-                { id: 'tech-research', name: names['tech-research'] },
-                { id: 'market-analysis', name: names['market-analysis'] },
-                { id: 'product-review', name: names['product-review'] },
-                { id: 'industry-insights', name: names['industry-insights'] }
-            ];
-            
-            categoriesDiv.innerHTML = categories.map(cat => `
+      }
+
+      // 渲染分类列表
+      function renderCategories() {
+        const names = initializeCategoryNames();
+        const categoriesDiv = document.getElementById("categories");
+
+        const categories = [
+          { id: "uncategorized", name: names["uncategorized"] },
+          { id: "tech-research", name: names["tech-research"] },
+          { id: "market-analysis", name: names["market-analysis"] },
+          { id: "product-review", name: names["product-review"] },
+          { id: "industry-insights", name: names["industry-insights"] },
+        ];
+
+        categoriesDiv.innerHTML = categories
+          .map(
+            (cat) => `
                 <div class="category">
                     <div class="category-info">
                         <div>
-                            <div class="category-name" id="name-${cat.id}">${cat.name || '❌ 未设置'}</div>
+                            <div class="category-name" id="name-${cat.id}">${cat.name || "❌ 未设置"}</div>
                             <div class="category-id">ID: ${cat.id}</div>
                         </div>
                     </div>
                     <div class="actions" id="actions-${cat.id}">
-                        ${editingId === cat.id ? 
-                            `<input type="text" id="input-${cat.id}" value="${extractName(cat.name || '')}" />
+                        ${
+                          editingId === cat.id
+                            ? `<input type="text" id="input-${cat.id}" value="${extractName(cat.name || "")}" />
                              <button class="save-btn" onclick="saveEdit('${cat.id}')">💾 保存</button>
-                             <button class="cancel-btn" onclick="cancelEdit()">❌ 取消</button>` :
-                            `<button class="edit-btn" onclick="startEdit('${cat.id}', '${cat.name || ''}')">✏️ 编辑</button>`
+                             <button class="cancel-btn" onclick="cancelEdit()">❌ 取消</button>`
+                            : `<button class="edit-btn" onclick="startEdit('${cat.id}', '${cat.name || ""}')">✏️ 编辑</button>`
                         }
                     </div>
                 </div>
-            `).join('');
-            
-            updateLocalStorageDisplay();
+            `,
+          )
+          .join("");
+
+        updateLocalStorageDisplay();
+      }
+
+      // 提取名称（去掉emoji）
+      function extractName(label) {
+        return label.replace(/^[^\s]*\s/, "");
+      }
+
+      // 开始编辑
+      function startEdit(categoryId, currentName) {
+        editingId = categoryId;
+        log(`✏️ 开始编辑分类: ${categoryId} (${currentName})`, "info");
+        renderCategories();
+        // 聚焦到输入框
+        setTimeout(() => {
+          const input = document.getElementById(`input-${categoryId}`);
+          if (input) {
+            input.focus();
+            input.select();
+          }
+        }, 100);
+      }
+
+      // 保存编辑
+      function saveEdit(categoryId) {
+        const input = document.getElementById(`input-${categoryId}`);
+        const newName = input.value.trim();
+
+        if (!newName) {
+          showStatus("❌ 分类名称不能为空", "error");
+          return;
         }
-        
-        // 提取名称（去掉emoji）
-        function extractName(label) {
-            return label.replace(/^[^\s]*\s/, '');
-        }
-        
-        // 开始编辑
-        function startEdit(categoryId, currentName) {
-            editingId = categoryId;
-            log(`✏️ 开始编辑分类: ${categoryId} (${currentName})`, 'info');
-            renderCategories();
-            // 聚焦到输入框
-            setTimeout(() => {
-                const input = document.getElementById(`input-${categoryId}`);
-                if (input) {
-                    input.focus();
-                    input.select();
-                }
-            }, 100);
-        }
-        
-        // 保存编辑
-        function saveEdit(categoryId) {
-            const input = document.getElementById(`input-${categoryId}`);
-            const newName = input.value.trim();
-            
-            if (!newName) {
-                showStatus('❌ 分类名称不能为空', 'error');
-                return;
+
+        // 添加emoji前缀
+        const categoryEmojis = {
+          uncategorized: "📁",
+          "tech-research": "💻",
+          "market-analysis": "📈",
+          "product-review": "🔍",
+          "industry-insights": "🔬",
+        };
+
+        const fullName = `${categoryEmojis[categoryId]} ${newName}`;
+
+        log(`💾 保存分类编辑: ${categoryId} → "${fullName}"`, "info");
+
+        // 读取现有数据
+        const existing = JSON.parse(
+          localStorage.getItem("predefined_category_names") || "{}",
+        );
+
+        // 更新数据
+        existing[categoryId] = fullName;
+
+        // 保存到localStorage
+        localStorage.setItem(
+          "predefined_category_names",
+          JSON.stringify(existing),
+        );
+
+        log(
+          `✅ 数据已保存到localStorage: ${JSON.stringify(existing)}`,
+          "success",
+        );
+        showStatus(`✅ 分类"${fullName}"保存成功`, "success");
+
+        // 退出编辑模式
+        editingId = null;
+
+        // 延迟重新渲染，模拟真实应用的时序
+        setTimeout(() => {
+          log("🔄 重新渲染分类列表...", "info");
+          renderCategories();
+
+          // 验证保存是否生效
+          setTimeout(() => {
+            const saved = JSON.parse(
+              localStorage.getItem("predefined_category_names") || "{}",
+            );
+            const savedName = saved[categoryId];
+            if (savedName === fullName) {
+              log(
+                `✅ 验证成功: 分类 ${categoryId} 的名称已正确保存为 "${savedName}"`,
+                "success",
+              );
+              showStatus("✅ 编辑成功且已验证", "success");
+            } else {
+              log(
+                `❌ 验证失败: 期望 "${fullName}"，实际 "${savedName}"`,
+                "error",
+              );
+              showStatus("❌ 编辑失败，数据不一致", "error");
             }
-            
-            // 添加emoji前缀
-            const categoryEmojis = {
-                'uncategorized': '📁',
-                'tech-research': '💻',
-                'market-analysis': '📈', 
-                'product-review': '🔍',
-                'industry-insights': '🔬'
-            };
-            
-            const fullName = `${categoryEmojis[categoryId]} ${newName}`;
-            
-            log(`💾 保存分类编辑: ${categoryId} → "${fullName}"`, 'info');
-            
-            // 读取现有数据
-            const existing = JSON.parse(localStorage.getItem('predefined_category_names') || '{}');
-            
-            // 更新数据
-            existing[categoryId] = fullName;
-            
-            // 保存到localStorage
-            localStorage.setItem('predefined_category_names', JSON.stringify(existing));
-            
-            log(`✅ 数据已保存到localStorage: ${JSON.stringify(existing)}`, 'success');
-            showStatus(`✅ 分类"${fullName}"保存成功`, 'success');
-            
-            // 退出编辑模式
-            editingId = null;
-            
-            // 延迟重新渲染，模拟真实应用的时序
-            setTimeout(() => {
-                log('🔄 重新渲染分类列表...', 'info');
-                renderCategories();
-                
-                // 验证保存是否生效
-                setTimeout(() => {
-                    const saved = JSON.parse(localStorage.getItem('predefined_category_names') || '{}');
-                    const savedName = saved[categoryId];
-                    if (savedName === fullName) {
-                        log(`✅ 验证成功: 分类 ${categoryId} 的名称已正确保存为 "${savedName}"`, 'success');
-                        showStatus('✅ 编辑成功且已验证', 'success');
-                    } else {
-                        log(`❌ 验证失败: 期望 "${fullName}"，实际 "${savedName}"`, 'error');
-                        showStatus('❌ 编辑失败，数据不一致', 'error');
-                    }
-                }, 100);
-            }, 150);
-        }
-        
-        // 取消编辑
-        function cancelEdit() {
-            log('❌ 取消编辑', 'info');
-            editingId = null;
+          }, 100);
+        }, 150);
+      }
+
+      // 取消编辑
+      function cancelEdit() {
+        log("❌ 取消编辑", "info");
+        editingId = null;
+        renderCategories();
+      }
+
+      // 清除所有数据
+      function clearAllData() {
+        if (
+          confirm("确定要清除所有localStorage数据吗？这将重置所有分类名称。")
+        ) {
+          localStorage.removeItem("predefined_category_names");
+          localStorage.removeItem("category_order");
+          localStorage.removeItem("hidden_categories");
+          localStorage.removeItem("custom_categories");
+          log("🗑️ 已清除所有localStorage数据", "warning");
+          showStatus("🗑️ 所有数据已清除，将重新初始化", "info");
+          editingId = null;
+          setTimeout(() => {
             renderCategories();
+          }, 500);
         }
-        
-        // 清除所有数据
-        function clearAllData() {
-            if (confirm('确定要清除所有localStorage数据吗？这将重置所有分类名称。')) {
-                localStorage.removeItem('predefined_category_names');
-                localStorage.removeItem('category_order');
-                localStorage.removeItem('hidden_categories');
-                localStorage.removeItem('custom_categories');
-                log('🗑️ 已清除所有localStorage数据', 'warning');
-                showStatus('🗑️ 所有数据已清除，将重新初始化', 'info');
-                editingId = null;
-                setTimeout(() => {
-                    renderCategories();
-                }, 500);
-            }
+      }
+
+      // 监听localStorage变化（跨标签页同步）
+      window.addEventListener("storage", function (e) {
+        if (e.key === "predefined_category_names") {
+          log("🔄 检测到localStorage变化，重新渲染...", "info");
+          renderCategories();
         }
-        
-        // 监听localStorage变化（跨标签页同步）
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'predefined_category_names') {
-                log('🔄 检测到localStorage变化，重新渲染...', 'info');
-                renderCategories();
-            }
-        });
-        
-        // 页面加载时初始化
-        window.addEventListener('load', function() {
-            log('🚀 页面加载完成，初始化分类测试工具', 'info');
-            renderCategories();
-        });
-        
-        // 测试页面刷新持久化
-        function testRefresh() {
-            showStatus('🔄 即将刷新页面测试持久化...', 'info');
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-        }
-        
-        // 添加刷新测试按钮
-        document.addEventListener('DOMContentLoaded', function() {
-            const container = document.querySelector('.container');
-            const refreshBtn = document.createElement('button');
-            refreshBtn.textContent = '🔄 测试页面刷新持久化';
-            refreshBtn.className = 'clear-btn';
-            refreshBtn.style.marginLeft = '10px';
-            refreshBtn.onclick = testRefresh;
-            
-            const clearBtn = document.querySelector('.clear-btn');
-            clearBtn.parentNode.insertBefore(refreshBtn, clearBtn.nextSibling);
-        });
+      });
+
+      // 页面加载时初始化
+      window.addEventListener("load", function () {
+        log("🚀 页面加载完成，初始化分类测试工具", "info");
+        renderCategories();
+      });
+
+      // 测试页面刷新持久化
+      function testRefresh() {
+        showStatus("🔄 即将刷新页面测试持久化...", "info");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
+
+      // 添加刷新测试按钮
+      document.addEventListener("DOMContentLoaded", function () {
+        const container = document.querySelector(".container");
+        const refreshBtn = document.createElement("button");
+        refreshBtn.textContent = "🔄 测试页面刷新持久化";
+        refreshBtn.className = "clear-btn";
+        refreshBtn.style.marginLeft = "10px";
+        refreshBtn.onclick = testRefresh;
+
+        const clearBtn = document.querySelector(".clear-btn");
+        clearBtn.parentNode.insertBefore(refreshBtn, clearBtn.nextSibling);
+      });
     </script>
-</body>
-</html> 
+  </body>
+</html>

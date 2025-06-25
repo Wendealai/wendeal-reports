@@ -1,30 +1,25 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { 
-  MoreHorizontal, 
-  Edit3, 
-  Trash2,
-  FolderPlus
-} from 'lucide-react';
-import { Category } from '@/types';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { MoreHorizontal, Edit3, Trash2, FolderPlus } from "lucide-react";
+import { Category } from "@/types";
 
 interface CategoryActionsProps {
   category: Category;
@@ -43,9 +38,9 @@ export function CategoryActions({ category, onRename }: CategoryActionsProps) {
   };
 
   const handleDelete = () => {
-    if (confirm('确定要删除这个分类吗？删除后其下的报告将被移动到未分类。')) {
+    if (confirm("确定要删除这个分类吗？删除后其下的报告将被移动到未分类。")) {
       // TODO: 实现分类删除逻辑
-      console.log('删除分类:', category.id);
+      console.log("删除分类:", category.id);
     }
   };
 
@@ -73,15 +68,15 @@ export function CategoryActions({ category, onRename }: CategoryActionsProps) {
             <Edit3 className="h-4 w-4 mr-2" />
             重命名
           </DropdownMenuItem>
-          
+
           <DropdownMenuItem disabled>
             <FolderPlus className="h-4 w-4 mr-2" />
             添加子分类
           </DropdownMenuItem>
-          
+
           <DropdownMenuSeparator />
-          
-          <DropdownMenuItem 
+
+          <DropdownMenuItem
             onClick={handleDelete}
             className="text-destructive focus:text-destructive"
             disabled
@@ -106,7 +101,7 @@ export function CategoryActions({ category, onRename }: CategoryActionsProps) {
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === "Enter") {
                     handleRename();
                   }
                 }}
@@ -116,18 +111,16 @@ export function CategoryActions({ category, onRename }: CategoryActionsProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setIsRenameDialogOpen(false)}
             >
               取消
             </Button>
-            <Button onClick={handleRename}>
-              保存
-            </Button>
+            <Button onClick={handleRename}>保存</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
   );
-} 
+}

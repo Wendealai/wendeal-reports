@@ -1,176 +1,128 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
-// 用户�?
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  username  String   @unique
-  password  String
-  avatar    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // 关联关系
-  reports       Report[]
+  id            String          @id @default(cuid())
+  email         String          @unique
+  username      String          @unique
+  password      String
+  avatar        String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   categories    Category[]
-  searchHistory SearchHistory[]
+  reports       Report[]
   savedSearches SavedSearch[]
+  searchHistory SearchHistory[]
 
   @@map("users")
 }
 
-// 分类�?
 model Category {
-  id          String   @id @default(cuid())
+  id          String     @id @default(cuid())
   name        String
   description String?
-  color       String?
   icon        String?
-  parentId    String?
+  color       String?
   userId      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // 关联关系
-  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
-  children Category[] @relation("CategoryHierarchy")
-  reports  Report[]
+  parentId    String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryHierarchy")
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reports     Report[]
 
   @@map("categories")
 }
 
-// 标签�?
 model Tag {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  color     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // 关联关系
+  id         String      @id @default(cuid())
+  name       String      @unique
+  color      String?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
   reportTags ReportTag[]
 
   @@map("tags")
 }
 
-// 报告�?
 model Report {
-  id          String    @id @default(cuid())
+  id          String      @id @default(cuid())
   title       String
   content     String
   description String?
   summary     String?
-  status      String    @default("draft") // draft, published, archived
-  priority    String    @default("medium") // low, medium, high, urgent
+  status      String      @default("draft")
+  priority    String      @default("medium")
   categoryId  String?
   userId      String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
   publishedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  files       File[]
+  reportTags  ReportTag[]
+  category    Category?   @relation(fields: [categoryId], references: [id])
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // 关联关系
-  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category   Category?   @relation(fields: [categoryId], references: [id])
-  reportTags ReportTag[]
-  files      File[]
-
-  // 性能优化索引
-  @@index([status])
-  @@index([priority])
-  @@index([categoryId])
-  @@index([userId])
-  @@index([createdAt])
-  @@index([updatedAt])
-  @@index([publishedAt])
-  @@index([status, priority])
-  @@index([categoryId, status])
-  @@index([userId, status])
-  @@index([createdAt, status])
   @@map("reports")
 }
 
-// 报告标签关联表（多对多）
 model ReportTag {
   id       String @id @default(cuid())
   reportId String
   tagId    String
-
-  // 关联关系
-  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
-  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  tag      Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@unique([reportId, tagId])
   @@map("report_tags")
 }
 
-// 搜索历史�?
 model SearchHistory {
   id        String   @id @default(cuid())
   query     String
   userId    String
   createdAt DateTime @default(now())
-
-  // 关联关系
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("search_history")
 }
 
-// 保存的搜索表
 model SavedSearch {
   id        String   @id @default(cuid())
   name      String
   query     String
-  filters   String? // JSON格式存储过滤条件
+  filters   String?
   userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  // 关联关系
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("saved_searches")
 }
 
-// 文件存储�?
 model File {
-  id        String   @id @default(cuid())
-  filename  String
-  originalName String
-  mimeType  String
-  size      Int
-  path      String
-  reportId  String?
-  createdAt DateTime @default(now())
+  id               String   @id @default(cuid())
+  filename         String
+  originalName     String
+  mimeType         String
+  size             Int
+  path             String
+  reportId         String?
+  createdAt        DateTime @default(now())
+  originalSize     Int?
+  compressedSize   Int?
+  isCompressed     Boolean  @default(false)
+  compressionRatio Float?
+  optimizationInfo String?
+  report           Report?  @relation(fields: [reportId], references: [id], onDelete: Cascade)
 
-  // 压缩和优化相关字�?
-  originalSize    Int?     // 原始文件大小
-  compressedSize  Int?     // 压缩后大�?
-  isCompressed    Boolean  @default(false) // 是否已压�?
-  compressionRatio Float?  // 压缩比率
-  optimizationInfo Json?   // 优化信息 (JSON格式)
-
-  // 关联关系
-  report Report? @relation(fields: [reportId], references: [id], onDelete: Cascade)
-
-  // 性能优化索引
-  @@index([reportId])
-  @@index([mimeType])
-  @@index([createdAt])
-  @@index([isCompressed])
-  @@index([size])
-  @@index([filename])
   @@map("files")
 }

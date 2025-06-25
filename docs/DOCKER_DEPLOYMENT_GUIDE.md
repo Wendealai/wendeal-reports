@@ -1,6 +1,7 @@
 # Wendeal Reports Docker 部署指南
 
 ## 📋 目录
+
 - [快速开始](#快速开始)
 - [部署模式](#部署模式)
 - [环境配置](#环境配置)
@@ -12,6 +13,7 @@
 ## 🚀 快速开始
 
 ### 前置要求
+
 - Docker 20.10+
 - Docker Compose 2.0+
 - 至少 2GB 可用内存
@@ -20,6 +22,7 @@
 ### 一键部署
 
 #### Windows
+
 ```bash
 # 运行部署脚本
 deploy.bat
@@ -30,6 +33,7 @@ make up
 ```
 
 #### Linux/Mac
+
 ```bash
 # 运行部署脚本
 chmod +x deploy.sh
@@ -43,6 +47,7 @@ make up
 ## 🎯 部署模式
 
 ### 1. 开发环境
+
 适用于本地开发和测试：
 
 ```bash
@@ -54,12 +59,14 @@ docker-compose -f docker-compose.dev.yml up -d
 ```
 
 **特性：**
+
 - 热重载支持
 - 调试日志级别
 - 开发专用数据库
 - 源代码挂载
 
 ### 2. 基本生产环境
+
 适用于小型部署：
 
 ```bash
@@ -71,11 +78,13 @@ docker-compose up -d
 ```
 
 **包含服务：**
+
 - Wendeal Reports 主应用
 - 自动数据库备份
 - 健康检查
 
 ### 3. 完整生产环境
+
 适用于生产级部署：
 
 ```bash
@@ -87,6 +96,7 @@ docker-compose --profile production up -d
 ```
 
 **包含服务：**
+
 - Wendeal Reports 主应用
 - Nginx 反向代理
 - Redis 缓存
@@ -97,6 +107,7 @@ docker-compose --profile production up -d
 ## ⚙️ 环境配置
 
 ### 环境变量文件
+
 复制并编辑环境变量文件：
 
 ```bash
@@ -132,7 +143,9 @@ BACKUP_SCHEDULE=0 2 * * *
 ```
 
 ### SSL 证书配置
+
 如果使用 HTTPS，将证书文件放置在：
+
 ```
 nginx/ssl/cert.pem
 nginx/ssl/key.pem
@@ -192,6 +205,7 @@ docker-compose build --no-cache
 ## 💾 数据备份
 
 ### 自动备份
+
 系统每天凌晨2点自动备份数据库，保留7天：
 
 ```bash
@@ -264,6 +278,7 @@ make status
 ```
 
 ### 自动更新
+
 Watchtower 服务会自动检查并更新镜像：
 
 ```bash
@@ -279,6 +294,7 @@ docker-compose restart watchtower
 ### 常见问题
 
 #### 1. 端口冲突
+
 ```bash
 # 检查端口占用
 netstat -tulpn | grep :7575
@@ -288,12 +304,14 @@ PORT=8080
 ```
 
 #### 2. 权限问题
+
 ```bash
 # 修复数据目录权限
 sudo chown -R 1000:1000 ./data
 ```
 
 #### 3. 内存不足
+
 ```bash
 # 检查内存使用
 docker stats --no-stream
@@ -303,6 +321,7 @@ make clean
 ```
 
 #### 4. 数据库锁定
+
 ```bash
 # 重启应用
 docker-compose restart wendeal-reports
@@ -336,6 +355,7 @@ docker volume rm wendeal-reports_wendeal_data wendeal-reports_wendeal_uploads
 ## 🌐 生产环境建议
 
 ### 安全配置
+
 1. 修改默认 JWT_SECRET
 2. 配置防火墙规则
 3. 使用 HTTPS（配置 SSL 证书）
@@ -343,6 +363,7 @@ docker volume rm wendeal-reports_wendeal_data wendeal-reports_wendeal_uploads
 5. 监控日志异常
 
 ### 性能优化
+
 1. 配置 Redis 缓存
 2. 使用 Nginx 反向代理
 3. 启用 Gzip 压缩
@@ -350,6 +371,7 @@ docker volume rm wendeal-reports_wendeal_data wendeal-reports_wendeal_uploads
 5. 监控资源使用
 
 ### 备份策略
+
 1. 定期数据库备份
 2. 备份上传文件
 3. 备份配置文件
@@ -358,6 +380,7 @@ docker volume rm wendeal-reports_wendeal_data wendeal-reports_wendeal_uploads
 ## 📞 技术支持
 
 如果遇到问题，请：
+
 1. 查看日志：`make logs`
 2. 检查状态：`make status`
 3. 健康检查：`make health`
@@ -368,4 +391,4 @@ docker volume rm wendeal-reports_wendeal_data wendeal-reports_wendeal_uploads
 
 **版本：** v2.0.0  
 **更新时间：** 2024年12月  
-**维护者：** Wendeal Reports Team 
+**维护者：** Wendeal Reports Team

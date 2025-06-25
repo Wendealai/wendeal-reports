@@ -1,9 +1,9 @@
-const fs = require('fs');
+const fs = require("fs");
 
-console.log('🔧 修复 api-client.ts 文件...');
+console.log("🔧 修复 api-client.ts 文件...");
 
-const filePath = 'src/lib/api-client.ts';
-let content = fs.readFileSync(filePath, 'utf8');
+const filePath = "src/lib/api-client.ts";
+let content = fs.readFileSync(filePath, "utf8");
 
 // 在文件开头添加logger导入
 const newHeader = `import { createLogger } from '@/lib/logger';
@@ -16,6 +16,6 @@ const logger = createLogger('ApiClient');
 content = newHeader + content;
 
 // 写回文件
-fs.writeFileSync(filePath, content, 'utf8');
+fs.writeFileSync(filePath, content, "utf8");
 
-console.log('✅ api-client.ts 修复完成！'); 
+console.log("✅ api-client.ts 修复完成！");

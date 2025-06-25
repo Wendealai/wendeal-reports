@@ -1,10 +1,14 @@
 import type { Context, Config } from "@netlify/functions";
-import { PrismaClient } from '@prisma/client';
-import { z } from 'zod';
+import { PrismaClient } from "@prisma/client";
+import { z } from "zod";
 // 使用简化版本避免构建时依赖问题
-import { optimizeFileContent, formatBytes, formatCompressionRatio } from '../../src/lib/file-optimization-simple';
-import { validateFile } from '../../src/lib/file-validation';
-import { cacheManager } from '../../src/lib/performance';
+import {
+  optimizeFileContent,
+  formatBytes,
+  formatCompressionRatio,
+} from "../../src/lib/file-optimization-simple";
+import { validateFile } from "../../src/lib/file-validation";
+import { cacheManager } from "../../src/lib/performance";
 
 // 初始化 Prisma 客户端
 let prisma: PrismaClient;
@@ -12,18 +16,26 @@ let prisma: PrismaClient;
 function getPrismaClient() {
   if (!prisma) {
     // 获取数据库 URL，支持多种环境变量来源
-    const databaseUrl = process.env.DATABASE_URL ||
-                       process.env.NEON_DATABASE_URL ||
-                       process.env.POSTGRES_URL ||
-                       process.env.DB_URL;
+    const databaseUrl =
+      process.env.DATABASE_URL ||
+      process.env.NEON_DATABASE_URL ||
+      process.env.POSTGRES_URL ||
+      process.env.DB_URL;
 
-    console.log('Database URL available:', !!databaseUrl);
-    console.log('Environment variables:', Object.keys(process.env).filter(key =>
-      key.includes('DATABASE') || key.includes('DB') || key.includes('POSTGRES') || key.includes('NEON')
-    ));
+    console.log("Database URL available:", !!databaseUrl);
+    console.log(
+      "Environment variables:",
+      Object.keys(process.env).filter(
+        (key) =>
+          key.includes("DATABASE") ||
+          key.includes("DB") ||
+          key.includes("POSTGRES") ||
+          key.includes("NEON"),
+      ),
+    );
 
     if (!databaseUrl) {
-      throw new Error('No database URL found in environment variables');
+      throw new Error("No database URL found in environment variables");
     }
 
     prisma = new PrismaClient({
@@ -38,25 +50,28 @@ function getPrismaClient() {
 }
 
 // 默认用户ID（用于简化的单用户系统）
-const DEFAULT_USER_ID = 'cmbusc9x00000x2w0fqyu591k';
+const DEFAULT_USER_ID = "cmbusc9x00000x2w0fqyu591k";
 
 // 预定义分类ID映射
 const PREDEFINED_CATEGORY_ID_MAP = {
-  'uncategorized': 'predefined-uncategorized',
-  'tech-research': 'predefined-tech-research',
-  'market-analysis': 'predefined-market-analysis',
-  'product-review': 'predefined-product-review',
-  'industry-insights': 'predefined-industry-insights',
+  uncategorized: "predefined-uncategorized",
+  "tech-research": "predefined-tech-research",
+  "market-analysis": "predefined-market-analysis",
+  "product-review": "predefined-product-review",
+  "industry-insights": "predefined-industry-insights",
 };
 
 // 报告创建验证Schema
 const createReportSchema = z.object({
-  title: z.string().min(1, '报告标题不能为空').max(200, '报告标题不能超过200个字符'),
-  content: z.string().min(1, '报告内容不能为空'),
+  title: z
+    .string()
+    .min(1, "报告标题不能为空")
+    .max(200, "报告标题不能超过200个字符"),
+  content: z.string().min(1, "报告内容不能为空"),
   description: z.string().optional(),
   summary: z.string().optional(),
-  status: z.enum(['draft', 'published', 'archived']).default('draft'),
-  priority: z.enum(['low', 'medium', 'high', 'urgent']).default('medium'),
+  status: z.enum(["draft", "published", "archived"]).default("draft"),
+  priority: z.enum(["low", "medium", "high", "urgent"]).default("medium"),
   categoryId: z.string().optional(),
   tags: z.array(z.string()).optional(),
 });
@@ -67,17 +82,17 @@ async function getReports(request: Request) {
 
   try {
     const url = new URL(request.url);
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const limit = parseInt(url.searchParams.get('limit') || '10');
-    const status = url.searchParams.get('status');
-    const categoryId = url.searchParams.get('categoryId');
-    const search = url.searchParams.get('search');
+    const page = parseInt(url.searchParams.get("page") || "1");
+    const limit = parseInt(url.searchParams.get("limit") || "10");
+    const status = url.searchParams.get("status");
+    const categoryId = url.searchParams.get("categoryId");
+    const search = url.searchParams.get("search");
 
     const skip = (page - 1) * limit;
 
     // 构建查询条件
     const where: any = {
-      userId: DEFAULT_USER_ID
+      userId: DEFAULT_USER_ID,
     };
 
     if (status) {
@@ -92,7 +107,7 @@ async function getReports(request: Request) {
       where.OR = [
         { title: { contains: search } },
         { content: { contains: search } },
-        { summary: { contains: search } }
+        { summary: { contains: search } },
       ];
     }
 
@@ -106,8 +121,8 @@ async function getReports(request: Request) {
               id: true,
               name: true,
               color: true,
-              icon: true
-            }
+              icon: true,
+            },
           },
           reportTags: {
             include: {
@@ -115,52 +130,54 @@ async function getReports(request: Request) {
                 select: {
                   id: true,
                   name: true,
-                  color: true
-                }
-              }
-            }
+                  color: true,
+                },
+              },
+            },
           },
           _count: {
             select: {
-              files: true
-            }
-          }
+              files: true,
+            },
+          },
         },
         orderBy: {
-          updatedAt: 'desc'
+          updatedAt: "desc",
         },
         skip,
-        take: limit
+        take: limit,
       }),
-      prisma.report.count({ where })
+      prisma.report.count({ where }),
     ]);
 
     // 格式化返回数据
-    const formattedReports = reports.map(report => ({
+    const formattedReports = reports.map((report) => ({
       ...report,
-      tags: report.reportTags.map(rt => rt.tag),
+      tags: report.reportTags.map((rt) => rt.tag),
       reportTags: undefined,
-      fileCount: report._count.files
+      fileCount: report._count.files,
     }));
 
-    return new Response(JSON.stringify({
-      reports: formattedReports,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit)
-      }
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
-
+    return new Response(
+      JSON.stringify({
+        reports: formattedReports,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   } catch (error) {
-    console.error('Get reports error:', error);
-    return new Response(JSON.stringify({ error: '获取报告列表失败' }), {
+    console.error("Get reports error:", error);
+    return new Response(JSON.stringify({ error: "获取报告列表失败" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { "Content-Type": "application/json" },
     });
   }
 }
@@ -168,9 +185,9 @@ async function getReports(request: Request) {
 // 创建新报告（支持文件上传）
 async function createReport(request: Request) {
   try {
-    const contentType = request.headers.get('content-type') || '';
+    const contentType = request.headers.get("content-type") || "";
 
-    if (contentType.includes('multipart/form-data')) {
+    if (contentType.includes("multipart/form-data")) {
       // 处理文件上传
       return await createReportFromFile(request);
     } else {
@@ -178,10 +195,10 @@ async function createReport(request: Request) {
       return await createReportFromJSON(request);
     }
   } catch (error) {
-    console.error('Create report error:', error);
-    return new Response(JSON.stringify({ error: '创建报告失败' }), {
+    console.error("Create report error:", error);
+    return new Response(JSON.stringify({ error: "创建报告失败" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { "Content-Type": "application/json" },
     });
   }
 }
@@ -192,13 +209,13 @@ async function createReportFromFile(request: Request) {
 
   try {
     const formData = await request.formData();
-    const file = formData.get('file') as File | null;
-    const categoryIdFromFrontend = formData.get('categoryId') as string | null;
+    const file = formData.get("file") as File | null;
+    const categoryIdFromFrontend = formData.get("categoryId") as string | null;
 
     if (!file) {
-      return new Response(JSON.stringify({ error: '没有提供文件' }), {
+      return new Response(JSON.stringify({ error: "没有提供文件" }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       });
     }
 
@@ -208,34 +225,43 @@ async function createReportFromFile(request: Request) {
     // 综合文件验证
     const validationResult = validateFile(file, fileBuffer, {
       maxFileSize: 10 * 1024 * 1024, // 10MB
-      allowedMimeTypes: ['text/html', 'application/xhtml+xml'],
-      allowedExtensions: ['.html', '.htm', '.xhtml'],
+      allowedMimeTypes: ["text/html", "application/xhtml+xml"],
+      allowedExtensions: [".html", ".htm", ".xhtml"],
       checkContent: true,
       strictMode: false,
       allowExternalResources: true,
-      allowScripts: true
+      allowScripts: true,
     });
 
     if (!validationResult.isValid) {
-      return new Response(JSON.stringify({
-        error: '文件验证失败',
-        details: validationResult.errors,
-        warnings: validationResult.warnings,
-        fileInfo: validationResult.fileInfo
-      }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+      return new Response(
+        JSON.stringify({
+          error: "文件验证失败",
+          details: validationResult.errors,
+          warnings: validationResult.warnings,
+          fileInfo: validationResult.fileInfo,
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
+      );
     }
 
     // 提取元数据
-    const htmlContent = fileBuffer.toString('utf-8');
+    const htmlContent = fileBuffer.toString("utf-8");
     const titleMatch = htmlContent.match(/<title>(.*?)<\/title>/);
-    const title = titleMatch ? titleMatch[1] : file.name.replace(/\.html$/i, '');
+    const title = titleMatch
+      ? titleMatch[1]
+      : file.name.replace(/\.html$/i, "");
 
     const pMatch = htmlContent.match(/<p>(.*?)<\/p>/);
-    let description = pMatch ? pMatch[1].substring(0, 200) : '';
+    let description = pMatch ? pMatch[1].substring(0, 200) : "";
     if (!description) {
       const bodyMatch = htmlContent.match(/<body[^>]*>([\s\S]*?)<\/body>/);
       if (bodyMatch) {
-        description = bodyMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 200);
+        description = bodyMatch[1]
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .substring(0, 200);
       }
     }
 
@@ -246,21 +272,29 @@ async function createReportFromFile(request: Request) {
       minSizeForCompression: 1024,
       enableHtmlMinification: true,
       removeComments: true,
-      removeWhitespace: true
+      removeWhitespace: true,
     });
 
     // 映射分类ID
-    const categoryId = categoryIdFromFrontend && PREDEFINED_CATEGORY_ID_MAP[categoryIdFromFrontend as keyof typeof PREDEFINED_CATEGORY_ID_MAP]
-      ? PREDEFINED_CATEGORY_ID_MAP[categoryIdFromFrontend as keyof typeof PREDEFINED_CATEGORY_ID_MAP]
-      : PREDEFINED_CATEGORY_ID_MAP['uncategorized'];
+    const categoryId =
+      categoryIdFromFrontend &&
+      PREDEFINED_CATEGORY_ID_MAP[
+        categoryIdFromFrontend as keyof typeof PREDEFINED_CATEGORY_ID_MAP
+      ]
+        ? PREDEFINED_CATEGORY_ID_MAP[
+            categoryIdFromFrontend as keyof typeof PREDEFINED_CATEGORY_ID_MAP
+          ]
+        : PREDEFINED_CATEGORY_ID_MAP["uncategorized"];
 
     // 验证数据
     const reportData = {
       title,
       description,
-      content: optimizationResult.isCompressed ? htmlContent : optimizationResult.optimizedContent,
-      status: 'draft' as const,
-      priority: 'medium' as const,
+      content: optimizationResult.isCompressed
+        ? htmlContent
+        : optimizationResult.optimizedContent,
+      status: "draft" as const,
+      priority: "medium" as const,
       categoryId,
     };
 
@@ -283,7 +317,7 @@ async function createReportFromFile(request: Request) {
         data: {
           filename: file.name,
           originalName: file.name,
-          mimeType: 'text/html',
+          mimeType: "text/html",
           size: optimizationResult.compressedSize,
           path: `/virtual/${report.id}`, // 虚拟路径，因为Netlify不支持文件存储
           reportId: report.id,
@@ -297,10 +331,12 @@ async function createReportFromFile(request: Request) {
             compressionLevel: 6,
             optimizedAt: new Date().toISOString(),
             savings: {
-              bytes: optimizationResult.originalSize - optimizationResult.compressedSize,
-              percentage: optimizationResult.compressionRatio
-            }
-          }
+              bytes:
+                optimizationResult.originalSize -
+                optimizationResult.compressedSize,
+              percentage: optimizationResult.compressionRatio,
+            },
+          },
         },
       });
 
@@ -310,22 +346,26 @@ async function createReportFromFile(request: Request) {
     // 清理缓存
     cacheManager.invalidateReportCache(result.id);
 
-    return new Response(JSON.stringify({
-      message: '报告创建成功',
-      report: result,
-      optimization: {
-        originalSize: formatBytes(optimizationResult.originalSize),
-        compressedSize: formatBytes(optimizationResult.compressedSize),
-        compressionRatio: formatCompressionRatio(optimizationResult.compressionRatio),
-        isCompressed: optimizationResult.isCompressed
-      }
-    }), { status: 200, headers: { 'Content-Type': 'application/json' } });
-
+    return new Response(
+      JSON.stringify({
+        message: "报告创建成功",
+        report: result,
+        optimization: {
+          originalSize: formatBytes(optimizationResult.originalSize),
+          compressedSize: formatBytes(optimizationResult.compressedSize),
+          compressionRatio: formatCompressionRatio(
+            optimizationResult.compressionRatio,
+          ),
+          isCompressed: optimizationResult.isCompressed,
+        },
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } },
+    );
   } catch (error) {
-    console.error('Create report from file error:', error);
-    return new Response(JSON.stringify({ error: '从文件创建报告失败' }), {
+    console.error("Create report from file error:", error);
+    return new Response(JSON.stringify({ error: "从文件创建报告失败" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { "Content-Type": "application/json" },
     });
   }
 }
@@ -353,10 +393,10 @@ async function createReportFromJSON(request: Request) {
             id: true,
             name: true,
             color: true,
-            icon: true
-          }
-        }
-      }
+            icon: true,
+          },
+        },
+      },
     });
 
     // 如果有标签，处理标签关联
@@ -367,17 +407,17 @@ async function createReportFromJSON(request: Request) {
           return prisma.tag.upsert({
             where: { name: tagName },
             update: {},
-            create: { name: tagName }
+            create: { name: tagName },
           });
-        })
+        }),
       );
 
       // 创建报告标签关联
       await prisma.reportTag.createMany({
-        data: tagRecords.map(tag => ({
+        data: tagRecords.map((tag) => ({
           reportId: report.id,
-          tagId: tag.id
-        }))
+          tagId: tag.id,
+        })),
       });
 
       // 重新获取包含标签的报告
@@ -389,8 +429,8 @@ async function createReportFromJSON(request: Request) {
               id: true,
               name: true,
               color: true,
-              icon: true
-            }
+              icon: true,
+            },
           },
           reportTags: {
             include: {
@@ -398,54 +438,62 @@ async function createReportFromJSON(request: Request) {
                 select: {
                   id: true,
                   name: true,
-                  color: true
-                }
-              }
-            }
-          }
-        }
+                  color: true,
+                },
+              },
+            },
+          },
+        },
       });
 
-      return new Response(JSON.stringify({
-        message: '报告创建成功',
+      return new Response(
+        JSON.stringify({
+          message: "报告创建成功",
+          report: {
+            ...reportWithTags,
+            tags: reportWithTags?.reportTags.map((rt) => rt.tag) || [],
+            reportTags: undefined,
+          },
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    return new Response(
+      JSON.stringify({
+        message: "报告创建成功",
         report: {
-          ...reportWithTags,
-          tags: reportWithTags?.reportTags.map(rt => rt.tag) || [],
-          reportTags: undefined
-        }
-      }), {
+          ...report,
+          tags: [],
+        },
+      }),
+      {
         status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    return new Response(JSON.stringify({
-      message: '报告创建成功',
-      report: {
-        ...report,
-        tags: []
-      }
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
-
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   } catch (error) {
-    console.error('Create report error:', error);
-    
+    console.error("Create report error:", error);
+
     if (error instanceof z.ZodError) {
-      return new Response(JSON.stringify({
-        error: '输入数据格式错误',
-        details: error.errors
-      }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return new Response(
+        JSON.stringify({
+          error: "输入数据格式错误",
+          details: error.errors,
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
-    return new Response(JSON.stringify({ error: '创建报告失败' }), {
+    return new Response(JSON.stringify({ error: "创建报告失败" }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { "Content-Type": "application/json" },
     });
   }
 }
@@ -457,56 +505,62 @@ export default async (req: Request, context: Context) => {
 
     // 设置 CORS 头部
     const headers = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Content-Type': 'application/json',
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Content-Type": "application/json",
     };
 
     // 处理 OPTIONS 请求
-    if (req.method === 'OPTIONS') {
+    if (req.method === "OPTIONS") {
       return new Response(null, { status: 200, headers });
     }
 
     try {
       switch (req.method) {
-        case 'GET':
+        case "GET":
           return await getReports(req);
-        case 'POST':
+        case "POST":
           return await createReport(req);
         default:
-          return new Response(JSON.stringify({ error: '方法不允许' }), {
+          return new Response(JSON.stringify({ error: "方法不允许" }), {
             status: 405,
-            headers
+            headers,
           });
       }
     } finally {
       await prisma.$disconnect();
     }
   } catch (error) {
-    console.error('Function error:', error);
+    console.error("Function error:", error);
 
     // 如果是数据库连接错误
-    if (error instanceof Error && error.message.includes('database URL')) {
-      return new Response(JSON.stringify({
-        error: '数据库连接配置错误',
-        details: 'DATABASE_URL 环境变量未设置或无效'
-      }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
+    if (error instanceof Error && error.message.includes("database URL")) {
+      return new Response(
+        JSON.stringify({
+          error: "数据库连接配置错误",
+          details: "DATABASE_URL 环境变量未设置或无效",
+        }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
-    return new Response(JSON.stringify({
-      error: '服务器内部错误',
-      details: error instanceof Error ? error.message : '未知错误'
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return new Response(
+      JSON.stringify({
+        error: "服务器内部错误",
+        details: error instanceof Error ? error.message : "未知错误",
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 };
 
 export const config: Config = {
-  path: "/api/reports"
-}; 
+  path: "/api/reports",
+};

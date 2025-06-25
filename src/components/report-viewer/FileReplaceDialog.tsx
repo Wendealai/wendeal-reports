@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useAppStore } from '@/store/useAppStore';
-import { Report } from '@/types';
+import React, { useState } from "react";
+import { useAppStore } from "@/store/useAppStore";
+import { Report } from "@/types";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Upload, AlertTriangle } from 'lucide-react';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Upload, AlertTriangle } from "lucide-react";
 
 interface FileReplaceDialogProps {
   report: Report | null;
@@ -19,20 +19,28 @@ interface FileReplaceDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function FileReplaceDialog({ report, open, onOpenChange }: FileReplaceDialogProps) {
+export function FileReplaceDialog({
+  report,
+  open,
+  onOpenChange,
+}: FileReplaceDialogProps) {
   const { replaceReportFile } = useAppStore();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
 
-  const handleFileReplace = async (filePath: string, fileSize?: number, wordCount?: number) => {
+  const handleFileReplace = async (
+    filePath: string,
+    fileSize?: number,
+    wordCount?: number,
+  ) => {
     if (!report) return;
-    
+
     setIsUploading(true);
-    
+
     try {
       replaceReportFile(report.id, filePath, fileSize, wordCount);
       setUploadComplete(true);
-      
+
       // 延迟关闭对话框
       setTimeout(() => {
         setUploadComplete(false);
@@ -40,7 +48,7 @@ export function FileReplaceDialog({ report, open, onOpenChange }: FileReplaceDia
         onOpenChange(false);
       }, 1500);
     } catch (error) {
-      console.error('File replace failed:', error);
+      console.error("File replace failed:", error);
       setIsUploading(false);
     }
   };
@@ -62,7 +70,8 @@ export function FileReplaceDialog({ report, open, onOpenChange }: FileReplaceDia
             替换报告文件
           </DialogTitle>
           <DialogDescription>
-                          为报告 &ldquo;{report.title}&rdquo; 上传新的 HTML 文件。新文件将替换当前的报告内容。
+            为报告 &ldquo;{report.title}&rdquo; 上传新的 HTML
+            文件。新文件将替换当前的报告内容。
           </DialogDescription>
         </DialogHeader>
 
@@ -104,9 +113,9 @@ export function FileReplaceDialog({ report, open, onOpenChange }: FileReplaceDia
               <Button
                 variant="outline"
                 onClick={() => {
-                  const input = document.createElement('input');
-                  input.type = 'file';
-                  input.accept = '.html,text/html';
+                  const input = document.createElement("input");
+                  input.type = "file";
+                  input.accept = ".html,text/html";
                   input.onchange = (e) => {
                     const file = (e.target as HTMLInputElement).files?.[0];
                     if (file) {
@@ -117,7 +126,7 @@ export function FileReplaceDialog({ report, open, onOpenChange }: FileReplaceDia
                       const reader = new FileReader();
                       reader.onload = () => {
                         const content = reader.result as string;
-                        const textContent = content.replace(/<[^>]*>/g, '');
+                        const textContent = content.replace(/<[^>]*>/g, "");
                         const wordCount = textContent.length;
                         handleFileReplace(filePath, fileSize, wordCount);
                       };
@@ -136,12 +145,10 @@ export function FileReplaceDialog({ report, open, onOpenChange }: FileReplaceDia
 
         {isUploading && (
           <div className="text-center py-4">
-            <div className="text-blue-600 font-medium">
-              正在替换文件...
-            </div>
+            <div className="text-blue-600 font-medium">正在替换文件...</div>
           </div>
         )}
       </DialogContent>
     </Dialog>
   );
-} 
+}

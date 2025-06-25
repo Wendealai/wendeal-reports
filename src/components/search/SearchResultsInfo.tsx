@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { useAppStore } from '@/store/useAppStore';
-import { getFilterSummary } from '@/lib/searchUtils';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { X, Search, Filter } from 'lucide-react';
+import React from "react";
+import { useAppStore } from "@/store/useAppStore";
+import { getFilterSummary } from "@/lib/searchUtils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { X, Search, Filter } from "lucide-react";
 
 interface SearchResultsInfoProps {
   resultCount: number;
@@ -13,28 +13,25 @@ interface SearchResultsInfoProps {
   className?: string;
 }
 
-export function SearchResultsInfo({ 
-  resultCount, 
-  totalCount, 
-  className 
+export function SearchResultsInfo({
+  resultCount,
+  totalCount,
+  className,
 }: SearchResultsInfoProps) {
-  const { 
-    searchQuery, 
-    searchFilters, 
-    setSearchQuery, 
-    setSearchFilters 
-  } = useAppStore();
+  const { searchQuery, searchFilters, setSearchQuery, setSearchFilters } =
+    useAppStore();
 
-  const hasActiveSearch = searchQuery.trim() || Object.keys(searchFilters).length > 0;
+  const hasActiveSearch =
+    searchQuery.trim() || Object.keys(searchFilters).length > 0;
   const filterSummary = getFilterSummary(searchFilters);
 
   const clearAllFilters = () => {
-    setSearchQuery('');
+    setSearchQuery("");
     setSearchFilters({});
   };
 
   const clearSearchQuery = () => {
-    setSearchQuery('');
+    setSearchQuery("");
   };
 
   const clearFilters = () => {
@@ -43,7 +40,9 @@ export function SearchResultsInfo({
 
   if (!hasActiveSearch && resultCount === totalCount) {
     return (
-      <div className={`flex items-center justify-between text-sm text-muted-foreground ${className}`}>
+      <div
+        className={`flex items-center justify-between text-sm text-muted-foreground ${className}`}
+      >
         <span>显示全部 {totalCount} 个报告</span>
       </div>
     );
@@ -56,9 +55,14 @@ export function SearchResultsInfo({
         <div className="flex items-center gap-2 text-sm">
           <Search className="h-4 w-4" />
           <span>
-            找到 <span className="font-medium text-foreground">{resultCount}</span> 个结果
+            找到{" "}
+            <span className="font-medium text-foreground">{resultCount}</span>{" "}
+            个结果
             {totalCount !== resultCount && (
-              <span className="text-muted-foreground"> (共 {totalCount} 个)</span>
+              <span className="text-muted-foreground">
+                {" "}
+                (共 {totalCount} 个)
+              </span>
             )}
           </span>
         </div>
@@ -83,7 +87,7 @@ export function SearchResultsInfo({
           {searchQuery.trim() && (
             <Badge variant="secondary" className="gap-1">
               <Search className="h-3 w-3" />
-                             关键词: &ldquo;{searchQuery}&rdquo;
+              关键词: &ldquo;{searchQuery}&rdquo;
               <Button
                 variant="ghost"
                 size="sm"
@@ -125,4 +129,4 @@ export function SearchResultsInfo({
       )}
     </div>
   );
-} 
+}

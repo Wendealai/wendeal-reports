@@ -1,26 +1,26 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { Report } from '@/types';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { 
-  Star, 
-  ChevronDown, 
-  ChevronUp, 
+import React, { useState } from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Report } from "@/types";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Star,
+  ChevronDown,
+  ChevronUp,
   Calendar,
   FileText,
   Tag,
   CheckSquare,
-  Square
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useAppStore } from '@/store/useAppStore';
-import { ReportCardActions } from './ReportCardActions';
-import { safeTextContent } from '@/lib/htmlUtils';
+  Square,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useAppStore } from "@/store/useAppStore";
+import { ReportCardActions } from "./ReportCardActions";
+import { safeTextContent } from "@/lib/htmlUtils";
 
 interface DraggableReportCardProps {
   report: Report;
@@ -28,15 +28,15 @@ interface DraggableReportCardProps {
   isDragging?: boolean;
 }
 
-export function DraggableReportCard({ 
-  report, 
+export function DraggableReportCard({
+  report,
   onReportClick,
-  isDragging = false 
+  isDragging = false,
 }: DraggableReportCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { selectedReports, setSelectedReports, batchMode } = useAppStore();
-  
+
   const {
     attributes,
     listeners,
@@ -52,9 +52,9 @@ export function DraggableReportCard({
   };
 
   const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('zh-CN', {
-      month: 'short',
-      day: 'numeric',
+    return new Intl.DateTimeFormat("zh-CN", {
+      month: "short",
+      day: "numeric",
     }).format(date);
   };
 
@@ -63,27 +63,27 @@ export function DraggableReportCard({
   const handleCardClick = (e: React.MouseEvent) => {
     // 防止在拖拽时触发点击
     if (isSortableDragging || isDragging) return;
-    
+
     // 如果菜单正在打开，不触发报告查看
     if (isMenuOpen) return;
-    
+
     // 如果点击的是展开按钮或设置按钮区域，不触发报告查看
-    if ((e.target as HTMLElement).closest('[data-action-button]')) {
+    if ((e.target as HTMLElement).closest("[data-action-button]")) {
       return;
     }
-    
+
     // 如果是批量模式，处理选择逻辑
     if (batchMode) {
       handleToggleSelect();
       return;
     }
-    
+
     onReportClick(report);
   };
 
   const handleToggleSelect = () => {
     if (isSelected) {
-      setSelectedReports(selectedReports.filter(id => id !== report.id));
+      setSelectedReports(selectedReports.filter((id) => id !== report.id));
     } else {
       setSelectedReports([...selectedReports, report.id]);
     }
@@ -95,7 +95,7 @@ export function DraggableReportCard({
   };
 
   return (
-    <Card 
+    <Card
       ref={setNodeRef}
       style={style}
       {...attributes}
@@ -104,7 +104,7 @@ export function DraggableReportCard({
         "cursor-pointer transition-all duration-200 hover:shadow-md border border-border relative",
         (isSortableDragging || isDragging) && "opacity-50 shadow-lg",
         isSelected && "ring-2 ring-blue-500 border-blue-500",
-        "select-none"
+        "select-none",
       )}
       onClick={handleCardClick}
     >
@@ -133,10 +133,12 @@ export function DraggableReportCard({
 
         {/* 标题和操作按钮 */}
         <div className="flex items-start justify-between mb-2">
-          <h4 className={cn(
-            "text-sm font-medium line-clamp-2 flex-1 pr-2",
-            batchMode && "ml-8" // 为复选框留出空间
-          )}>
+          <h4
+            className={cn(
+              "text-sm font-medium line-clamp-2 flex-1 pr-2",
+              batchMode && "ml-8", // 为复选框留出空间
+            )}
+          >
             {report.title}
           </h4>
           <div className="flex items-center gap-1 flex-shrink-0">
@@ -156,8 +158,8 @@ export function DraggableReportCard({
                 <ChevronDown className="h-3 w-3" />
               )}
             </Button>
-            <ReportCardActions 
-              report={report} 
+            <ReportCardActions
+              report={report}
               onMenuOpenChange={setIsMenuOpen}
             />
           </div>
@@ -172,7 +174,7 @@ export function DraggableReportCard({
                 {safeTextContent(report.description, 150)}
               </p>
             )}
-            
+
             {/* 日期信息 */}
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
@@ -193,12 +195,19 @@ export function DraggableReportCard({
                 <Tag className="h-3 w-3 text-muted-foreground flex-shrink-0 mt-0.5" />
                 <div className="flex flex-wrap gap-1 flex-1">
                   {report.tags.slice(0, 3).map((tag) => (
-                    <Badge key={tag} variant="outline" className="text-xs px-1 py-0 h-auto">
+                    <Badge
+                      key={tag}
+                      variant="outline"
+                      className="text-xs px-1 py-0 h-auto"
+                    >
                       {tag}
                     </Badge>
                   ))}
                   {report.tags.length > 3 && (
-                    <Badge variant="outline" className="text-xs px-1 py-0 h-auto">
+                    <Badge
+                      variant="outline"
+                      className="text-xs px-1 py-0 h-auto"
+                    >
                       +{report.tags.length - 3}
                     </Badge>
                   )}
@@ -215,12 +224,18 @@ export function DraggableReportCard({
               {report.tags.length > 0 && (
                 <div className="flex gap-1">
                   {report.tags.slice(0, 2).map((tag) => (
-                    <Badge key={tag} variant="outline" className="text-xs px-1 py-0 h-auto">
+                    <Badge
+                      key={tag}
+                      variant="outline"
+                      className="text-xs px-1 py-0 h-auto"
+                    >
                       {tag}
                     </Badge>
                   ))}
                   {report.tags.length > 2 && (
-                    <span className="text-xs text-muted-foreground">+{report.tags.length - 2}</span>
+                    <span className="text-xs text-muted-foreground">
+                      +{report.tags.length - 2}
+                    </span>
                   )}
                 </div>
               )}
@@ -233,4 +248,4 @@ export function DraggableReportCard({
       </CardContent>
     </Card>
   );
-} 
+}

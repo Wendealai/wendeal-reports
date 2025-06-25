@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useAppStore } from '@/store/useAppStore';
-import { Report } from '@/types';
-import { Button } from '@/components/ui/button';
+import React, { useState } from "react";
+import { useAppStore } from "@/store/useAppStore";
+import { Report } from "@/types";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +20,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 import {
   CheckSquare,
   Square,
@@ -30,16 +30,19 @@ import {
   FolderOpen,
   BookOpen,
   X,
-} from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { CategorySelector } from '../upload/CategorySelector';
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { CategorySelector } from "../upload/CategorySelector";
 
 interface BatchActionsToolbarProps {
   reports: Report[];
   className?: string;
 }
 
-export function BatchActionsToolbar({ reports, className }: BatchActionsToolbarProps) {
+export function BatchActionsToolbar({
+  reports,
+  className,
+}: BatchActionsToolbarProps) {
   const {
     selectedReports,
     setSelectedReports,
@@ -59,8 +62,12 @@ export function BatchActionsToolbar({ reports, className }: BatchActionsToolbarP
   const allSelected = selectedCount === totalCount && totalCount > 0;
   const someSelected = selectedCount > 0 && selectedCount < totalCount;
 
-  const selectedReportObjects = reports.filter(report => selectedReports.includes(report.id));
-  const favoriteCount = selectedReportObjects.filter(report => report.isFavorite).length;
+  const selectedReportObjects = reports.filter((report) =>
+    selectedReports.includes(report.id),
+  );
+  const favoriteCount = selectedReportObjects.filter(
+    (report) => report.isFavorite,
+  ).length;
   const shouldSetFavorite = favoriteCount < selectedCount;
 
   // 切换批量模式
@@ -76,7 +83,7 @@ export function BatchActionsToolbar({ reports, className }: BatchActionsToolbarP
     if (allSelected || someSelected) {
       setSelectedReports([]);
     } else {
-      setSelectedReports(reports.map(r => r.id));
+      setSelectedReports(reports.map((r) => r.id));
     }
   };
 
@@ -92,7 +99,7 @@ export function BatchActionsToolbar({ reports, className }: BatchActionsToolbarP
   };
 
   // 批量更新状态
-  const handleStatusChange = (status: Report['readStatus']) => {
+  const handleStatusChange = (status: Report["readStatus"]) => {
     updateReportsStatus(selectedReports, status);
   };
 
@@ -124,7 +131,9 @@ export function BatchActionsToolbar({ reports, className }: BatchActionsToolbarP
   }
 
   return (
-    <div className={`bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 ${className}`}>
+    <div
+      className={`bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 ${className}`}
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           {/* 全选按钮 */}
@@ -141,14 +150,12 @@ export function BatchActionsToolbar({ reports, className }: BatchActionsToolbarP
             ) : (
               <Square className="h-4 w-4" />
             )}
-            {allSelected ? '取消全选' : '全选'}
+            {allSelected ? "取消全选" : "全选"}
           </Button>
 
           {/* 选中数量 */}
           {selectedCount > 0 && (
-            <Badge variant="secondary">
-              已选择 {selectedCount} 项
-            </Badge>
+            <Badge variant="secondary">已选择 {selectedCount} 项</Badge>
           )}
         </div>
 
@@ -234,10 +241,7 @@ export function BatchActionsToolbar({ reports, className }: BatchActionsToolbarP
               将 {selectedCount} 个报告移动到指定分类
             </p>
           </div>
-          <CategorySelector
-            value=""
-            onValueChange={handleCategoryChange}
-          />
+          <CategorySelector value="" onValueChange={handleCategoryChange} />
           <div className="flex justify-end gap-2 mt-3">
             <Button
               variant="outline"
@@ -272,4 +276,4 @@ export function BatchActionsToolbar({ reports, className }: BatchActionsToolbarP
       </AlertDialog>
     </div>
   );
-} 
+}

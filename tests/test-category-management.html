@@ -1,370 +1,409 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>分类管理功能展示 - Wendeal Reports</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        h1 {
-            text-align: center;
-            color: white;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
-        
-        .subtitle {
-            text-align: center;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1.1rem;
-            margin-bottom: 40px;
-        }
-        
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-        
-        .feature-card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            display: block;
-        }
-        
-        .feature-title {
-            color: white;
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-        
-        .feature-desc {
-            color: rgba(255, 255, 255, 0.8);
-            line-height: 1.6;
-            font-size: 0.95rem;
-        }
-        
-        .demo-section {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 30px;
-            margin-top: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .demo-title {
-            color: white;
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .demo-cards {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .category-demo-card {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(16, 185, 129, 0.2));
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 16px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .category-demo-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
-        }
-        
-        .category-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 12px;
-        }
-        
-        .category-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .drag-handle {
-            padding: 4px;
-            border-radius: 6px;
-            background-color: rgba(71, 85, 105, 0.5);
-            cursor: grab;
-        }
-        
-        .category-name {
-            color: white;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        
-        .report-count {
-            background: rgba(255, 255, 255, 0.7);
-            color: #1e293b;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .edit-button {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.8), rgba(99, 102, 241, 0.6));
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 6px 12px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .edit-button:hover {
-            transform: scale(1.05);
-            background: linear-gradient(135deg, rgba(99, 102, 241, 1), rgba(99, 102, 241, 0.8));
-        }
-        
-        .instructions {
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 30px;
-        }
-        
-        .instructions h3 {
-            color: white;
-            margin-bottom: 15px;
-        }
-        
-        .instructions ol {
-            color: rgba(255, 255, 255, 0.9);
-            padding-left: 20px;
-        }
-        
-        .instructions li {
-            margin-bottom: 8px;
-            line-height: 1.5;
-        }
-        
-        .quick-actions {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-        
-        .quick-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(5px);
-        }
-        
-        .quick-btn.add {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.8), rgba(16, 185, 129, 0.8));
-        }
-        
-        .quick-btn.sort {
-            background: linear-gradient(135deg, rgba(168, 85, 247, 0.8), rgba(147, 51, 234, 0.8));
-        }
-        
-        .quick-btn:hover {
-            transform: scale(1.05);
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        padding: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      h1 {
+        text-align: center;
+        color: white;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      }
+
+      .subtitle {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.1rem;
+        margin-bottom: 40px;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+      }
+
+      .feature-card {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        display: block;
+      }
+
+      .feature-title {
+        color: white;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+
+      .feature-desc {
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.6;
+        font-size: 0.95rem;
+      }
+
+      .demo-section {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 30px;
+        margin-top: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .demo-title {
+        color: white;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .demo-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .category-demo-card {
+        background: linear-gradient(
+          135deg,
+          rgba(59, 130, 246, 0.2),
+          rgba(16, 185, 129, 0.2)
+        );
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        padding: 16px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .category-demo-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+      }
+
+      .category-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
+      .category-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .drag-handle {
+        padding: 4px;
+        border-radius: 6px;
+        background-color: rgba(71, 85, 105, 0.5);
+        cursor: grab;
+      }
+
+      .category-name {
+        color: white;
+        font-weight: 500;
+        font-size: 14px;
+      }
+
+      .report-count {
+        background: rgba(255, 255, 255, 0.7);
+        color: #1e293b;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .edit-button {
+        background: linear-gradient(
+          135deg,
+          rgba(99, 102, 241, 0.8),
+          rgba(99, 102, 241, 0.6)
+        );
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .edit-button:hover {
+        transform: scale(1.05);
+        background: linear-gradient(
+          135deg,
+          rgba(99, 102, 241, 1),
+          rgba(99, 102, 241, 0.8)
+        );
+      }
+
+      .instructions {
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 30px;
+      }
+
+      .instructions h3 {
+        color: white;
+        margin-bottom: 15px;
+      }
+
+      .instructions ol {
+        color: rgba(255, 255, 255, 0.9);
+        padding-left: 20px;
+      }
+
+      .instructions li {
+        margin-bottom: 8px;
+        line-height: 1.5;
+      }
+
+      .quick-actions {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+
+      .quick-btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 10px;
+        color: white;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(5px);
+      }
+
+      .quick-btn.add {
+        background: linear-gradient(
+          135deg,
+          rgba(34, 197, 94, 0.8),
+          rgba(16, 185, 129, 0.8)
+        );
+      }
+
+      .quick-btn.sort {
+        background: linear-gradient(
+          135deg,
+          rgba(168, 85, 247, 0.8),
+          rgba(147, 51, 234, 0.8)
+        );
+      }
+
+      .quick-btn:hover {
+        transform: scale(1.05);
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>🎯 分类管理功能展示</h1>
-        <p class="subtitle">现代化半透明卡片样式，带有毛玻璃效果和流畅动画</p>
-        
-        <div class="feature-grid">
-            <div class="feature-card">
-                <span class="feature-icon">🎨</span>
-                <h3 class="feature-title">半透明卡片设计</h3>
-                <p class="feature-desc">使用毛玻璃效果（backdrop-filter: blur）和渐变背景，创造现代视觉体验</p>
-            </div>
-            
-            <div class="feature-card">
-                <span class="feature-icon">✨</span>
-                <h3 class="feature-title">流畅动画效果</h3>
-                <p class="feature-desc">悬停时卡片向上浮动，按钮有缩放动画，提供丰富的交互反馈</p>
-            </div>
-            
-            <div class="feature-card">
-                <span class="feature-icon">🎭</span>
-                <h3 class="feature-title">渐变背景主题</h3>
-                <p class="feature-desc">蓝到绿的渐变效果，选中状态有特殊高亮，适配暗色和亮色主题</p>
-            </div>
-            
-            <div class="feature-card">
-                <span class="feature-icon">🔧</span>
-                <h3 class="feature-title">拖拽排序功能</h3>
-                <p class="feature-desc">左侧拖拽手柄，支持自由拖拽重新排序，实时保存顺序变更</p>
-            </div>
-            
-            <div class="feature-card">
-                <span class="feature-icon">📝</span>
-                <h3 class="feature-title">实时编辑模式</h3>
-                <p class="feature-desc">点击编辑按钮即刻切换到编辑状态，支持快捷键操作和实时保存</p>
-            </div>
-            
-            <div class="feature-card">
-                <span class="feature-icon">📊</span>
-                <h3 class="feature-title">智能数量统计</h3>
-                <p class="feature-desc">每个分类自动显示报告数量，实时更新统计信息</p>
-            </div>
+      <h1>🎯 分类管理功能展示</h1>
+      <p class="subtitle">现代化半透明卡片样式，带有毛玻璃效果和流畅动画</p>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <span class="feature-icon">🎨</span>
+          <h3 class="feature-title">半透明卡片设计</h3>
+          <p class="feature-desc">
+            使用毛玻璃效果（backdrop-filter: blur）和渐变背景，创造现代视觉体验
+          </p>
         </div>
-        
-        <div class="demo-section">
-            <h2 class="demo-title">📊 快速操作区域演示</h2>
-            <div class="quick-actions">
-                <button class="quick-btn add">➕ 新分类</button>
-                <button class="quick-btn sort">🎯 整理</button>
-            </div>
-            
-            <h2 class="demo-title">🎯 分类卡片样式演示</h2>
-            <div class="demo-cards">
-                <div class="category-demo-card">
-                    <div class="category-header">
-                        <div class="category-info">
-                            <div class="drag-handle">⋮⋮</div>
-                            <span style="font-size: 18px;">💻</span>
-                            <span class="category-name">技术研究</span>
-                        </div>
-                        <div class="report-count">12</div>
-                    </div>
-                    <div style="display: flex; justify-content: flex-end;">
-                        <button class="edit-button">⚙️ 编辑</button>
-                    </div>
-                </div>
-                
-                <div class="category-demo-card">
-                    <div class="category-header">
-                        <div class="category-info">
-                            <div class="drag-handle">⋮⋮</div>
-                            <span style="font-size: 18px;">📈</span>
-                            <span class="category-name">市场分析</span>
-                        </div>
-                        <div class="report-count">8</div>
-                    </div>
-                    <div style="display: flex; justify-content: flex-end;">
-                        <button class="edit-button">⚙️ 编辑</button>
-                    </div>
-                </div>
-                
-                <div class="category-demo-card">
-                    <div class="category-header">
-                        <div class="category-info">
-                            <div class="drag-handle">⋮⋮</div>
-                            <span style="font-size: 18px;">🔬</span>
-                            <span class="category-name">实验数据</span>
-                        </div>
-                        <div class="report-count">15</div>
-                    </div>
-                    <div style="display: flex; justify-content: flex-end;">
-                        <button class="edit-button">⚙️ 编辑</button>
-                    </div>
-                </div>
-            </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">✨</span>
+          <h3 class="feature-title">流畅动画效果</h3>
+          <p class="feature-desc">
+            悬停时卡片向上浮动，按钮有缩放动画，提供丰富的交互反馈
+          </p>
         </div>
-        
-        <div class="instructions">
-            <h3>📝 使用说明</h3>
-            <ol>
-                <li><strong>查看新样式：</strong> 观察每个分类卡片的半透明效果和渐变背景</li>
-                <li><strong>点击编辑：</strong> 点击任意分类卡片底部的紫色"编辑"按钮</li>
-                <li><strong>修改名称：</strong> 在编辑模式下输入新的分类名称</li>
-                <li><strong>保存更改：</strong> 点击绿色保存按钮或按Enter键保存</li>
-                <li><strong>拖拽排序：</strong> 抓住左侧的拖拽手柄重新排序分类</li>
-                <li><strong>悬停体验：</strong> 将鼠标悬停在卡片上查看动画效果</li>
-                <li><strong>快速操作：</strong> 使用顶部的快速操作按钮添加分类和整理排序</li>
-            </ol>
+
+        <div class="feature-card">
+          <span class="feature-icon">🎭</span>
+          <h3 class="feature-title">渐变背景主题</h3>
+          <p class="feature-desc">
+            蓝到绿的渐变效果，选中状态有特殊高亮，适配暗色和亮色主题
+          </p>
         </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">🔧</span>
+          <h3 class="feature-title">拖拽排序功能</h3>
+          <p class="feature-desc">
+            左侧拖拽手柄，支持自由拖拽重新排序，实时保存顺序变更
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">📝</span>
+          <h3 class="feature-title">实时编辑模式</h3>
+          <p class="feature-desc">
+            点击编辑按钮即刻切换到编辑状态，支持快捷键操作和实时保存
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <span class="feature-icon">📊</span>
+          <h3 class="feature-title">智能数量统计</h3>
+          <p class="feature-desc">每个分类自动显示报告数量，实时更新统计信息</p>
+        </div>
+      </div>
+
+      <div class="demo-section">
+        <h2 class="demo-title">📊 快速操作区域演示</h2>
+        <div class="quick-actions">
+          <button class="quick-btn add">➕ 新分类</button>
+          <button class="quick-btn sort">🎯 整理</button>
+        </div>
+
+        <h2 class="demo-title">🎯 分类卡片样式演示</h2>
+        <div class="demo-cards">
+          <div class="category-demo-card">
+            <div class="category-header">
+              <div class="category-info">
+                <div class="drag-handle">⋮⋮</div>
+                <span style="font-size: 18px">💻</span>
+                <span class="category-name">技术研究</span>
+              </div>
+              <div class="report-count">12</div>
+            </div>
+            <div style="display: flex; justify-content: flex-end">
+              <button class="edit-button">⚙️ 编辑</button>
+            </div>
+          </div>
+
+          <div class="category-demo-card">
+            <div class="category-header">
+              <div class="category-info">
+                <div class="drag-handle">⋮⋮</div>
+                <span style="font-size: 18px">📈</span>
+                <span class="category-name">市场分析</span>
+              </div>
+              <div class="report-count">8</div>
+            </div>
+            <div style="display: flex; justify-content: flex-end">
+              <button class="edit-button">⚙️ 编辑</button>
+            </div>
+          </div>
+
+          <div class="category-demo-card">
+            <div class="category-header">
+              <div class="category-info">
+                <div class="drag-handle">⋮⋮</div>
+                <span style="font-size: 18px">🔬</span>
+                <span class="category-name">实验数据</span>
+              </div>
+              <div class="report-count">15</div>
+            </div>
+            <div style="display: flex; justify-content: flex-end">
+              <button class="edit-button">⚙️ 编辑</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="instructions">
+        <h3>📝 使用说明</h3>
+        <ol>
+          <li>
+            <strong>查看新样式：</strong> 观察每个分类卡片的半透明效果和渐变背景
+          </li>
+          <li>
+            <strong>点击编辑：</strong> 点击任意分类卡片底部的紫色"编辑"按钮
+          </li>
+          <li><strong>修改名称：</strong> 在编辑模式下输入新的分类名称</li>
+          <li><strong>保存更改：</strong> 点击绿色保存按钮或按Enter键保存</li>
+          <li><strong>拖拽排序：</strong> 抓住左侧的拖拽手柄重新排序分类</li>
+          <li><strong>悬停体验：</strong> 将鼠标悬停在卡片上查看动画效果</li>
+          <li>
+            <strong>快速操作：</strong> 使用顶部的快速操作按钮添加分类和整理排序
+          </li>
+        </ol>
+      </div>
     </div>
 
     <script>
-        // 添加交互效果
-        document.querySelectorAll('.category-demo-card').forEach(card => {
-            card.addEventListener('mouseenter', () => {
-                card.style.transform = 'translateY(-2px)';
-                card.style.boxShadow = '0 8px 24px rgba(59, 130, 246, 0.3)';
-            });
-            
-            card.addEventListener('mouseleave', () => {
-                card.style.transform = 'translateY(0)';
-                card.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.1)';
-            });
+      // 添加交互效果
+      document.querySelectorAll(".category-demo-card").forEach((card) => {
+        card.addEventListener("mouseenter", () => {
+          card.style.transform = "translateY(-2px)";
+          card.style.boxShadow = "0 8px 24px rgba(59, 130, 246, 0.3)";
         });
-        
-        document.querySelectorAll('.edit-button').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                alert('编辑模式演示：这里会切换到编辑状态');
-            });
+
+        card.addEventListener("mouseleave", () => {
+          card.style.transform = "translateY(0)";
+          card.style.boxShadow = "0 4px 16px rgba(0, 0, 0, 0.1)";
         });
-        
-        document.querySelectorAll('.quick-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const action = btn.textContent.includes('新分类') ? '添加新分类' : '按字母顺序整理分类';
-                alert(`快速操作演示：${action}`);
-            });
+      });
+
+      document.querySelectorAll(".edit-button").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          alert("编辑模式演示：这里会切换到编辑状态");
         });
+      });
+
+      document.querySelectorAll(".quick-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const action = btn.textContent.includes("新分类")
+            ? "添加新分类"
+            : "按字母顺序整理分类";
+          alert(`快速操作演示：${action}`);
+        });
+      });
     </script>
-</body>
-</html> 
+  </body>
+</html>

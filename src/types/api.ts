@@ -33,8 +33,8 @@ export interface ReportResponse {
   content: string;
   description?: string;
   summary?: string;
-  status: 'draft' | 'published' | 'archived';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  status: "draft" | "published" | "archived";
+  priority: "low" | "medium" | "high" | "urgent";
   categoryId?: string;
   userId: string;
   publishedAt?: string;
@@ -92,8 +92,8 @@ export interface CreateReportRequest {
   title: string;
   content: string;
   summary?: string;
-  status?: 'draft' | 'published' | 'archived';
-  priority?: 'low' | 'medium' | 'high' | 'urgent';
+  status?: "draft" | "published" | "archived";
+  priority?: "low" | "medium" | "high" | "urgent";
   categoryId?: string;
   tags?: string[];
 }
@@ -133,4 +133,4 @@ export interface ReportsQueryParams {
   status?: string;
   categoryId?: string;
   search?: string;
-} 
+}

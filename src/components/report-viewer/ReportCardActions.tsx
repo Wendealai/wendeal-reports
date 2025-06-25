@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useAppStore } from '@/store/useAppStore';
-import { Report } from '@/types';
+import React, { useState } from "react";
+import { useAppStore } from "@/store/useAppStore";
+import { Report } from "@/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +20,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 import {
   MoreHorizontal,
   Edit,
@@ -30,18 +30,21 @@ import {
   Upload,
   Eye,
   Copy,
-} from 'lucide-react';
-import { ReportEditDialog } from './ReportEditDialog';
-import { FileReplaceDialog } from './FileReplaceDialog';
+} from "lucide-react";
+import { ReportEditDialog } from "./ReportEditDialog";
+import { FileReplaceDialog } from "./FileReplaceDialog";
 
 interface ReportCardActionsProps {
   report: Report;
   onMenuOpenChange?: (open: boolean) => void;
 }
 
-export function ReportCardActions({ report, onMenuOpenChange }: ReportCardActionsProps) {
+export function ReportCardActions({
+  report,
+  onMenuOpenChange,
+}: ReportCardActionsProps) {
   const { deleteReport, toggleFavorite, setSelectedReport } = useAppStore();
-  
+
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [replaceDialogOpen, setReplaceDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -88,15 +91,15 @@ export function ReportCardActions({ report, onMenuOpenChange }: ReportCardAction
     try {
       await navigator.clipboard.writeText(report.title);
     } catch (error) {
-      console.error('Failed to copy title:', error);
+      console.error("Failed to copy title:", error);
     }
   };
 
   return (
     <>
-      <DropdownMenu 
-        modal={false} 
-        open={menuOpen} 
+      <DropdownMenu
+        modal={false}
+        open={menuOpen}
         onOpenChange={(open) => {
           setMenuOpen(open);
           onMenuOpenChange?.(open);
@@ -113,16 +116,20 @@ export function ReportCardActions({ report, onMenuOpenChange }: ReportCardAction
             <MoreHorizontal className="h-3 w-3" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenuItem 
+        <DropdownMenuContent
+          align="end"
+          className="w-48"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <DropdownMenuItem
             onClick={handleView}
             onSelect={(e) => e.preventDefault()}
           >
             <Eye className="h-4 w-4 mr-2" />
             查看报告
           </DropdownMenuItem>
-          
-          <DropdownMenuItem 
+
+          <DropdownMenuItem
             onClick={handleEdit}
             onSelect={(e) => e.preventDefault()}
           >
@@ -130,7 +137,7 @@ export function ReportCardActions({ report, onMenuOpenChange }: ReportCardAction
             编辑信息
           </DropdownMenuItem>
 
-          <DropdownMenuItem 
+          <DropdownMenuItem
             onClick={handleToggleFavorite}
             onSelect={(e) => e.preventDefault()}
           >
@@ -147,7 +154,7 @@ export function ReportCardActions({ report, onMenuOpenChange }: ReportCardAction
             )}
           </DropdownMenuItem>
 
-          <DropdownMenuItem 
+          <DropdownMenuItem
             onClick={handleCopyTitle}
             onSelect={(e) => e.preventDefault()}
           >
@@ -157,7 +164,7 @@ export function ReportCardActions({ report, onMenuOpenChange }: ReportCardAction
 
           <DropdownMenuSeparator />
 
-          <DropdownMenuItem 
+          <DropdownMenuItem
             onClick={handleReplaceFile}
             onSelect={(e) => e.preventDefault()}
           >
@@ -214,4 +221,4 @@ export function ReportCardActions({ report, onMenuOpenChange }: ReportCardAction
       </AlertDialog>
     </>
   );
-} 
+}

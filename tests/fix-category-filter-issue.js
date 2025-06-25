@@ -4,16 +4,19 @@
  * 解决：移除filter并为空的分类名称提供默认值
  */
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const sidebarFilePath = path.join(__dirname, 'src/components/sidebar/DashboardSidebar.tsx');
+const sidebarFilePath = path.join(
+  __dirname,
+  "src/components/sidebar/DashboardSidebar.tsx",
+);
 
-console.log('🔧 开始修复DashboardSidebar中的filter问题...');
+console.log("🔧 开始修复DashboardSidebar中的filter问题...");
 
 try {
-  let content = fs.readFileSync(sidebarFilePath, 'utf8');
-  
+  let content = fs.readFileSync(sidebarFilePath, "utf8");
+
   // 查找并替换问题代码
   const oldCode = `      // 🚀 修复：预定义分类，优先使用localStorage中的实际名称
       const allPredefinedCategories = [
@@ -23,7 +26,7 @@ try {
         { id: 'product-review', label: currentNames['product-review'], icon: File, order: orderMap['product-review'] || 3 },
         { id: 'industry-insights', label: currentNames['industry-insights'], icon: File, order: orderMap['industry-insights'] || 4 },
       ].filter(cat => cat.label); // 🔧 只显示有名称的分类`;
-  
+
   const newCode = `      // 🚀 关键修复：为空的分类名称提供默认值，避免filter误删
       const defaultCategoryNames = {
         'uncategorized': '📁 未分类',
@@ -49,19 +52,20 @@ try {
         { id: 'product-review', label: currentNames['product-review'] || defaultCategoryNames['product-review'], icon: File, order: orderMap['product-review'] || 3 },
         { id: 'industry-insights', label: currentNames['industry-insights'] || defaultCategoryNames['industry-insights'], icon: File, order: orderMap['industry-insights'] || 4 },
       ]; // 🔧 移除filter，确保所有分类都显示`;
-  
+
   if (content.includes(oldCode)) {
     content = content.replace(oldCode, newCode);
-    fs.writeFileSync(sidebarFilePath, content, 'utf8');
-    console.log('✅ DashboardSidebar.tsx 修复完成！');
-    console.log('🎯 关键修复：');
-    console.log('   - 移除了有问题的 .filter(cat => cat.label)');
-    console.log('   - 为每个分类提供默认名称，确保即使localStorage为空也能显示');
-    console.log('   - 保持用户自定义名称的优先级');
+    fs.writeFileSync(sidebarFilePath, content, "utf8");
+    console.log("✅ DashboardSidebar.tsx 修复完成！");
+    console.log("🎯 关键修复：");
+    console.log("   - 移除了有问题的 .filter(cat => cat.label)");
+    console.log(
+      "   - 为每个分类提供默认名称，确保即使localStorage为空也能显示",
+    );
+    console.log("   - 保持用户自定义名称的优先级");
   } else {
-    console.log('⚠️ 未找到目标代码，可能已经修复过或代码结构已改变');
+    console.log("⚠️ 未找到目标代码，可能已经修复过或代码结构已改变");
   }
-  
 } catch (error) {
-  console.error('❌ 修复过程中出现错误:', error);
-} 
+  console.error("❌ 修复过程中出现错误:", error);
+}

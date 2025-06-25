@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   wendeal-reports:
@@ -32,7 +32,15 @@ services:
       - ./tsconfig.json:/app/tsconfig.json:ro
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000/api/health",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -59,4 +67,4 @@ networks:
   wendeal-dev-network:
     driver: bridge
     labels:
-      - "com.wendeal.network=development" 
+      - "com.wendeal.network=development"

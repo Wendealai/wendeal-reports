@@ -31,22 +31,26 @@
 提供以下核心函数：
 
 #### `stripHtmlTags(html: string, maxLength?: number): string`
+
 - 去除所有HTML标签，返回纯文本
 - 支持客户端DOMParser和服务端正则表达式两种方法
 - 处理HTML实体解码
 - 支持长度限制和截断
 
 #### `extractDescriptionFromHtml(html: string, maxLength = 200): string`
+
 - 优先从meta标签提取描述（`<meta name="description">` 或 `<meta property="og:description">`）
 - 如果没有meta描述，从正文提取纯文本
 - 自动截断到指定长度
 
 #### `safeTextContent(text: string, maxLength?: number): string`
+
 - 检查文本是否包含HTML标签
 - 如果包含则自动清理，否则直接返回
 - 统一的安全文本处理入口
 
 #### `containsHtmlTags(text: string): boolean`
+
 - 检测字符串是否包含HTML标签
 - 用于条件性处理
 
@@ -55,44 +59,65 @@
 更新以下组件使用新的HTML处理函数：
 
 #### DraggableReportCard.tsx
+
 ```tsx
 // 修复前
-{report.description}
+{
+  report.description;
+}
 
 // 修复后
-{safeTextContent(report.description, 150)}
+{
+  safeTextContent(report.description, 150);
+}
 ```
 
 #### ReportList.tsx
+
 ```tsx
 // 修复前
-{report.description}
+{
+  report.description;
+}
 
 // 修复后
-{safeTextContent(report.description, 100)}
+{
+  safeTextContent(report.description, 100);
+}
 ```
 
 #### ReportViewer.tsx
+
 ```tsx
 // 修复前
-{report.description}
+{
+  report.description;
+}
 
 // 修复后
-{safeTextContent(report.description)}
+{
+  safeTextContent(report.description);
+}
 ```
 
 #### Dashboard页面
+
 ```tsx
 // 修复前
-{report.description}
+{
+  report.description;
+}
 
 // 修复后
-{safeTextContent(report.description, 120)}
+{
+  safeTextContent(report.description, 120);
+}
 ```
 
 ### 3. 统一描述提取逻辑
 
 #### FileUpload.tsx
+
 ```tsx
 // 修复前：手动HTML解析和文本提取
 let description = doc.querySelector('meta[name="description"]')?.getAttribute('content') || ...
@@ -102,9 +127,13 @@ const description = extractDescriptionFromHtml(content, 200);
 ```
 
 #### CreateReportDialog.tsx
+
 ```tsx
 // 修复前：简单的正则替换
-const textContent = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+const textContent = html
+  .replace(/<[^>]*>/g, " ")
+  .replace(/\s+/g, " ")
+  .trim();
 
 // 修复后：使用专业工具函数
 return extractDescriptionFromHtml(html, 200);
@@ -113,12 +142,15 @@ return extractDescriptionFromHtml(html, 200);
 ## 技术特性
 
 ### 双重处理策略
+
 - **客户端**: 使用DOMParser API进行准确的HTML解析
 - **服务端**: 使用正则表达式作为降级方案
 - **错误处理**: 自动降级到备用方法
 
 ### HTML实体处理
+
 正确处理常见HTML实体：
+
 - `&nbsp;` → 空格
 - `&lt;` → `<`
 - `&gt;` → `>`
@@ -127,12 +159,15 @@ return extractDescriptionFromHtml(html, 200);
 - `&#39;` → `'`
 
 ### Meta标签优先级
+
 智能提取策略：
+
 1. 优先使用 `<meta name="description">`
 2. 其次使用 `<meta property="og:description">`
 3. 最后从正文内容提取
 
 ### 长度控制
+
 - 支持自定义最大长度
 - 超长自动截断并添加省略号
 - 不同场景使用不同长度限制
@@ -140,11 +175,13 @@ return extractDescriptionFromHtml(html, 200);
 ## 修复效果
 
 ### 修复前
+
 ```
 描述显示: "<div style='font-family: Arial'><h1>标题</h1><p>内容...</p></div>"
 ```
 
 ### 修复后
+
 ```
 描述显示: "标题内容..."
 ```
@@ -152,9 +189,11 @@ return extractDescriptionFromHtml(html, 200);
 ## 涉及文件
 
 ### 新增文件
+
 - `src/lib/htmlUtils.ts` - HTML处理工具库
 
 ### 修改文件
+
 - `src/components/report-viewer/DraggableReportCard.tsx`
 - `src/components/sidebar/ReportList.tsx`
 - `src/components/report-viewer/ReportViewer.tsx`
@@ -163,6 +202,7 @@ return extractDescriptionFromHtml(html, 200);
 - `src/components/upload/CreateReportDialog.tsx`
 
 ### 测试文件
+
 - `test-html-description-fix.html` - 测试用HTML文件
 
 ## 测试验证
@@ -187,4 +227,4 @@ return extractDescriptionFromHtml(html, 200);
 - 服务端使用轻量级正则表达式
 - 缓存友好的纯函数设计
 
-这个修复确保了所有报告描述都以用户友好的纯文本形式显示，提升了整体用户体验。 
+这个修复确保了所有报告描述都以用户友好的纯文本形式显示，提升了整体用户体验。

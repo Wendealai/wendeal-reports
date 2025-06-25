@@ -81,12 +81,14 @@ wendeal-reports/
 ### 方法一：Docker 部署（推荐）
 
 #### 环境要求
+
 - Docker Engine 20.10+
 - Docker Compose 2.0+
 
 #### 一键部署
 
 **Windows 用户：**
+
 ```cmd
 git clone https://github.com/Wendealai/wendeal-reports.git
 cd wendeal-reports
@@ -95,6 +97,7 @@ deploy.bat prod   # 生产环境
 ```
 
 **Linux/Mac 用户：**
+
 ```bash
 git clone https://github.com/Wendealai/wendeal-reports.git
 cd wendeal-reports
@@ -104,6 +107,7 @@ chmod +x deploy.sh
 ```
 
 **手动部署：**
+
 ```bash
 git clone https://github.com/Wendealai/wendeal-reports.git
 cd wendeal-reports
@@ -117,35 +121,40 @@ docker-compose up -d --build
 ### 方法二：本地开发
 
 #### 环境要求
+
 - Node.js >= 18.0.0
 - npm >= 8.0.0
 
 #### 安装步骤
 
 1. **克隆仓库**
+
 ```bash
 git clone https://github.com/Wendealai/wendeal-reports.git
 cd wendeal-reports
 ```
 
 2. **安装依赖**
+
 ```bash
 npm install
 ```
 
 3. **配置数据库**
+
 ```bash
 npx prisma generate
 npx prisma migrate dev
 ```
 
 4. **启动开发服务器**
+
 ```bash
 npm run dev
 ```
 
 5. **访问应用**
-打开浏览器访问 [http://localhost:3000](http://localhost:3000)
+   打开浏览器访问 [http://localhost:3000](http://localhost:3000)
 
 ### Docker 管理命令
 
@@ -209,24 +218,28 @@ npm run clean
 ## 📖 使用指南
 
 ### 上传报告
+
 1. 点击仪表板的"上传文件"按钮
 2. 选择或拖拽 HTML 格式的报告文件
 3. 选择分类并确认上传
 4. 系统自动解析文件内容和元数据
 
 ### 搜索报告
+
 1. 使用顶部搜索栏进行全文搜索
 2. 点击高级搜索使用多维度过滤
 3. 保存常用搜索条件
 4. 查看搜索历史记录
 
 ### 管理分类
+
 1. 在侧边栏管理分类结构
 2. 创建、编辑、删除分类
 3. 设置分类颜色和描述
 4. 拖拽调整分类顺序
 
 ### 批量操作
+
 1. 启用批量选择模式
 2. 选择多个报告
 3. 执行批量操作（移动、收藏、删除等）
@@ -236,22 +249,25 @@ npm run clean
 ### 生产环境部署
 
 1. **服务器要求**
+
    - Docker Engine 20.10+
    - Docker Compose 2.0+
    - 至少2GB内存
    - 至少5GB磁盘空间
 
 2. **安全配置**
+
    ```bash
    # 生成强JWT密钥
    openssl rand -base64 32
-   
+
    # 配置防火墙
    sudo ufw allow 7575
    sudo ufw enable
    ```
 
 3. **SSL证书（可选）**
+
    ```bash
    # 使用Let's Encrypt
    sudo certbot certonly --standalone -d your-domain.com
@@ -287,17 +303,20 @@ docker cp wendeal-reports-app:/app/data/backup-$(date +%Y%m%d).db ./
 ## 🎯 开发路线图
 
 ### Phase 1: 基础功能 ✅
+
 - [x] 项目架构搭建
 - [x] 基础 UI 组件库
 - [x] 报告展示和管理
 
 ### Phase 2: 核心功能 ✅
+
 - [x] 分类管理系统
 - [x] 搜索和过滤功能
 - [x] 文件上传和解析
 - [x] 批量操作功能
 
 ### Phase 3: 高级功能 ✅
+
 - [x] 数据持久化（Prisma + SQLite）
 - [x] 用户认证系统
 - [x] PDF文件支持
@@ -305,6 +324,7 @@ docker cp wendeal-reports-app:/app/data/backup-$(date +%Y%m%d).db ./
 - [x] Docker容器化部署
 
 ### Phase 4: 扩展功能 🚧
+
 - [ ] 报告导出功能
 - [ ] 标签管理系统
 - [ ] 全文搜索优化
@@ -332,6 +352,7 @@ docker cp wendeal-reports-app:/app/data/backup-$(date +%Y%m%d).db ./
 ## 📝 更新日志
 
 ### v2.0.0 (2024-12-17)
+
 - 🐳 **Docker容器化支持**: 一键部署到任何服务器
 - 🗄️ **数据库集成**: Prisma ORM + SQLite 数据持久化
 - 🔐 **用户认证**: JWT + bcrypt 安全认证系统
@@ -342,6 +363,7 @@ docker cp wendeal-reports-app:/app/data/backup-$(date +%Y%m%d).db ./
 - 🔧 **一键部署**: Windows/Linux 部署脚本
 
 ### v1.0.0 (2024-01-20)
+
 - 🎉 首次发布
 - ✨ 完整的报告管理系统
 - 🔍 强大的搜索和过滤功能

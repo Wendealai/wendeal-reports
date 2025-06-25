@@ -1,12 +1,12 @@
-const fetch = require('node-fetch');
+const fetch = require("node-fetch");
 
 // 测试新增报告功能
 async function testCreateReport() {
-  console.log('🧪 开始测试新增报告功能...\n');
+  console.log("🧪 开始测试新增报告功能...\n");
 
   const testReports = [
     {
-      title: 'AI技术发展趋势分析',
+      title: "AI技术发展趋势分析",
       content: `
         <h1>AI技术发展趋势分析</h1>
         <p>本报告分析了2024年人工智能技术的主要发展趋势，包括大语言模型、多模态AI和AI安全等方面。</p>
@@ -25,14 +25,15 @@ async function testCreateReport() {
           <li>更低的计算成本</li>
         </ol>
       `,
-      summary: '分析2024年AI技术发展趋势，包括大语言模型、多模态AI和AI安全等方面的最新进展。',
-      status: 'published',
-      priority: 'high',
-      categoryId: 'tech-research',
-      tags: ['AI', '技术趋势', '大语言模型', '多模态', 'AI安全']
+      summary:
+        "分析2024年AI技术发展趋势，包括大语言模型、多模态AI和AI安全等方面的最新进展。",
+      status: "published",
+      priority: "high",
+      categoryId: "tech-research",
+      tags: ["AI", "技术趋势", "大语言模型", "多模态", "AI安全"],
     },
     {
-      title: '区块链市场分析报告',
+      title: "区块链市场分析报告",
       content: `
         <div style="font-family: Arial, sans-serif;">
           <h1 style="color: #2563eb;">区块链市场分析报告</h1>
@@ -68,46 +69,49 @@ async function testCreateReport() {
           </div>
         </div>
       `,
-      summary: '本季度区块链市场分析，包括市场数据、DeFi和NFT表现，以及投资建议。',
-      status: 'published',
-      priority: 'medium',
-      categoryId: 'market-analysis',
-      tags: ['区块链', '市场分析', 'DeFi', 'NFT', '投资']
+      summary:
+        "本季度区块链市场分析，包括市场数据、DeFi和NFT表现，以及投资建议。",
+      status: "published",
+      priority: "medium",
+      categoryId: "market-analysis",
+      tags: ["区块链", "市场分析", "DeFi", "NFT", "投资"],
     },
     {
-      title: '简单文本报告测试',
+      title: "简单文本报告测试",
       content: `
         <title>简单文本报告测试</title>
         <h1>这是一个简单的测试报告</h1>
         <p>这个报告用于测试新增报告功能的基本功能。</p>
         <p>包含一些简单的文本内容，用于验证系统是否能正确处理。</p>
       `,
-      status: 'draft',
-      priority: 'low',
-      categoryId: 'uncategorized',
-      tags: ['测试', '简单文本']
-    }
+      status: "draft",
+      priority: "low",
+      categoryId: "uncategorized",
+      tags: ["测试", "简单文本"],
+    },
   ];
 
   for (let i = 0; i < testReports.length; i++) {
     const report = testReports[i];
     console.log(`📝 测试报告 ${i + 1}: ${report.title}`);
-    
+
     try {
-      const response = await fetch('http://localhost:3000/api/reports', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3000/api/reports", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(report)
+        body: JSON.stringify(report),
       });
 
       if (response.ok) {
         const result = await response.json();
         console.log(`✅ 创建成功: ${result.report.id}`);
         console.log(`   标题: ${result.report.title}`);
-        console.log(`   分类: ${result.report.categoryId || '未分类'}`);
-        console.log(`   标签: ${result.report.tags?.map(t => t.name || t).join(', ') || '无'}`);
+        console.log(`   分类: ${result.report.categoryId || "未分类"}`);
+        console.log(
+          `   标签: ${result.report.tags?.map((t) => t.name || t).join(", ") || "无"}`,
+        );
         console.log(`   状态: ${result.report.status}`);
         console.log(`   优先级: ${result.report.priority}`);
       } else {
@@ -120,18 +124,20 @@ async function testCreateReport() {
     } catch (error) {
       console.log(`❌ 网络错误: ${error.message}`);
     }
-    
-    console.log(''); // 空行分隔
+
+    console.log(""); // 空行分隔
   }
 
   // 测试获取报告列表
-  console.log('📋 测试获取报告列表...');
+  console.log("📋 测试获取报告列表...");
   try {
-    const response = await fetch('http://localhost:3000/api/reports');
+    const response = await fetch("http://localhost:3000/api/reports");
     if (response.ok) {
       const result = await response.json();
       console.log(`✅ 获取成功，共 ${result.reports.length} 个报告`);
-      console.log(`   分页信息: 第${result.pagination.page}页，共${result.pagination.totalPages}页`);
+      console.log(
+        `   分页信息: 第${result.pagination.page}页，共${result.pagination.totalPages}页`,
+      );
     } else {
       console.log(`❌ 获取失败: ${response.status}`);
     }
@@ -139,8 +145,8 @@ async function testCreateReport() {
     console.log(`❌ 网络错误: ${error.message}`);
   }
 
-  console.log('\n🎉 测试完成！');
+  console.log("\n🎉 测试完成！");
 }
 
 // 运行测试
-testCreateReport().catch(console.error); 
+testCreateReport().catch(console.error);

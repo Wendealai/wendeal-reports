@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   wendeal-reports:
@@ -22,7 +22,15 @@ services:
       - /var/log/wendeal-reports:/app/logs
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000/api/health",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -45,4 +53,4 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - wendeal-reports
-    restart: unless-stopped 
+    restart: unless-stopped

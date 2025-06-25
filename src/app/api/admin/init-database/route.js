@@ -1,23 +1,19 @@
 import { PrismaClient } from '@prisma/client';
+import { NextResponse } from 'next/server';
 
 const prisma = new PrismaClient();
 const DEFAULT_USER_ID = 'cmbusc9x00000x2w0fqyu591k';
 
-export default async function handler(req, res) {
-  // 只允许POST请求
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+export async function POST(request) {
   try {
     console.log('🚀 开始初始化Vercel生产环境数据库...');
     
     // 验证环境变量
     if (!process.env.DATABASE_URL) {
-      return res.status(500).json({ 
+      return NextResponse.json({ 
         error: 'DATABASE_URL环境变量未配置',
         message: '请在Vercel项目设置中配置DATABASE_URL'
-      });
+      }, { status: 500 });
     }
 
     const results = {
@@ -119,7 +115,7 @@ export default async function handler(req, res) {
 
     console.log('🎉 生产环境数据库初始化完成！');
 
-    return res.status(200).json({
+    return NextResponse.json({
       success: true,
       message: '生产环境数据库初始化完成！',
       data: {
@@ -140,7 +136,7 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('❌ 数据库初始化失败:', error);
     
-    return res.status(500).json({
+    return NextResponse.json({
       success: false,
       error: '数据库初始化失败',
       message: error.message,
@@ -154,8 +150,17 @@ export default async function handler(req, res) {
         '验证数据库权限是否充足',
         '检查网络连接是否正常'
       ]
-    });
+    }, { status: 500 });
   } finally {
     await prisma.$disconnect();
   }
+}
+
+// 支持GET请求用于健康检查
+export async function GET() {
+  return NextResponse.json({
+    message: '数据库初始化API端点',
+    usage: '发送POST请求来初始化数据库',
+    endpoint: '/api/admin/init-database'
+  });
 }

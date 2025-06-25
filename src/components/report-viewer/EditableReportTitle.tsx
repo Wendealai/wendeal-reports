@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import React, { useState, useRef, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 interface EditableReportTitleProps {
   title: string;
@@ -10,10 +10,10 @@ interface EditableReportTitleProps {
   className?: string;
 }
 
-export function EditableReportTitle({ 
-  title, 
-  onTitleChange, 
-  className 
+export function EditableReportTitle({
+  title,
+  onTitleChange,
+  className,
 }: EditableReportTitleProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(title);
@@ -50,10 +50,10 @@ export function EditableReportTitle({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       handleSave();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       e.preventDefault();
       handleCancel();
     }
@@ -71,7 +71,10 @@ export function EditableReportTitle({
         onChange={(e) => setEditValue(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
-        className={cn("h-auto py-1 px-2 text-sm font-medium bg-background border-primary", className)}
+        className={cn(
+          "h-auto py-1 px-2 text-sm font-medium bg-background border-primary",
+          className,
+        )}
         onClick={(e) => e.stopPropagation()}
         data-editable-title
       />
@@ -79,8 +82,11 @@ export function EditableReportTitle({
   }
 
   return (
-    <h4 
-      className={cn("text-sm font-medium line-clamp-2 flex-1 pr-2 cursor-pointer hover:bg-muted/30 p-1 rounded", className)}
+    <h4
+      className={cn(
+        "text-sm font-medium line-clamp-2 flex-1 pr-2 cursor-pointer hover:bg-muted/30 p-1 rounded",
+        className,
+      )}
       onDoubleClick={handleDoubleClick}
       onClick={(e) => e.stopPropagation()}
       title="双击编辑标题"
@@ -89,4 +95,4 @@ export function EditableReportTitle({
       {title}
     </h4>
   );
-} 
+}

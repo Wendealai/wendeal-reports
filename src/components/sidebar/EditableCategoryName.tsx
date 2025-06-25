@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import React, { useState, useRef, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 interface EditableCategoryNameProps {
   name: string;
@@ -10,10 +10,10 @@ interface EditableCategoryNameProps {
   className?: string;
 }
 
-export function EditableCategoryName({ 
-  name, 
-  onNameChange, 
-  className 
+export function EditableCategoryName({
+  name,
+  onNameChange,
+  className,
 }: EditableCategoryNameProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(name);
@@ -46,10 +46,10 @@ export function EditableCategoryName({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       handleSave();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       e.preventDefault();
       handleCancel();
     }
@@ -67,19 +67,25 @@ export function EditableCategoryName({
         onChange={(e) => setEditValue(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
-        className={cn("h-auto py-0 px-1 text-sm font-medium bg-background border-primary", className)}
+        className={cn(
+          "h-auto py-0 px-1 text-sm font-medium bg-background border-primary",
+          className,
+        )}
         onClick={(e) => e.stopPropagation()}
       />
     );
   }
 
   return (
-    <span 
-      className={cn("text-sm font-medium truncate cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded", className)}
+    <span
+      className={cn(
+        "text-sm font-medium truncate cursor-pointer hover:bg-muted/50 px-1 py-0.5 rounded",
+        className,
+      )}
       onDoubleClick={handleDoubleClick}
       title="双击编辑分类名称"
     >
       {name}
     </span>
   );
-} 
+}

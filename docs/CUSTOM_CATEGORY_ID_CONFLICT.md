@@ -7,19 +7,21 @@
 ### **核心问题：ID生成机制的双重标准**
 
 #### 1. **前端临时ID生成**
+
 ```typescript
 // ❌ 问题：前端先生成临时ID
 const newCategoryId = `category-${Date.now()}`;
 ```
 
 #### 2. **数据库真实ID替换**
+
 ```typescript
 // ✅ 数据库返回真实ID（格式不同）
 const dbCategory = {
   id: result.category.id, // 真实ID格式: 'cmbu...'（非category-开头）
   label: `📁 ${result.category.name}`,
   icon: Folder,
-  order: predefinedCategories.length
+  order: predefinedCategories.length,
 };
 ```
 
@@ -36,7 +38,7 @@ const dbCategory = {
 
 ```typescript
 // ❌ 问题代码：ID格式判断失效
-if (category.id.startsWith('category-')) {
+if (category.id.startsWith("category-")) {
   // 这里的逻辑永远不会执行，因为数据库ID不是'category-'开头
   // 执行自定义分类更新逻辑
 } else {
@@ -53,23 +55,32 @@ if (category.id.startsWith('category-')) {
 // 🚀 基于Context7最佳实践：检查分类来源而非ID格式
 const isCustomCategory = (categoryId: string) => {
   // 检查是否在自定义分类localStorage中
-  const customCategories = JSON.parse(localStorage.getItem('custom_categories') || '[]');
+  const customCategories = JSON.parse(
+    localStorage.getItem("custom_categories") || "[]",
+  );
   return customCategories.some((cat: any) => cat.id === categoryId);
 };
 
 // 修正的处理逻辑
 if (isCustomCategory(category.id)) {
   // 自定义分类更新逻辑
-  const customCategories = JSON.parse(localStorage.getItem('custom_categories') || '[]');
-  const updatedCustomCategories = customCategories.map((cat: any) => 
-    cat.id === category.id ? { ...cat, label: newLabel } : cat
+  const customCategories = JSON.parse(
+    localStorage.getItem("custom_categories") || "[]",
   );
-  localStorage.setItem('custom_categories', JSON.stringify(updatedCustomCategories));
-  
+  const updatedCustomCategories = customCategories.map((cat: any) =>
+    cat.id === category.id ? { ...cat, label: newLabel } : cat,
+  );
+  localStorage.setItem(
+    "custom_categories",
+    JSON.stringify(updatedCustomCategories),
+  );
+
   // 发送更新事件
-  window.dispatchEvent(new CustomEvent('customCategoryChanged', {
-    detail: { categoryId: category.id, newLabel }
-  }));
+  window.dispatchEvent(
+    new CustomEvent("customCategoryChanged", {
+      detail: { categoryId: category.id, newLabel },
+    }),
+  );
 } else {
   // 预定义分类更新逻辑
   await updatePredefinedCategoryName(category.id, newLabel);
@@ -83,14 +94,15 @@ if (isCustomCategory(category.id)) {
 const categoryData = {
   id: `category-${Date.now()}`, // 强制使用前端格式
   name: `新分类 ${predefinedCategories.length + 1}`,
-  icon: '📁',
-  color: '#6B7280'
+  icon: "📁",
+  color: "#6B7280",
 };
 ```
 
 ## 📊 **问题影响分析**
 
 ### **当前状态流程**
+
 1. ✅ 用户创建分类 → 前端ID `category-123456`
 2. ✅ 保存到数据库 → 获得真实ID `cmbu...`
 3. ✅ 更新UI状态 → 显示正确
@@ -98,6 +110,7 @@ const categoryData = {
 5. ❌ 状态不同步 → UI不更新
 
 ### **修复后流程**
+
 1. ✅ 用户创建分类 → 数据库ID `cmbu...`
 2. ✅ 正确检测类型 → `isCustomCategory()` 返回 true
 3. ✅ 走自定义分类逻辑 → localStorage + 事件通知
@@ -113,4 +126,4 @@ const categoryData = {
 3. **事件同步**：确保所有状态变更都触发相应事件
 4. **引用一致性**：保持状态对象的引用更新
 
-这样就能彻底解决新建分类无法重命名的问题！ 
+这样就能彻底解决新建分类无法重命名的问题！

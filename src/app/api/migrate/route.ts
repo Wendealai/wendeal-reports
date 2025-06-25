@@ -1,107 +1,107 @@
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { withAuth, AuthenticatedRequest } from '@/lib/middleware'
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { withAuth, AuthenticatedRequest } from "@/lib/middleware";
 
 interface LocalStorageReport {
-  id: string
-  title: string
-  content: string
-  summary?: string
-  status: 'draft' | 'published' | 'archived'
-  priority: 'low' | 'medium' | 'high' | 'urgent'
-  category?: string
-  tags?: string[]
-  createdAt: string
-  updatedAt: string
+  id: string;
+  title: string;
+  content: string;
+  summary?: string;
+  status: "draft" | "published" | "archived";
+  priority: "low" | "medium" | "high" | "urgent";
+  category?: string;
+  tags?: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface MigrationData {
-  reports: LocalStorageReport[]
+  reports: LocalStorageReport[];
   categories?: Array<{
-    name: string
-    description?: string
-    color?: string
-    icon?: string
-  }>
+    name: string;
+    description?: string;
+    color?: string;
+    icon?: string;
+  }>;
 }
 
 // 数据迁移API
 async function migrateData(request: AuthenticatedRequest) {
   try {
-    const body = await request.json() as MigrationData
-    const { reports, categories = [] } = body
+    const body = (await request.json()) as MigrationData;
+    const { reports, categories = [] } = body;
 
     if (!reports || !Array.isArray(reports)) {
       return NextResponse.json(
-        { error: '无效的迁移数据格式' },
-        { status: 400 }
-      )
+        { error: "无效的迁移数据格式" },
+        { status: 400 },
+      );
     }
 
-    const userId = request.user!.userId
+    const userId = request.user!.userId;
     const results = {
       categoriesCreated: 0,
       reportsCreated: 0,
       tagsCreated: 0,
-      errors: [] as string[]
-    }
+      errors: [] as string[],
+    };
 
     // 1. 创建分类映射
-    const categoryMap = new Map<string, string>()
-    
+    const categoryMap = new Map<string, string>();
+
     for (const categoryData of categories) {
       try {
         // 检查分类是否已存在
         let category = await prisma.category.findFirst({
           where: {
             name: categoryData.name,
-            userId
-          }
-        })
+            userId,
+          },
+        });
 
         if (!category) {
           category = await prisma.category.create({
             data: {
               ...categoryData,
-              userId
-            }
-          })
-          results.categoriesCreated++
+              userId,
+            },
+          });
+          results.categoriesCreated++;
         }
 
-        categoryMap.set(categoryData.name, category.id)
+        categoryMap.set(categoryData.name, category.id);
       } catch (error) {
-        results.errors.push(`创建分类 "${categoryData.name}" 失败: ${error}`)
+        results.errors.push(`创建分类 "${categoryData.name}" 失败: ${error}`);
       }
     }
 
     // 2. 收集所有标签
-    const allTags = new Set<string>()
-    reports.forEach(report => {
+    const allTags = new Set<string>();
+    reports.forEach((report) => {
       if (report.tags) {
-        report.tags.forEach(tag => allTags.add(tag))
+        report.tags.forEach((tag) => allTags.add(tag));
       }
-    })
+    });
 
     // 3. 创建标签映射
-    const tagMap = new Map<string, string>()
-    
+    const tagMap = new Map<string, string>();
+
     for (const tagName of allTags) {
       try {
         let tag = await prisma.tag.findUnique({
-          where: { name: tagName }
-        })
+          where: { name: tagName },
+        });
 
         if (!tag) {
           tag = await prisma.tag.create({
-            data: { name: tagName }
-          })
-          results.tagsCreated++
+            data: { name: tagName },
+          });
+          results.tagsCreated++;
         }
 
-        tagMap.set(tagName, tag.id)
+        tagMap.set(tagName, tag.id);
       } catch (error) {
-        results.errors.push(`创建标签 "${tagName}" 失败: ${error}`)
+        results.errors.push(`创建标签 "${tagName}" 失败: ${error}`);
       }
     }
 
@@ -112,13 +112,13 @@ async function migrateData(request: AuthenticatedRequest) {
         const existingReport = await prisma.report.findFirst({
           where: {
             title: reportData.title,
-            userId
-          }
-        })
+            userId,
+          },
+        });
 
         if (existingReport) {
-          results.errors.push(`报告 "${reportData.title}" 已存在，跳过`)
-          continue
+          results.errors.push(`报告 "${reportData.title}" 已存在，跳过`);
+          continue;
         }
 
         // 创建报告
@@ -129,74 +129,74 @@ async function migrateData(request: AuthenticatedRequest) {
             summary: reportData.summary,
             status: reportData.status,
             priority: reportData.priority,
-            categoryId: reportData.category ? categoryMap.get(reportData.category) : null,
+            categoryId: reportData.category
+              ? categoryMap.get(reportData.category)
+              : null,
             userId,
             createdAt: new Date(reportData.createdAt),
             updatedAt: new Date(reportData.updatedAt),
-            publishedAt: reportData.status === 'published' ? new Date(reportData.updatedAt) : null
-          }
-        })
+            publishedAt:
+              reportData.status === "published"
+                ? new Date(reportData.updatedAt)
+                : null,
+          },
+        });
 
         // 创建标签关联
         if (reportData.tags && reportData.tags.length > 0) {
           const reportTagData = reportData.tags
-            .map(tagName => {
-              const tagId = tagMap.get(tagName)
-              return tagId ? { reportId: report.id, tagId } : null
+            .map((tagName) => {
+              const tagId = tagMap.get(tagName);
+              return tagId ? { reportId: report.id, tagId } : null;
             })
-            .filter(Boolean) as Array<{ reportId: string; tagId: string }>
+            .filter(Boolean) as Array<{ reportId: string; tagId: string }>;
 
           if (reportTagData.length > 0) {
             await prisma.reportTag.createMany({
-              data: reportTagData
-            })
+              data: reportTagData,
+            });
           }
         }
 
-        results.reportsCreated++
+        results.reportsCreated++;
       } catch (error) {
-        results.errors.push(`创建报告 "${reportData.title}" 失败: ${error}`)
+        results.errors.push(`创建报告 "${reportData.title}" 失败: ${error}`);
       }
     }
 
     return NextResponse.json({
-      message: '数据迁移完成',
-      results
-    })
-
+      message: "数据迁移完成",
+      results,
+    });
   } catch (error) {
-    console.error('Migration error:', error)
+    console.error("Migration error:", error);
     return NextResponse.json(
-      { error: '数据迁移失败', details: error },
-      { status: 500 }
-    )
+      { error: "数据迁移失败", details: error },
+      { status: 500 },
+    );
   }
 }
 
 // 获取迁移状态
 async function getMigrationStatus(request: AuthenticatedRequest) {
   try {
-    const userId = request.user!.userId
+    const userId = request.user!.userId;
 
     const [reportCount, categoryCount] = await Promise.all([
       prisma.report.count({ where: { userId } }),
-      prisma.category.count({ where: { userId } })
-    ])
+      prisma.category.count({ where: { userId } }),
+    ]);
 
     return NextResponse.json({
       hasData: reportCount > 0 || categoryCount > 0,
       reportCount,
-      categoryCount
-    })
-
+      categoryCount,
+    });
   } catch (error) {
-    console.error('Get migration status error:', error)
-    return NextResponse.json(
-      { error: '获取迁移状态失败' },
-      { status: 500 }
-    )
+    console.error("Get migration status error:", error);
+    return NextResponse.json({ error: "获取迁移状态失败" }, { status: 500 });
   }
 }
 
-export const POST = withAuth(migrateData)
-export const GET = withAuth(getMigrationStatus) 
+export const POST = withAuth(migrateData);
+export const GET = withAuth(getMigrationStatus);

@@ -1,216 +1,482 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI自动化格局：市场领导者、创新者与专家的战略分析</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        /* Custom Styles */
-        body {
-            font-family: 'Inter', 'Noto Sans SC', sans-serif;
-            background: linear-gradient(135deg, #111827, #000000);
-            color: #E5E7EB; /* Lighter gray for better readability */
-        }
+      /* Custom Styles */
+      body {
+        font-family: "Inter", "Noto Sans SC", sans-serif;
+        background: linear-gradient(135deg, #111827, #000000);
+        color: #e5e7eb; /* Lighter gray for better readability */
+      }
 
-        .main-title {
-            color: #FF6B35;
-        }
+      .main-title {
+        color: #ff6b35;
+      }
 
-        .section-title {
-            color: #FF6B35;
-            border-bottom: 2px solid #FF6B35;
-        }
+      .section-title {
+        color: #ff6b35;
+        border-bottom: 2px solid #ff6b35;
+      }
 
-        .highlight {
-            color: #FF6B35;
-            font-weight: 700;
-        }
+      .highlight {
+        color: #ff6b35;
+        font-weight: 700;
+      }
 
-        .card {
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
-        }
+      .card {
+        background: rgba(30, 41, 59, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+      }
 
-        .stat-number {
-            color: #FF6B35;
-        }
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+      }
 
-        .tag {
-            background-color: #FF6B35;
-            color: white;
-        }
-        
-        .content-link {
-            color: #F97316; /* A slightly brighter orange for links */
-            text-decoration: none;
-            font-weight: 600;
-            border-bottom: 1px dotted #F97316;
-            transition: color 0.3s ease, border-bottom-color 0.3s ease;
-        }
+      .stat-number {
+        color: #ff6b35;
+      }
 
-        .content-link:hover {
-            color: #FB923C;
-            border-bottom-color: #FB923C;
-        }
+      .tag {
+        background-color: #ff6b35;
+        color: white;
+      }
 
-        /* Responsive table styles */
-        .table-container {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        table {
-            border-collapse: separate;
-            border-spacing: 0;
-            width: 100%;
-        }
+      .content-link {
+        color: #f97316; /* A slightly brighter orange for links */
+        text-decoration: none;
+        font-weight: 600;
+        border-bottom: 1px dotted #f97316;
+        transition:
+          color 0.3s ease,
+          border-bottom-color 0.3s ease;
+      }
 
-        th, td {
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-width: 0 1px 1px 0;
-        }
+      .content-link:hover {
+        color: #fb923c;
+        border-bottom-color: #fb923c;
+      }
 
-        th:first-child, td:first-child {
-            border-left-width: 1px;
-        }
-         th {
-             border-top-width: 1px;
-         }
+      /* Responsive table styles */
+      .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
 
-        th:first-child { border-top-left-radius: 0.5rem; }
-        th:last-child { border-top-right-radius: 0.5rem; }
-        tr:last-child td:first-child { border-bottom-left-radius: 0.5rem; }
-        tr:last-child td:last-child { border-bottom-right-radius: 0.5rem; }
+      table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+      }
 
+      th,
+      td {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-width: 0 1px 1px 0;
+      }
+
+      th:first-child,
+      td:first-child {
+        border-left-width: 1px;
+      }
+      th {
+        border-top-width: 1px;
+      }
+
+      th:first-child {
+        border-top-left-radius: 0.5rem;
+      }
+      th:last-child {
+        border-top-right-radius: 0.5rem;
+      }
+      tr:last-child td:first-child {
+        border-bottom-left-radius: 0.5rem;
+      }
+      tr:last-child td:last-child {
+        border-bottom-right-radius: 0.5rem;
+      }
     </style>
-</head>
-<body class="bg-gray-900 text-gray-200">
-
+  </head>
+  <body class="bg-gray-900 text-gray-200">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+      <!-- Header -->
+      <header class="text-center mb-16">
+        <h1
+          class="text-4xl md:text-5xl lg:text-6xl font-extrabold main-title tracking-tight"
+        >
+          AI自动化格局深度调研
+        </h1>
+        <p class="mt-4 text-xl md:text-2xl text-gray-400 font-light">
+          A Strategic Analysis of the AI Automation Landscape: Leaders,
+          Innovators & Specialists
+        </p>
+        <p class="mt-6 max-w-3xl mx-auto text-lg text-gray-300">
+          本报告对超过20家AI自动化领域的关键参与者进行全面分析，评估其技术、定价和竞争策略，旨在为企业领导者提供制定战略决策所需的情报。
+        </p>
+      </header>
 
-        <!-- Header -->
-        <header class="text-center mb-16">
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold main-title tracking-tight">AI自动化格局深度调研</h1>
-            <p class="mt-4 text-xl md:text-2xl text-gray-400 font-light">A Strategic Analysis of the AI Automation Landscape: Leaders, Innovators & Specialists</p>
-            <p class="mt-6 max-w-3xl mx-auto text-lg text-gray-300">
-                本报告对超过20家AI自动化领域的关键参与者进行全面分析，评估其技术、定价和竞争策略，旨在为企业领导者提供制定战略决策所需的情报。
-            </p>
-        </header>
-
-        <!-- Key Insights Cards -->
-        <section class="mb-20">
-            <h2 class="text-3xl font-bold section-title pb-2 mb-8">核心洞察 / Key Insights</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-
-                <!-- Card 1: Market Evolution -->
-                <div class="card rounded-xl p-6 md:col-span-2">
-                    <div class="flex items-center mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-400 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                        <h3 class="text-xl font-bold text-white">市场演进：从RPA到代理式AI</h3>
-                    </div>
-                    <p class="text-gray-300">市场正从任务中心的RPA，转向由<span class="highlight">AI驱动、能够思考并执行</span>的代理式（Agentic）企业流程编排，这是一个根本性的范式转变。</p>
-                </div>
-
-                <!-- Card 2: Agentic AI -->
-                <div class="card rounded-xl p-6">
-                    <h3 class="text-xl font-bold text-white mb-2">代理式AI兴起</h3>
-                    <p class="text-gray-300 mb-4">AI代理能以最少的人工干预处理复杂的多步骤流程。</p>
-                    <span class="tag text-sm font-semibold py-1 px-3 rounded-full">Think & Do</span>
-                </div>
-
-                <!-- Card 3: Unicorn Boom -->
-                <div class="card rounded-xl p-6">
-                     <h3 class="text-xl font-bold text-white mb-2">AI独角兽热潮</h3>
-                     <p class="stat-number text-5xl font-extrabold">370+</p>
-                     <p class="text-gray-300">AI独角兽公司总估值已超<span class="highlight">$1万亿</span>。</p>
-                </div>
-                
-                <!-- Card 4: Key Player Segments -->
-                <div class="card rounded-xl p-6 lg:col-span-4">
-                    <h3 class="text-xl font-bold text-white mb-4">主要市场细分</h3>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 text-center">
-                        <div class="bg-gray-800 p-3 rounded-lg"><span class="block text-2xl mb-1">👑</span><span class="text-sm">自动化平台三巨头</span></div>
-                        <div class="bg-gray-800 p-3 rounded-lg"><span class="block text-2xl mb-1">☁️</span><span class="text-sm">超大规模企业</span></div>
-                        <div class="bg-gray-800 p-3 rounded-lg"><span class="block text-2xl mb-1">🔗</span><span class="text-sm">iPaaS连接器</span></div>
-                        <div class="bg-gray-800 p-3 rounded-lg"><span class="block text-2xl mb-1">🧠</span><span class="text-sm">流程智能专家</span></div>
-                        <div class="bg-gray-800 p-3 rounded-lg col-span-2 sm:col-span-1"><span class="block text-2xl mb-1">🎯</span><span class="text-sm">垂直领域方案商</span></div>
-                    </div>
-                </div>
-
-                <!-- Card 5: Strategic Imperative -->
-                <div class="card rounded-xl p-6 md:col-span-2">
-                    <div class="flex items-center mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-amber-400 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-                        <h3 class="text-xl font-bold text-white">战略要务：平台化与收购</h3>
-                    </div>
-                    <p class="text-gray-300">RPA领导者正通过“平台化”防御超大规模企业的竞争。同时，<span class="highlight">收购</span>已成为快速扩展能力和市场整合的主要手段，如ServiceNow收购Moveworks。</p>
-                </div>
-
-                 <!-- Card 6: Competing Models -->
-                <div class="card rounded-xl p-6 md:col-span-2">
-                    <h3 class="text-xl font-bold text-white mb-4">两种市场进入模式</h3>
-                    <div class="space-y-3">
-                        <div class="bg-slate-800 p-3 rounded-lg">
-                            <p class="font-bold">自上而下 (Top-down)</p>
-                            <p class="text-sm text-gray-400">大型企业平台 (UiPath, Celonis)，高成本，专注数字化转型。</p>
-                        </div>
-                         <div class="bg-slate-800 p-3 rounded-lg">
-                            <p class="font-bold">自下而上 (Bottom-up)</p>
-                            <p class="text-sm text-gray-400">民主化工具 (Zapier, Make)，产品驱动增长，吸引个人和团队。</p>
-                        </div>
-                    </div>
-                </div>
-
+      <!-- Key Insights Cards -->
+      <section class="mb-20">
+        <h2 class="text-3xl font-bold section-title pb-2 mb-8">
+          核心洞察 / Key Insights
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- Card 1: Market Evolution -->
+          <div class="card rounded-xl p-6 md:col-span-2">
+            <div class="flex items-center mb-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-8 w-8 text-indigo-400 mr-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13 10V3L4 14h7v7l9-11h-7z"
+                />
+              </svg>
+              <h3 class="text-xl font-bold text-white">
+                市场演进：从RPA到代理式AI
+              </h3>
             </div>
-        </section>
+            <p class="text-gray-300">
+              市场正从任务中心的RPA，转向由<span class="highlight"
+                >AI驱动、能够思考并执行</span
+              >的代理式（Agentic）企业流程编排，这是一个根本性的范式转变。
+            </p>
+          </div>
 
-        <!-- Full Report Content -->
-        <main id="full-report" class="prose prose-invert max-w-none prose-p:text-gray-300 prose-headings:text-white prose-h2:section-title prose-h3:text-gray-100 prose-h4:text-gray-200 prose-strong:text-gray-100 prose-a:text-orange-500 hover:prose-a:text-orange-400">
-            <!-- The full report content will be dynamically injected here -->
-        </main>
-        
+          <!-- Card 2: Agentic AI -->
+          <div class="card rounded-xl p-6">
+            <h3 class="text-xl font-bold text-white mb-2">代理式AI兴起</h3>
+            <p class="text-gray-300 mb-4">
+              AI代理能以最少的人工干预处理复杂的多步骤流程。
+            </p>
+            <span class="tag text-sm font-semibold py-1 px-3 rounded-full"
+              >Think & Do</span
+            >
+          </div>
+
+          <!-- Card 3: Unicorn Boom -->
+          <div class="card rounded-xl p-6">
+            <h3 class="text-xl font-bold text-white mb-2">AI独角兽热潮</h3>
+            <p class="stat-number text-5xl font-extrabold">370+</p>
+            <p class="text-gray-300">
+              AI独角兽公司总估值已超<span class="highlight">$1万亿</span>。
+            </p>
+          </div>
+
+          <!-- Card 4: Key Player Segments -->
+          <div class="card rounded-xl p-6 lg:col-span-4">
+            <h3 class="text-xl font-bold text-white mb-4">主要市场细分</h3>
+            <div
+              class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 text-center"
+            >
+              <div class="bg-gray-800 p-3 rounded-lg">
+                <span class="block text-2xl mb-1">👑</span
+                ><span class="text-sm">自动化平台三巨头</span>
+              </div>
+              <div class="bg-gray-800 p-3 rounded-lg">
+                <span class="block text-2xl mb-1">☁️</span
+                ><span class="text-sm">超大规模企业</span>
+              </div>
+              <div class="bg-gray-800 p-3 rounded-lg">
+                <span class="block text-2xl mb-1">🔗</span
+                ><span class="text-sm">iPaaS连接器</span>
+              </div>
+              <div class="bg-gray-800 p-3 rounded-lg">
+                <span class="block text-2xl mb-1">🧠</span
+                ><span class="text-sm">流程智能专家</span>
+              </div>
+              <div class="bg-gray-800 p-3 rounded-lg col-span-2 sm:col-span-1">
+                <span class="block text-2xl mb-1">🎯</span
+                ><span class="text-sm">垂直领域方案商</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 5: Strategic Imperative -->
+          <div class="card rounded-xl p-6 md:col-span-2">
+            <div class="flex items-center mb-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-8 w-8 text-amber-400 mr-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                />
+              </svg>
+              <h3 class="text-xl font-bold text-white">
+                战略要务：平台化与收购
+              </h3>
+            </div>
+            <p class="text-gray-300">
+              RPA领导者正通过“平台化”防御超大规模企业的竞争。同时，<span
+                class="highlight"
+                >收购</span
+              >已成为快速扩展能力和市场整合的主要手段，如ServiceNow收购Moveworks。
+            </p>
+          </div>
+
+          <!-- Card 6: Competing Models -->
+          <div class="card rounded-xl p-6 md:col-span-2">
+            <h3 class="text-xl font-bold text-white mb-4">两种市场进入模式</h3>
+            <div class="space-y-3">
+              <div class="bg-slate-800 p-3 rounded-lg">
+                <p class="font-bold">自上而下 (Top-down)</p>
+                <p class="text-sm text-gray-400">
+                  大型企业平台 (UiPath, Celonis)，高成本，专注数字化转型。
+                </p>
+              </div>
+              <div class="bg-slate-800 p-3 rounded-lg">
+                <p class="font-bold">自下而上 (Bottom-up)</p>
+                <p class="text-sm text-gray-400">
+                  民主化工具 (Zapier, Make)，产品驱动增长，吸引个人和团队。
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Full Report Content -->
+      <main
+        id="full-report"
+        class="prose prose-invert max-w-none prose-p:text-gray-300 prose-headings:text-white prose-h2:section-title prose-h3:text-gray-100 prose-h4:text-gray-200 prose-strong:text-gray-100 prose-a:text-orange-500 hover:prose-a:text-orange-400"
+      >
+        <!-- The full report content will be dynamically injected here -->
+      </main>
     </div>
 
     <script>
-        // Data processing and injection logic
-        document.addEventListener('DOMContentLoaded', function() {
-            // Mapping of citation numbers to their URLs
-            const citationMap = {
-                1: "https://www.blueprism.com/resources/analyst-reports/gartner-magic-quadrant-for-rpa-2024/", 2: "https://www.blueprism.com/resources/analyst-reports/forrester-wave-report/", 3: "https://beam.ai/agentic-insights/from-code-to-unicorn-how-ai-agents-are-redefining-startup-success", 4: "https://www.moveworks.com/us/en/resources/blog/agentic-ai-tools-for-business", 5: "https://www.uipath.com/platform/agentic-automation", 6: "https://optezo.com/resources/whitepaper-2023-forrester-wave-for-rpa", 7: "https://10xds.com/news/the-forrester-wave-robotic-process-automation-q1-2023/", 8: "https://www.relevancelab.com/post/uipath-vs-other-rpa-platforms", 9: "https://www.reddit.com/r/AI_Tools_at_Work/comments/1hqh4ux/top_10_ai_tech_companies_of_2024/", 10: "https://news.sap.com/2024/09/sap-a-challenger-2024-gartner-magic-quadrant-for-rpa/",
-                11: "https://www.microsoft.com/en-us/power-platform", 12: "https://www.sap.com/products/technology-platform/build.html", 13: "https://thectoclub.com/tools/best-process-mining-software/", 14: "https://www.designrush.com/agency/software-development/trends/process-mining-tools", 15: "https://www.celonis.com/platform/process-mining/", 16: "https://mickael.substack.com/p/celonis-transforming-enterprise-efficiency", 17: "https://pesto.tech/resources/top-24-ai-automation-tools", 18: "https://zapier.com/", 19: "https://sacra.com/c/zapier/", 20: "https://www.fluid.ai/blog/top-ai-startups-revolutionizing-in-2024",
-                21: "https://www.reveillesoftware.com/datacap/top-10-intelligent-document-processing-idp-platforms-of-2025/", 22: "https://www.tines.com/blog/security-automation/", 23: "https://www.moveworks.com/us/en/resources/datasheets/enterprise-copilot-platform-for-employee-support", 24: "https://roboticsai.co.uk/wp-content/uploads/2024/02/2023-Gartner-Magic-Quadrant-for-RPA-report.pdf", 25: "https://www.automationanywhere.com/products", 26: "https://www.gartner.com/en/webinar/569270/1281346", 27: "https://www.uipath.com/resources/automation-analyst-reports/gartner-magic-quadrant-robotic-process-automation", 28: "https://www.businesswire.com/news/home/20230227005913/en/UiPath-Named-a-Leader-in-RPA-by-Independent-Research-Firm", 29: "https://www.forrester.com/report/the-forrester-wave-tm-robotic-process-automation-q1-2023/RES178434", 30: "https://thunderbit.com/blog/ai-unicorn-stats-2025",
-                31: "https://en.wikipedia.org/wiki/Celonis", 32: "https://swipefile.com/ai-unicorn-companies-with-fewest-employees", 33: "https://techfundingnews.com/new-unicorn-from-ireland-next-gen-ai-automation-startup-tines-raises-125m-at-1-1b-valuation/", 34: "https://www.prnewswire.com/news-releases/tines-secures-125m-in-series-c-financing-bringing-total-valuation-to-1-125b-302372726.html", 35: "https://www.superblocks.com/blog/power-automate-free-paid", 36: "https://www.sap.com/products/technology-platform/build/pricing.html", 37: "https://www.vertice.one/blog/uipath-pricing-how-to-secure-a-discounted-price", 38: "https://www.automationanywhere.com/products/automation-360", 39: "https://www.processmaker.com/blog/how-much-does-process-mining-cost-2024-pricing-guide/", 40: "https://apty.ai/blog/servicenow-implementation-cost/",
-                41: "https://www.elevatiq.com/post/servicenow-moveworks-acquisition/", 42: "https://thedigitalprojectmanager.com/tools/zapier-pricing/", 43: "https://www.activepieces.com/blog/zapier-pricing", 44: "https://www.mergersight.com/post/servicenow-s-2-85bn-acquisition-of-moveworks", 45: "https://smartbranding.com/integromat-evolves-to-a-new-platform-rebrands-to-make-com/", 46: "https://en.wikipedia.org/wiki/Appian_Corporation", 47: "https://pitchbook.com/profiles/company/95733-46", 48: "https://en.wikipedia.org/wiki/Automation_Anywhere", 49: "https://tracxn.com/d/companies/uipath/__formTBBcGVzYartPKXLHeFBIAeai4W_NY3fZIQSmX64", 50: "https://en.wikipedia.org/wiki/UiPath",
-                51: "https://ir.uipath.com/financials/sec-filings/content/0001734722-25-000023/0001734722-25-000023.pdf", 52: "https://www.uipath.com/", 53: "https://store.sap.com/dcp/en/product/display-2001016062_live_v1/uipath-business-automation-platform/", 54: "https://www.auxis.com/intelligent-document-processing-software-top-2024-idp-tools/", 55: "https://research.aimultiple.com/uipath-pricing/", 56: "https://www.sterling-team.com/news/en/why-uipath-is-the-leader-in-the-robotic-process-automation-market/", 57: "https://tunehq.ai/blog/uipath-pricing", 58: "https://www.peerspot.com/products/comparisons/appian-rpa_vs_uipath-platform", 59: "https://tracxn.com/d/companies/automation-anywhere/__tre2zh_F5voAIrD5MmsvheJ0drmtTXyaT3m8-w_KaZ0", 60: "https://tracxn.com/d/companies/automation-anywhere/__tre2zh_F5voAIrD5MmsvheJ0drmtTXyaT3m8-w_KaZ0/funding-and-investors",
-                61: "https://www.automationanywhere.com/products/automation-workspace", 62: "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/395704102447886", 63: "https://www.automationanywhere.com/products/enterprise/community-edition", 64: "https://research.aimultiple.com/rpa-pricing/", 65: "https://www.automationanywhere.com/company/press-room/rpa-cloud-packages-for-business-continuity", 66: "https://www.vendr.com/marketplace/automation-anywhere", 67: "https://www.peerspot.com/products/comparisons/automation-anywhere_vs_blue-prism", 68: "https://canvasbusinessmodel.com/blogs/competitors/automation-anywhere-competitive-landscape", 69: "https://www.automationanywhere.com/rpa/rpa-vs-ipa-vs-apa", 70: "https://en.wikipedia.org/wiki/Blue_Prism",
-                71: "https://www.blueprism.com/about/history/", 72: "https://pitchbook.com/profiles/company/65026-36", 73: "https://www.blueprism.com/products/enterprise/", 74: "https://www.blueprism.com/products/deployment-options/", 75: "https://www.blueprism.com/resources/videos/ss-c-blue-prism-powers-smarter-automation/", 76: "https://www.360quadrants.com/software/robotic-process-automation-rpa/blue-prism", 77: "https://aws.amazon.com/marketplace/pp/prodview-as6mia4nk4wzq", 78: "https://docs.blueprism.com/en-US/bundle/blue-prism-cloud-2021-1/page/pricing/consumption-pricing.htm", 79: "https://www.trustradius.com/compare-products/automation-anywhere-vs-ss-c-blue-prism", 80: "https://builtin.com/artificial-intelligence/ai-companies-roundup",
-                81: "https://learn.microsoft.com/en-us/power-automate/", 82: "https://learn.microsoft.com/en-us/power-automate/flow-types", 83: "https://www.brightwork.com/blog/microsoft-power-platform", 84: "https://www.microsoft.com/en/power-platform/products/power-automate/pricing", 85: "https://www.flowforma.com/blog/power-automate-pricing", 86: "https://www.microsoft.com/en-us/microsoft-copilot/copilot-101/ai-automation", 87: "https://www.microsoft.com/en-us/ai/ai-business-value-and-benefits", 88: "https://www.microsoft.com/en-us/industry/microsoft-in-business/era-of-ai/2025/03/04/enhancing-efficiency-with-ai-automation-and-insights/", 89: "https://www.wheelhouse.com/products/sap-build-process-automation", 90: "https://discovery-center.cloud.sap/serviceCatalog/process-automation?region=all",
-                91: "https://www.sap.com/products/technology-platform/process-automation/features.html", 92: "https://news.sap.com/2025/05/connection-harnessing-customer-experience-competitive-advantage/", 93: "https://www.fingent.com/au/blog/top-7-business-benefits-of-adopting-sap-intelligent-robotic-process-automation/", 94: "https://community.sap.com/t5/technology-blog-posts-by-sap/introducing-the-new-pricing-and-packaging-for-sap-build-a-unified/ba-p/14086382", 95: "https://www.g2.com/products/sap-build-process-automation/pricing", 96: "https://www.trustradius.com/products/sap-build/pricing", 97: "https://tracxn.com/d/companies/celonis/__urB5xFYRh07I9OiGj7ECQA0dCmwZ3bVs1o4NXwhqSBg", 98: "https://tracxn.com/d/companies/celonis/__urB5xFYRh07I9OiGj7ECQA0dCmwZ3bVs1o4NXwhqSBg/funding-and-investors", 99: "https://research.aimultiple.com/celonis/", 100: "https://www.t-h.de/en/products/celonis-ems-execution-management-system/",
-                101: "https://www.salesfive.com/en/salesforce-guide/process-mining-celonis-salesforce/", 102: "https://www.celonis.com/", 103: "https://www.peerspot.com/questions/what-is-your-experience-regarding-pricing-and-costs-for-celonis", 104: "https://www.vendr.com/marketplace/celonis", 105: "https://canvasbusinessmodel.com/blogs/competitors/celonis-competitive-landscape", 106: "https://tracxn.com/d/companies/appian/__w6g6rEXhG1MO2wK4AcN254gLnEOqRk_u2DrKT2K067s", 107: "https://appian.com/products/platform/low-code", 108: "https://appian.com/products/platform/low-code.html", 109: "https://www.superblocks.com/blog/what-is-appian", 110: "https://smythos.com/developers/agent-comparisons/uipath-vs-appian-ai/",
-                111: "https://www.superblocks.com/blog/appian-pricing", 112: "https://www.appsmith.com/blog/appian-pricing", 113: "https://www.trustradius.com/products/appian/pricing", 114: "https://tracxn.com/d/companies/zapier/__M0GRI5XzSGaxAGJkKBYUSwpVmq148p0Ngn32DrgXz90", 115: "https://en.wikipedia.org/wiki/Zapier", 116: "https://help.zapier.com/hc/en-us/articles/8496181725453-Learn-key-concepts-in-Zaps", 117: "https://www.startmotionmedia.com/zapier-net-worth-and-growth-insights/", 118: "https://www.instituteofaistudies.com/insights/10-make-com-features-essential-automation-tools-for-businesses", 119: "https://devchandra.com/blog/make-review/", 120: "https://www.make.com/en",
-                121: "https://www.konnectify.co/blogs/zapier-vs-make-a-comparison", 122: "https://www.whalesync.com/blog/zapier-vs-make", 123: "https://www.reddit.com/r/nocode/comments/1ig72ux/make_pricing_vs_zapier/", 124: "https://learn.customer.io/how-we-work/evolution-of-our-visual-workflow-builder", 125: "https://fintech.global/2025/02/12/tines-raises-125m-to-accelerate-ai-powered-workflow-innovation/", 126: "https://globalcybersecuritynetwork.com/company/tines/", 127: "https://www.vendr.com/marketplace/tines", 128: "https://aws.amazon.com/marketplace/pp/prodview-i3ovaucj2d6pe", 129: "https://www.tines.com/blog/how-security-teams-manage-threat-intelligence-with-tines/", 130: "https://www.gartner.com/reviews/market/security-orchestration-automation-and-response-solutions/vendor/tines/product/tines/alternatives",
-                131: "https://tracxn.com/d/companies/hyperscience/__HqPFAW4_6ujVbpUNPL0WqjDtKyt3wKydPjEN0HNj0Ps/funding-and-investors", 132: "https://www.hyperscience.ai/platform/hypercell/", 133: "https://help.hyperscience.com/docs/v38-flows-overview", 134: "https://flows-sdk.hyperscience.com/pages/source-docs.html", 135: "https://www.gartner.com/reviews/market/intelligent-document-processing-solutions/vendor/hyperscience/product/hyperscience-hypercell", 136: "https://www.deep-analysis.net/vendor-vignette-0/hyperscience/", 137: "https://www.g2.com/products/hyperscience/reviews", 138: "https://help.hyperscience.com/v40/docs/license-packages-and-feature-availability", 139: "https://tracxn.com/d/companies/workfusion/__AeXIu1ZHwmLz8rOCVlpQHfaqFKh0kaihyPZvoS5vPpI/funding-and-investors", 140: "https://leadiq.com/c/workfusion/5a1d8d7b5400005c00741084",
-                141: "https://www.workfusion.com/", 142: "https://www.workfusion.com/digital-workers/", 143: "https://start.workfusion.com/process-group/anti-money-laundering/", 144: "https://aws.amazon.com/marketplace/pp/prodview-n62pzn6dqjgsk", 145: "https://www.workfusion.com/wp-content/uploads/2023/02/Chartis_Workfusion_CLM_Automation_Report.pdf", 146: "https://tracxn.com/d/companies/laiye/__lAyn4RfZx4VM6F6Qz8mQAQfyreRUcghJRf-gkm6Qis0", 147: "https://tracxn.com/d/companies/laiye/__lAyn4RfZx4VM6F6Qz8mQAQfyreRUcghJRf-gkm6Qis0/funding-and-investors", 148: "https://laiye.com/", 149: "https://laiye.com/en/product/conversational-ai-platform", 150: "https://laiye.com/en/news/idc-marketscape-laiye-ranks-as-a-chinas-rpa-software-leader-with-significant-strategic-and-market-share-advantages",
-                151: "https://laiye.com/en/blog/everest-group-idp-products-peak-matrix-assessment-2024", 152: "https://laiye.com/en/roi-calculator", 153: "https://marketplace.huaweicloud.com/intl/product/OFFI659947684604129280", 154: "https://store.servicenow.com/store/app/b46211481b4e661061c4eb18624bcb1b", 155: "https://store.servicenow.com/store/app/8ae8e72e1be06a50a85b16db234bcbac", 156: "https://www.hfsresearch.com/research/servicenow-target-agentic/", 157: "https://www.everestgrp.com/blog/servicenows-2-85b-moveworks-acquisition-evaluating-the-strategic-impact-blog.html", 158: "https://www.desk365.io/blog/servicenow-pricing/", 159: "https://en.wikipedia.org/wiki/Pegasystems#:~:text=Alan%20Trefler%20founded%20Pegasystems%20in,companies%20such%20as%20American%20Express.", 160: "https://www.pega.com/business-process-management",
-                161: "https://www.pega.com/products/platform", 162: "https://www.saasworthy.com/product/pega-platform/pricing", 163: "https://www.trustradius.com/products/pega-platform/pricing", 164: "https://www.gartner.com/reviews/market/bpm-platform-based-case-management-frameworks/vendor/pegasystems", 165: "https://en.wikipedia.org/wiki/Pegasystems", 166: "https://www.gartner.com/reviews/market/robotic-process-automation/vendor/pegasystems/product/pega-robotic-process-automation", 167: "https://en.wikipedia.org/wiki/ABBYY", 168: "https://canvasbusinessmodel.com/blogs/brief-history/abbyy-brief-history", 169: "https://www.abbyy.com/timeline/process-monitoring/", 170: "https://www.abbyy.com/vantage/",
-                171: "https://www.abbyy.com/company/news/abbyy-named-2021-leader-for-intelligent-document-processing-by-isg-and-quandrant-knowledge-solutions/", 172: "https://pdf.abbyy.com/pricing/", 173: "https://www.trustradius.com/products/abbyy-finereader/pricing", 174: "https://www.vendr.com/marketplace/abbyy", 175: "https://www.abbyy.com/resources/report/abbyy-leads-in-idc-marketscape/", 176: "https://tracxn.com/d/companies/alteryx/__IHE8lRB_y2bqgdKpeGezn5E06TwEvE4Vr3CnhYa8yG8", 177: "https://en.wikipedia.org/wiki/Alteryx", 178: "https://aws.amazon.com/marketplace/pp/prodview-h6znkixubjike", 179: "https://www.alteryx.com/glossary/cloud-analytics", 180: "https://community.alteryx.com/t5/Alteryx-Analytics-Cloud-Platform/bd-p/analytics-cloud",
-                181: "https://mammoth.io/blog/alteryx-pricing/", 182: "https://www.trustradius.com/products/alteryx-platform/pricing", 183: "https://www.vertice.one/vendors/alteryx", 184: "https://maserumetro.com/watchtowmt8/what-is-alteryx-a-deep-dive-into-analytics-innovation.html", 185: "https://www.alteryx.com/resources/data-sheet/the-roi-of-alteryx-accelerating-business-value-through-analytics-automation", 186: "https://www.alteryx.com/wp-content/uploads/media/data-sheet/the-roi-of-alteryx-accelerating-business-value-through-analytics-automation.pdf", 187: "https://tracxn.com/d/companies/moveworks/__rb7kuLII8eM6ESA9YA_T3m4ELshllKlLgvCQ-zoZeyw", 188: "https://www.moveworks.com/us/en/company/about", 189: "https://en.wikipedia.org/wiki/Moveworks", 190: "https://www.iconiqcapital.com/growth/insights/celebrating-moveworkss-acquisition-by-servicenow-to-extend-leading-agentic-ai-to-every-employee",
-                191: "https://appsource.microsoft.com/en-in/product/office/WA200002149?tab=Overview", 192: "https://www.moveworks.com/", 193: "https://www.unleash.so/post/what-is-moveworks-pricing", 194: "https://www.vendr.com/marketplace/moveworks", 195: "https://www.mvp.vc/company-initations/moveworks-one-stop-ai-solution-tackling-digital-debt", 196: "https://www.aitimejournal.com/artificial-intelligence-companies-to-watch/", 197: "https://resolvetech.com/unleashing-efficiency-a-look-at-sap-intelligent-robotic-process-automation-rpa/",
-            };
+      // Data processing and injection logic
+      document.addEventListener("DOMContentLoaded", function () {
+        // Mapping of citation numbers to their URLs
+        const citationMap = {
+          1: "https://www.blueprism.com/resources/analyst-reports/gartner-magic-quadrant-for-rpa-2024/",
+          2: "https://www.blueprism.com/resources/analyst-reports/forrester-wave-report/",
+          3: "https://beam.ai/agentic-insights/from-code-to-unicorn-how-ai-agents-are-redefining-startup-success",
+          4: "https://www.moveworks.com/us/en/resources/blog/agentic-ai-tools-for-business",
+          5: "https://www.uipath.com/platform/agentic-automation",
+          6: "https://optezo.com/resources/whitepaper-2023-forrester-wave-for-rpa",
+          7: "https://10xds.com/news/the-forrester-wave-robotic-process-automation-q1-2023/",
+          8: "https://www.relevancelab.com/post/uipath-vs-other-rpa-platforms",
+          9: "https://www.reddit.com/r/AI_Tools_at_Work/comments/1hqh4ux/top_10_ai_tech_companies_of_2024/",
+          10: "https://news.sap.com/2024/09/sap-a-challenger-2024-gartner-magic-quadrant-for-rpa/",
+          11: "https://www.microsoft.com/en-us/power-platform",
+          12: "https://www.sap.com/products/technology-platform/build.html",
+          13: "https://thectoclub.com/tools/best-process-mining-software/",
+          14: "https://www.designrush.com/agency/software-development/trends/process-mining-tools",
+          15: "https://www.celonis.com/platform/process-mining/",
+          16: "https://mickael.substack.com/p/celonis-transforming-enterprise-efficiency",
+          17: "https://pesto.tech/resources/top-24-ai-automation-tools",
+          18: "https://zapier.com/",
+          19: "https://sacra.com/c/zapier/",
+          20: "https://www.fluid.ai/blog/top-ai-startups-revolutionizing-in-2024",
+          21: "https://www.reveillesoftware.com/datacap/top-10-intelligent-document-processing-idp-platforms-of-2025/",
+          22: "https://www.tines.com/blog/security-automation/",
+          23: "https://www.moveworks.com/us/en/resources/datasheets/enterprise-copilot-platform-for-employee-support",
+          24: "https://roboticsai.co.uk/wp-content/uploads/2024/02/2023-Gartner-Magic-Quadrant-for-RPA-report.pdf",
+          25: "https://www.automationanywhere.com/products",
+          26: "https://www.gartner.com/en/webinar/569270/1281346",
+          27: "https://www.uipath.com/resources/automation-analyst-reports/gartner-magic-quadrant-robotic-process-automation",
+          28: "https://www.businesswire.com/news/home/20230227005913/en/UiPath-Named-a-Leader-in-RPA-by-Independent-Research-Firm",
+          29: "https://www.forrester.com/report/the-forrester-wave-tm-robotic-process-automation-q1-2023/RES178434",
+          30: "https://thunderbit.com/blog/ai-unicorn-stats-2025",
+          31: "https://en.wikipedia.org/wiki/Celonis",
+          32: "https://swipefile.com/ai-unicorn-companies-with-fewest-employees",
+          33: "https://techfundingnews.com/new-unicorn-from-ireland-next-gen-ai-automation-startup-tines-raises-125m-at-1-1b-valuation/",
+          34: "https://www.prnewswire.com/news-releases/tines-secures-125m-in-series-c-financing-bringing-total-valuation-to-1-125b-302372726.html",
+          35: "https://www.superblocks.com/blog/power-automate-free-paid",
+          36: "https://www.sap.com/products/technology-platform/build/pricing.html",
+          37: "https://www.vertice.one/blog/uipath-pricing-how-to-secure-a-discounted-price",
+          38: "https://www.automationanywhere.com/products/automation-360",
+          39: "https://www.processmaker.com/blog/how-much-does-process-mining-cost-2024-pricing-guide/",
+          40: "https://apty.ai/blog/servicenow-implementation-cost/",
+          41: "https://www.elevatiq.com/post/servicenow-moveworks-acquisition/",
+          42: "https://thedigitalprojectmanager.com/tools/zapier-pricing/",
+          43: "https://www.activepieces.com/blog/zapier-pricing",
+          44: "https://www.mergersight.com/post/servicenow-s-2-85bn-acquisition-of-moveworks",
+          45: "https://smartbranding.com/integromat-evolves-to-a-new-platform-rebrands-to-make-com/",
+          46: "https://en.wikipedia.org/wiki/Appian_Corporation",
+          47: "https://pitchbook.com/profiles/company/95733-46",
+          48: "https://en.wikipedia.org/wiki/Automation_Anywhere",
+          49: "https://tracxn.com/d/companies/uipath/__formTBBcGVzYartPKXLHeFBIAeai4W_NY3fZIQSmX64",
+          50: "https://en.wikipedia.org/wiki/UiPath",
+          51: "https://ir.uipath.com/financials/sec-filings/content/0001734722-25-000023/0001734722-25-000023.pdf",
+          52: "https://www.uipath.com/",
+          53: "https://store.sap.com/dcp/en/product/display-2001016062_live_v1/uipath-business-automation-platform/",
+          54: "https://www.auxis.com/intelligent-document-processing-software-top-2024-idp-tools/",
+          55: "https://research.aimultiple.com/uipath-pricing/",
+          56: "https://www.sterling-team.com/news/en/why-uipath-is-the-leader-in-the-robotic-process-automation-market/",
+          57: "https://tunehq.ai/blog/uipath-pricing",
+          58: "https://www.peerspot.com/products/comparisons/appian-rpa_vs_uipath-platform",
+          59: "https://tracxn.com/d/companies/automation-anywhere/__tre2zh_F5voAIrD5MmsvheJ0drmtTXyaT3m8-w_KaZ0",
+          60: "https://tracxn.com/d/companies/automation-anywhere/__tre2zh_F5voAIrD5MmsvheJ0drmtTXyaT3m8-w_KaZ0/funding-and-investors",
+          61: "https://www.automationanywhere.com/products/automation-workspace",
+          62: "https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/395704102447886",
+          63: "https://www.automationanywhere.com/products/enterprise/community-edition",
+          64: "https://research.aimultiple.com/rpa-pricing/",
+          65: "https://www.automationanywhere.com/company/press-room/rpa-cloud-packages-for-business-continuity",
+          66: "https://www.vendr.com/marketplace/automation-anywhere",
+          67: "https://www.peerspot.com/products/comparisons/automation-anywhere_vs_blue-prism",
+          68: "https://canvasbusinessmodel.com/blogs/competitors/automation-anywhere-competitive-landscape",
+          69: "https://www.automationanywhere.com/rpa/rpa-vs-ipa-vs-apa",
+          70: "https://en.wikipedia.org/wiki/Blue_Prism",
+          71: "https://www.blueprism.com/about/history/",
+          72: "https://pitchbook.com/profiles/company/65026-36",
+          73: "https://www.blueprism.com/products/enterprise/",
+          74: "https://www.blueprism.com/products/deployment-options/",
+          75: "https://www.blueprism.com/resources/videos/ss-c-blue-prism-powers-smarter-automation/",
+          76: "https://www.360quadrants.com/software/robotic-process-automation-rpa/blue-prism",
+          77: "https://aws.amazon.com/marketplace/pp/prodview-as6mia4nk4wzq",
+          78: "https://docs.blueprism.com/en-US/bundle/blue-prism-cloud-2021-1/page/pricing/consumption-pricing.htm",
+          79: "https://www.trustradius.com/compare-products/automation-anywhere-vs-ss-c-blue-prism",
+          80: "https://builtin.com/artificial-intelligence/ai-companies-roundup",
+          81: "https://learn.microsoft.com/en-us/power-automate/",
+          82: "https://learn.microsoft.com/en-us/power-automate/flow-types",
+          83: "https://www.brightwork.com/blog/microsoft-power-platform",
+          84: "https://www.microsoft.com/en/power-platform/products/power-automate/pricing",
+          85: "https://www.flowforma.com/blog/power-automate-pricing",
+          86: "https://www.microsoft.com/en-us/microsoft-copilot/copilot-101/ai-automation",
+          87: "https://www.microsoft.com/en-us/ai/ai-business-value-and-benefits",
+          88: "https://www.microsoft.com/en-us/industry/microsoft-in-business/era-of-ai/2025/03/04/enhancing-efficiency-with-ai-automation-and-insights/",
+          89: "https://www.wheelhouse.com/products/sap-build-process-automation",
+          90: "https://discovery-center.cloud.sap/serviceCatalog/process-automation?region=all",
+          91: "https://www.sap.com/products/technology-platform/process-automation/features.html",
+          92: "https://news.sap.com/2025/05/connection-harnessing-customer-experience-competitive-advantage/",
+          93: "https://www.fingent.com/au/blog/top-7-business-benefits-of-adopting-sap-intelligent-robotic-process-automation/",
+          94: "https://community.sap.com/t5/technology-blog-posts-by-sap/introducing-the-new-pricing-and-packaging-for-sap-build-a-unified/ba-p/14086382",
+          95: "https://www.g2.com/products/sap-build-process-automation/pricing",
+          96: "https://www.trustradius.com/products/sap-build/pricing",
+          97: "https://tracxn.com/d/companies/celonis/__urB5xFYRh07I9OiGj7ECQA0dCmwZ3bVs1o4NXwhqSBg",
+          98: "https://tracxn.com/d/companies/celonis/__urB5xFYRh07I9OiGj7ECQA0dCmwZ3bVs1o4NXwhqSBg/funding-and-investors",
+          99: "https://research.aimultiple.com/celonis/",
+          100: "https://www.t-h.de/en/products/celonis-ems-execution-management-system/",
+          101: "https://www.salesfive.com/en/salesforce-guide/process-mining-celonis-salesforce/",
+          102: "https://www.celonis.com/",
+          103: "https://www.peerspot.com/questions/what-is-your-experience-regarding-pricing-and-costs-for-celonis",
+          104: "https://www.vendr.com/marketplace/celonis",
+          105: "https://canvasbusinessmodel.com/blogs/competitors/celonis-competitive-landscape",
+          106: "https://tracxn.com/d/companies/appian/__w6g6rEXhG1MO2wK4AcN254gLnEOqRk_u2DrKT2K067s",
+          107: "https://appian.com/products/platform/low-code",
+          108: "https://appian.com/products/platform/low-code.html",
+          109: "https://www.superblocks.com/blog/what-is-appian",
+          110: "https://smythos.com/developers/agent-comparisons/uipath-vs-appian-ai/",
+          111: "https://www.superblocks.com/blog/appian-pricing",
+          112: "https://www.appsmith.com/blog/appian-pricing",
+          113: "https://www.trustradius.com/products/appian/pricing",
+          114: "https://tracxn.com/d/companies/zapier/__M0GRI5XzSGaxAGJkKBYUSwpVmq148p0Ngn32DrgXz90",
+          115: "https://en.wikipedia.org/wiki/Zapier",
+          116: "https://help.zapier.com/hc/en-us/articles/8496181725453-Learn-key-concepts-in-Zaps",
+          117: "https://www.startmotionmedia.com/zapier-net-worth-and-growth-insights/",
+          118: "https://www.instituteofaistudies.com/insights/10-make-com-features-essential-automation-tools-for-businesses",
+          119: "https://devchandra.com/blog/make-review/",
+          120: "https://www.make.com/en",
+          121: "https://www.konnectify.co/blogs/zapier-vs-make-a-comparison",
+          122: "https://www.whalesync.com/blog/zapier-vs-make",
+          123: "https://www.reddit.com/r/nocode/comments/1ig72ux/make_pricing_vs_zapier/",
+          124: "https://learn.customer.io/how-we-work/evolution-of-our-visual-workflow-builder",
+          125: "https://fintech.global/2025/02/12/tines-raises-125m-to-accelerate-ai-powered-workflow-innovation/",
+          126: "https://globalcybersecuritynetwork.com/company/tines/",
+          127: "https://www.vendr.com/marketplace/tines",
+          128: "https://aws.amazon.com/marketplace/pp/prodview-i3ovaucj2d6pe",
+          129: "https://www.tines.com/blog/how-security-teams-manage-threat-intelligence-with-tines/",
+          130: "https://www.gartner.com/reviews/market/security-orchestration-automation-and-response-solutions/vendor/tines/product/tines/alternatives",
+          131: "https://tracxn.com/d/companies/hyperscience/__HqPFAW4_6ujVbpUNPL0WqjDtKyt3wKydPjEN0HNj0Ps/funding-and-investors",
+          132: "https://www.hyperscience.ai/platform/hypercell/",
+          133: "https://help.hyperscience.com/docs/v38-flows-overview",
+          134: "https://flows-sdk.hyperscience.com/pages/source-docs.html",
+          135: "https://www.gartner.com/reviews/market/intelligent-document-processing-solutions/vendor/hyperscience/product/hyperscience-hypercell",
+          136: "https://www.deep-analysis.net/vendor-vignette-0/hyperscience/",
+          137: "https://www.g2.com/products/hyperscience/reviews",
+          138: "https://help.hyperscience.com/v40/docs/license-packages-and-feature-availability",
+          139: "https://tracxn.com/d/companies/workfusion/__AeXIu1ZHwmLz8rOCVlpQHfaqFKh0kaihyPZvoS5vPpI/funding-and-investors",
+          140: "https://leadiq.com/c/workfusion/5a1d8d7b5400005c00741084",
+          141: "https://www.workfusion.com/",
+          142: "https://www.workfusion.com/digital-workers/",
+          143: "https://start.workfusion.com/process-group/anti-money-laundering/",
+          144: "https://aws.amazon.com/marketplace/pp/prodview-n62pzn6dqjgsk",
+          145: "https://www.workfusion.com/wp-content/uploads/2023/02/Chartis_Workfusion_CLM_Automation_Report.pdf",
+          146: "https://tracxn.com/d/companies/laiye/__lAyn4RfZx4VM6F6Qz8mQAQfyreRUcghJRf-gkm6Qis0",
+          147: "https://tracxn.com/d/companies/laiye/__lAyn4RfZx4VM6F6Qz8mQAQfyreRUcghJRf-gkm6Qis0/funding-and-investors",
+          148: "https://laiye.com/",
+          149: "https://laiye.com/en/product/conversational-ai-platform",
+          150: "https://laiye.com/en/news/idc-marketscape-laiye-ranks-as-a-chinas-rpa-software-leader-with-significant-strategic-and-market-share-advantages",
+          151: "https://laiye.com/en/blog/everest-group-idp-products-peak-matrix-assessment-2024",
+          152: "https://laiye.com/en/roi-calculator",
+          153: "https://marketplace.huaweicloud.com/intl/product/OFFI659947684604129280",
+          154: "https://store.servicenow.com/store/app/b46211481b4e661061c4eb18624bcb1b",
+          155: "https://store.servicenow.com/store/app/8ae8e72e1be06a50a85b16db234bcbac",
+          156: "https://www.hfsresearch.com/research/servicenow-target-agentic/",
+          157: "https://www.everestgrp.com/blog/servicenows-2-85b-moveworks-acquisition-evaluating-the-strategic-impact-blog.html",
+          158: "https://www.desk365.io/blog/servicenow-pricing/",
+          159: "https://en.wikipedia.org/wiki/Pegasystems#:~:text=Alan%20Trefler%20founded%20Pegasystems%20in,companies%20such%20as%20American%20Express.",
+          160: "https://www.pega.com/business-process-management",
+          161: "https://www.pega.com/products/platform",
+          162: "https://www.saasworthy.com/product/pega-platform/pricing",
+          163: "https://www.trustradius.com/products/pega-platform/pricing",
+          164: "https://www.gartner.com/reviews/market/bpm-platform-based-case-management-frameworks/vendor/pegasystems",
+          165: "https://en.wikipedia.org/wiki/Pegasystems",
+          166: "https://www.gartner.com/reviews/market/robotic-process-automation/vendor/pegasystems/product/pega-robotic-process-automation",
+          167: "https://en.wikipedia.org/wiki/ABBYY",
+          168: "https://canvasbusinessmodel.com/blogs/brief-history/abbyy-brief-history",
+          169: "https://www.abbyy.com/timeline/process-monitoring/",
+          170: "https://www.abbyy.com/vantage/",
+          171: "https://www.abbyy.com/company/news/abbyy-named-2021-leader-for-intelligent-document-processing-by-isg-and-quandrant-knowledge-solutions/",
+          172: "https://pdf.abbyy.com/pricing/",
+          173: "https://www.trustradius.com/products/abbyy-finereader/pricing",
+          174: "https://www.vendr.com/marketplace/abbyy",
+          175: "https://www.abbyy.com/resources/report/abbyy-leads-in-idc-marketscape/",
+          176: "https://tracxn.com/d/companies/alteryx/__IHE8lRB_y2bqgdKpeGezn5E06TwEvE4Vr3CnhYa8yG8",
+          177: "https://en.wikipedia.org/wiki/Alteryx",
+          178: "https://aws.amazon.com/marketplace/pp/prodview-h6znkixubjike",
+          179: "https://www.alteryx.com/glossary/cloud-analytics",
+          180: "https://community.alteryx.com/t5/Alteryx-Analytics-Cloud-Platform/bd-p/analytics-cloud",
+          181: "https://mammoth.io/blog/alteryx-pricing/",
+          182: "https://www.trustradius.com/products/alteryx-platform/pricing",
+          183: "https://www.vertice.one/vendors/alteryx",
+          184: "https://maserumetro.com/watchtowmt8/what-is-alteryx-a-deep-dive-into-analytics-innovation.html",
+          185: "https://www.alteryx.com/resources/data-sheet/the-roi-of-alteryx-accelerating-business-value-through-analytics-automation",
+          186: "https://www.alteryx.com/wp-content/uploads/media/data-sheet/the-roi-of-alteryx-accelerating-business-value-through-analytics-automation.pdf",
+          187: "https://tracxn.com/d/companies/moveworks/__rb7kuLII8eM6ESA9YA_T3m4ELshllKlLgvCQ-zoZeyw",
+          188: "https://www.moveworks.com/us/en/company/about",
+          189: "https://en.wikipedia.org/wiki/Moveworks",
+          190: "https://www.iconiqcapital.com/growth/insights/celebrating-moveworkss-acquisition-by-servicenow-to-extend-leading-agentic-ai-to-every-employee",
+          191: "https://appsource.microsoft.com/en-in/product/office/WA200002149?tab=Overview",
+          192: "https://www.moveworks.com/",
+          193: "https://www.unleash.so/post/what-is-moveworks-pricing",
+          194: "https://www.vendr.com/marketplace/moveworks",
+          195: "https://www.mvp.vc/company-initations/moveworks-one-stop-ai-solution-tackling-digital-debt",
+          196: "https://www.aitimejournal.com/artificial-intelligence-companies-to-watch/",
+          197: "https://resolvetech.com/unleashing-efficiency-a-look-at-sap-intelligent-robotic-process-automation-rpa/",
+        };
 
-            const fullReportContent = `
+        const fullReportContent = `
                 <h2 class="text-3xl font-bold section-title pb-2 mb-8 mt-16">完整报告 / Full Report</h2>
                 
                 <h3>执行摘要</h3>
@@ -679,23 +945,25 @@
                 </ul>
             `;
 
-            const reportContainer = document.getElementById('full-report');
-            
-            // This regex finds numbers preceded by a space and followed by a word boundary.
-            // This is a robust way to find citation numbers like " 1" or " 23" without incorrectly matching other numbers.
-            let processedContent = fullReportContent.replace(/\s(\d+)\b/g, (match, numberStr) => {
-                const number = parseInt(numberStr, 10);
-                if (citationMap[number]) {
-                    // Re-add the leading space and wrap the number in a link
-                    return ` <a href="${citationMap[number]}" target="_blank" rel="noopener noreferrer" class="content-link">[${number}]</a>`;
-                }
-                // If no link is found for the number, return the original match (e.g., " 123")
-                return match; 
-            });
+        const reportContainer = document.getElementById("full-report");
 
-            reportContainer.innerHTML = processedContent;
-        });
+        // This regex finds numbers preceded by a space and followed by a word boundary.
+        // This is a robust way to find citation numbers like " 1" or " 23" without incorrectly matching other numbers.
+        let processedContent = fullReportContent.replace(
+          /\s(\d+)\b/g,
+          (match, numberStr) => {
+            const number = parseInt(numberStr, 10);
+            if (citationMap[number]) {
+              // Re-add the leading space and wrap the number in a link
+              return ` <a href="${citationMap[number]}" target="_blank" rel="noopener noreferrer" class="content-link">[${number}]</a>`;
+            }
+            // If no link is found for the number, return the original match (e.g., " 123")
+            return match;
+          },
+        );
+
+        reportContainer.innerHTML = processedContent;
+      });
     </script>
-
-</body>
+  </body>
 </html>

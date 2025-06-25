@@ -1,4 +1,4 @@
-import { Report, SearchFilters, SortOptions } from '@/types';
+import { Report, SearchFilters, SortOptions } from "@/types";
 
 /**
  * 搜索和过滤报告
@@ -6,16 +6,19 @@ import { Report, SearchFilters, SortOptions } from '@/types';
 export function searchAndFilterReports(
   reports: Report[],
   query: string,
-  filters: SearchFilters
+  filters: SearchFilters,
 ): Report[] {
-  return reports.filter(report => {
+  return reports.filter((report) => {
     // 文本搜索
     if (query.trim()) {
       const searchText = query.toLowerCase();
       const matchesTitle = report.title.toLowerCase().includes(searchText);
-      const matchesDescription = report.description?.toLowerCase().includes(searchText) || false;
-      const matchesTags = report.tags.some(tag => tag.toLowerCase().includes(searchText));
-      
+      const matchesDescription =
+        report.description?.toLowerCase().includes(searchText) || false;
+      const matchesTags = report.tags.some((tag) =>
+        tag.toLowerCase().includes(searchText),
+      );
+
       if (!matchesTitle && !matchesDescription && !matchesTags) {
         return false;
       }
@@ -38,7 +41,9 @@ export function searchAndFilterReports(
 
     // 标签过滤
     if (filters.tags && filters.tags.length > 0) {
-      const hasMatchingTag = filters.tags.some(tag => report.tags.includes(tag));
+      const hasMatchingTag = filters.tags.some((tag) =>
+        report.tags.includes(tag),
+      );
       if (!hasMatchingTag) {
         return false;
       }
@@ -47,21 +52,30 @@ export function searchAndFilterReports(
     // 日期范围过滤
     if (filters.dateRange) {
       const reportDate = new Date(report.createdAt);
-      if (reportDate < filters.dateRange.start || reportDate > filters.dateRange.end) {
+      if (
+        reportDate < filters.dateRange.start ||
+        reportDate > filters.dateRange.end
+      ) {
         return false;
       }
     }
 
     // 字数范围过滤
     if (filters.wordCountRange && report.wordCount) {
-      if (report.wordCount < filters.wordCountRange.min || report.wordCount > filters.wordCountRange.max) {
+      if (
+        report.wordCount < filters.wordCountRange.min ||
+        report.wordCount > filters.wordCountRange.max
+      ) {
         return false;
       }
     }
 
     // 文件大小范围过滤
     if (filters.fileSizeRange && report.fileSize) {
-      if (report.fileSize < filters.fileSizeRange.min || report.fileSize > filters.fileSizeRange.max) {
+      if (
+        report.fileSize < filters.fileSizeRange.min ||
+        report.fileSize > filters.fileSizeRange.max
+      ) {
         return false;
       }
     }
@@ -73,29 +87,32 @@ export function searchAndFilterReports(
 /**
  * 排序报告
  */
-export function sortReports(reports: Report[], sortOptions: SortOptions): Report[] {
+export function sortReports(
+  reports: Report[],
+  sortOptions: SortOptions,
+): Report[] {
   return [...reports].sort((a, b) => {
     let aValue: string | number;
     let bValue: string | number;
 
     switch (sortOptions.field) {
-      case 'title':
+      case "title":
         aValue = a.title.toLowerCase();
         bValue = b.title.toLowerCase();
         break;
-      case 'createdAt':
+      case "createdAt":
         aValue = new Date(a.createdAt).getTime();
         bValue = new Date(b.createdAt).getTime();
         break;
-      case 'updatedAt':
+      case "updatedAt":
         aValue = new Date(a.updatedAt).getTime();
         bValue = new Date(b.updatedAt).getTime();
         break;
-      case 'wordCount':
+      case "wordCount":
         aValue = a.wordCount || 0;
         bValue = b.wordCount || 0;
         break;
-      case 'fileSize':
+      case "fileSize":
         aValue = a.fileSize || 0;
         bValue = b.fileSize || 0;
         break;
@@ -104,10 +121,10 @@ export function sortReports(reports: Report[], sortOptions: SortOptions): Report
     }
 
     if (aValue < bValue) {
-      return sortOptions.order === 'asc' ? -1 : 1;
+      return sortOptions.order === "asc" ? -1 : 1;
     }
     if (aValue > bValue) {
-      return sortOptions.order === 'asc' ? 1 : -1;
+      return sortOptions.order === "asc" ? 1 : -1;
     }
     return 0;
   });
@@ -120,14 +137,14 @@ export function processReports(
   reports: Report[],
   query: string,
   filters: SearchFilters,
-  sortOptions: SortOptions
+  sortOptions: SortOptions,
 ): Report[] {
   // 1. 先进行搜索和过滤
   const filteredReports = searchAndFilterReports(reports, query, filters);
-  
+
   // 2. 然后排序
   const sortedReports = sortReports(filteredReports, sortOptions);
-  
+
   return sortedReports;
 }
 
@@ -137,7 +154,7 @@ export function processReports(
 export function getSearchSuggestions(
   reports: Report[],
   query: string,
-  limit = 5
+  limit = 5,
 ): Array<{ type: string; value: string; label: string }> {
   if (!query.trim()) return [];
 
@@ -145,11 +162,13 @@ export function getSearchSuggestions(
   const queryLower = query.toLowerCase();
 
   // 标题建议
-  reports.forEach(report => {
-    if (report.title.toLowerCase().includes(queryLower) && 
-        !suggestions.find(s => s.value === report.title)) {
+  reports.forEach((report) => {
+    if (
+      report.title.toLowerCase().includes(queryLower) &&
+      !suggestions.find((s) => s.value === report.title)
+    ) {
       suggestions.push({
-        type: 'title',
+        type: "title",
         value: report.title,
         label: `标题: ${report.title}`,
       });
@@ -157,12 +176,14 @@ export function getSearchSuggestions(
   });
 
   // 标签建议
-  const allTags = Array.from(new Set(reports.flatMap(r => r.tags)));
-  allTags.forEach(tag => {
-    if (tag.toLowerCase().includes(queryLower) && 
-        !suggestions.find(s => s.value === tag)) {
+  const allTags = Array.from(new Set(reports.flatMap((r) => r.tags)));
+  allTags.forEach((tag) => {
+    if (
+      tag.toLowerCase().includes(queryLower) &&
+      !suggestions.find((s) => s.value === tag)
+    ) {
       suggestions.push({
-        type: 'tag',
+        type: "tag",
         value: tag,
         label: `标签: ${tag}`,
       });
@@ -170,15 +191,18 @@ export function getSearchSuggestions(
   });
 
   // 描述建议
-  reports.forEach(report => {
-    if (report.description && 
-        report.description.toLowerCase().includes(queryLower) &&
-        !suggestions.find(s => s.value === report.description)) {
-      const excerpt = report.description.length > 50 
-        ? report.description.substring(0, 50) + '...'
-        : report.description;
+  reports.forEach((report) => {
+    if (
+      report.description &&
+      report.description.toLowerCase().includes(queryLower) &&
+      !suggestions.find((s) => s.value === report.description)
+    ) {
+      const excerpt =
+        report.description.length > 50
+          ? report.description.substring(0, 50) + "..."
+          : report.description;
       suggestions.push({
-        type: 'description',
+        type: "description",
         value: report.description,
         label: `描述: ${excerpt}`,
       });
@@ -193,9 +217,15 @@ export function getSearchSuggestions(
  */
 export function highlightSearchTerm(text: string, searchTerm: string): string {
   if (!searchTerm.trim()) return text;
-  
-  const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-  return text.replace(regex, '<mark class="bg-yellow-200 dark:bg-yellow-800">$1</mark>');
+
+  const regex = new RegExp(
+    `(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
+    "gi",
+  );
+  return text.replace(
+    regex,
+    '<mark class="bg-yellow-200 dark:bg-yellow-800">$1</mark>',
+  );
 }
 
 /**
@@ -210,19 +240,19 @@ export function getFilterSummary(filters: SearchFilters): string {
 
   if (filters.readStatus) {
     const statusLabels = {
-      unread: '未读',
-      reading: '阅读中',
-      completed: '已读'
+      unread: "未读",
+      reading: "阅读中",
+      completed: "已读",
     };
     parts.push(`状态: ${statusLabels[filters.readStatus]}`);
   }
 
   if (filters.favoriteOnly) {
-    parts.push('仅收藏');
+    parts.push("仅收藏");
   }
 
   if (filters.tags && filters.tags.length > 0) {
-    parts.push(`标签: ${filters.tags.join(', ')}`);
+    parts.push(`标签: ${filters.tags.join(", ")}`);
   }
 
   if (filters.dateRange) {
@@ -232,7 +262,9 @@ export function getFilterSummary(filters: SearchFilters): string {
   }
 
   if (filters.wordCountRange) {
-    parts.push(`字数: ${filters.wordCountRange.min} - ${filters.wordCountRange.max}`);
+    parts.push(
+      `字数: ${filters.wordCountRange.min} - ${filters.wordCountRange.max}`,
+    );
   }
 
   if (filters.fileSizeRange) {
@@ -241,5 +273,5 @@ export function getFilterSummary(filters: SearchFilters): string {
     parts.push(`大小: ${minMB}MB - ${maxMB}MB`);
   }
 
-  return parts.join(' | ');
-} 
+  return parts.join(" | ");
+}

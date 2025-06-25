@@ -47,13 +47,13 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ### 环境变量说明
 
-| 变量名 | 说明 | 默认值 | 必需 |
-|--------|------|--------|------|
-| `DATABASE_URL` | 数据库连接字符串 | `file:/app/data/wendeal.db` | 是 |
-| `JWT_SECRET` | JWT签名密钥 | - | 是 |
-| `NODE_ENV` | 运行环境 | `production` | 否 |
-| `APP_NAME` | 应用名称 | `Wendeal Reports` | 否 |
-| `APP_URL` | 应用URL | `http://localhost:7575` | 否 |
+| 变量名         | 说明             | 默认值                      | 必需 |
+| -------------- | ---------------- | --------------------------- | ---- |
+| `DATABASE_URL` | 数据库连接字符串 | `file:/app/data/wendeal.db` | 是   |
+| `JWT_SECRET`   | JWT签名密钥      | -                           | 是   |
+| `NODE_ENV`     | 运行环境         | `production`                | 否   |
+| `APP_NAME`     | 应用名称         | `Wendeal Reports`           | 否   |
+| `APP_URL`      | 应用URL          | `http://localhost:7575`     | 否   |
 
 ### 数据持久化
 
@@ -211,12 +211,14 @@ docker-compose up -d --build
 ### 常见问题
 
 1. **容器启动失败**
+
    ```bash
    # 检查日志
    docker-compose logs wendeal-reports
    ```
 
 2. **数据库连接错误**
+
    ```bash
    # 检查数据库文件权限
    docker-compose exec wendeal-reports ls -la /app/data/
@@ -248,4 +250,4 @@ docker-compose up -d
 
 ---
 
-**注意**: 在生产环境中，请确保定期备份数据并监控应用性能。 
+**注意**: 在生产环境中，请确保定期备份数据并监控应用性能。

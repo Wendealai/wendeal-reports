@@ -3,6 +3,7 @@
 ## 数据库表结构
 
 ### 1. 用户表 (users)
+
 ```sql
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -17,6 +18,7 @@ CREATE TABLE users (
 ```
 
 ### 2. 分类表 (categories)
+
 ```sql
 CREATE TABLE categories (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -37,6 +39,7 @@ CREATE INDEX idx_categories_user_id ON categories(user_id);
 ```
 
 ### 3. 报告表 (reports)
+
 ```sql
 CREATE TABLE reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -69,6 +72,7 @@ CREATE INDEX idx_reports_search ON reports USING gin(to_tsvector('english', titl
 ```
 
 ### 4. 标签表 (tags)
+
 ```sql
 CREATE TABLE tags (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -82,6 +86,7 @@ CREATE INDEX idx_tags_user_id ON tags(user_id);
 ```
 
 ### 5. 报告标签关联表 (report_tags)
+
 ```sql
 CREATE TABLE report_tags (
   report_id UUID REFERENCES reports(id) ON DELETE CASCADE,
@@ -91,6 +96,7 @@ CREATE TABLE report_tags (
 ```
 
 ### 6. 搜索历史表 (search_history)
+
 ```sql
 CREATE TABLE search_history (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -106,6 +112,7 @@ CREATE INDEX idx_search_history_created_at ON search_history(created_at);
 ```
 
 ### 7. 保存的搜索表 (saved_searches)
+
 ```sql
 CREATE TABLE saved_searches (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -120,6 +127,7 @@ CREATE INDEX idx_saved_searches_user_id ON saved_searches(user_id);
 ```
 
 ### 8. 文件存储表 (file_storage)
+
 ```sql
 CREATE TABLE file_storage (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -158,4 +166,4 @@ CREATE INDEX idx_file_storage_checksum ON file_storage(checksum);
 1. **索引策略**：为常用查询字段创建索引
 2. **分区策略**：按时间分区大表（如搜索历史）
 3. **全文搜索**：使用 PostgreSQL 的全文搜索功能
-4. **缓存策略**：Redis 缓存热点数据 
+4. **缓存策略**：Redis 缓存热点数据

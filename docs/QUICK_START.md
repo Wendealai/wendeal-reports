@@ -5,6 +5,7 @@
 ### 方法一：使用部署脚本（推荐）
 
 #### Windows用户：
+
 ```cmd
 # 1. 克隆项目
 git clone https://github.com/Wendealai/wendeal-reports.git
@@ -16,6 +17,7 @@ deploy.bat prod   # 生产环境
 ```
 
 #### Linux/Mac用户：
+
 ```bash
 # 1. 克隆项目
 git clone https://github.com/Wendealai/wendeal-reports.git
@@ -78,12 +80,14 @@ curl http://localhost:7575/api/health
 ## 🔒 生产环境注意事项
 
 1. **设置强密码**：
+
    ```bash
    # 生成JWT密钥
    openssl rand -base64 32
    ```
 
 2. **配置防火墙**：
+
    ```bash
    # Ubuntu/Debian
    sudo ufw allow 80
@@ -106,6 +110,7 @@ curl http://localhost:7575/api/health
 ### 常见问题
 
 1. **端口被占用**：
+
    ```bash
        # 检查端口占用
     netstat -tulpn | grep :7575
@@ -113,6 +118,7 @@ curl http://localhost:7575/api/health
    ```
 
 2. **权限问题**：
+
    ```bash
    # 检查Docker权限
    sudo usermod -aG docker $USER
@@ -131,4 +137,4 @@ curl http://localhost:7575/api/health
 
 - 查看详细文档：`DOCKER_DEPLOYMENT.md`
 - GitHub Issues：https://github.com/Wendealai/wendeal-reports/issues
-- 健康检查：http://localhost:7575/api/health 
+- 健康检查：http://localhost:7575/api/health

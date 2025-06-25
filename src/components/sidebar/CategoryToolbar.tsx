@@ -1,53 +1,47 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { 
-  Settings, 
-  Download, 
-  Upload, 
-  Trash2, 
-  RefreshCw
-} from 'lucide-react';
-import { Category } from '@/types';
-import { useAppStore } from '@/store/useAppStore';
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Settings, Download, Upload, Trash2, RefreshCw } from "lucide-react";
+import { Category } from "@/types";
+import { useAppStore } from "@/store/useAppStore";
 
 export function CategoryToolbar() {
   const { categories, setCategories, reports } = useAppStore();
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-  const [importData, setImportData] = useState('');
+  const [importData, setImportData] = useState("");
 
   // 导出分类数据
   const handleExportCategories = () => {
     const exportData = {
       categories,
       exportTime: new Date().toISOString(),
-      version: '1.0'
+      version: "1.0",
     };
-    
+
     const dataStr = JSON.stringify(exportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
-    
-    const link = document.createElement('a');
+
+    const link = document.createElement("a");
     link.href = url;
-    link.download = `wendeal-categories-${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `wendeal-categories-${new Date().toISOString().split("T")[0]}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -58,10 +52,10 @@ export function CategoryToolbar() {
   const handleImportCategories = () => {
     try {
       const parsedData = JSON.parse(importData);
-      
+
       if (parsedData.categories && Array.isArray(parsedData.categories)) {
         const mergedCategories = [...categories];
-        
+
         // 简单合并逻辑：添加新分类，跳过重复的
         parsedData.categories.forEach((importCat: Category) => {
           const exists = findCategoryById(mergedCategories, importCat.id);
@@ -69,15 +63,15 @@ export function CategoryToolbar() {
             mergedCategories.push(importCat);
           }
         });
-        
+
         setCategories(mergedCategories);
         setIsImportDialogOpen(false);
-        setImportData('');
+        setImportData("");
       } else {
-        alert('导入数据格式错误');
+        alert("导入数据格式错误");
       }
     } catch (error) {
-      alert('导入数据解析失败：' + (error as Error).message);
+      alert("导入数据解析失败：" + (error as Error).message);
     }
   };
 
@@ -95,19 +89,21 @@ export function CategoryToolbar() {
 
   // 清理空分类
   const handleCleanEmptyCategories = () => {
-    if (confirm('确定要删除所有空分类吗？此操作不可撤销。')) {
+    if (confirm("确定要删除所有空分类吗？此操作不可撤销。")) {
       const cleanCategories = (cats: Category[]): Category[] => {
-        return cats.filter(cat => {
+        return cats.filter((cat) => {
           // 先清理子分类
           if (cat.children) {
             cat.children = cleanCategories(cat.children);
           }
-          
+
           // 如果有报告或子分类，保留
-          return cat.reportCount > 0 || (cat.children && cat.children.length > 0);
+          return (
+            cat.reportCount > 0 || (cat.children && cat.children.length > 0)
+          );
         });
       };
-      
+
       const cleanedCategories = cleanCategories(categories);
       setCategories(cleanedCategories);
     }
@@ -117,19 +113,21 @@ export function CategoryToolbar() {
   const handleRebuildStats = () => {
     // 统计每个分类的报告数量
     const calculateReportCounts = (cats: Category[]): Category[] => {
-      return cats.map(cat => {
-        const reportCount = reports.filter(report => report.category === cat.id).length;
-        
+      return cats.map((cat) => {
+        const reportCount = reports.filter(
+          (report) => report.category === cat.id,
+        ).length;
+
         const updatedCat = { ...cat, reportCount };
-        
+
         if (cat.children) {
           updatedCat.children = calculateReportCounts(cat.children);
         }
-        
+
         return updatedCat;
       });
     };
-    
+
     const updatedCategories = calculateReportCounts(categories);
     setCategories(updatedCategories);
   };
@@ -137,8 +135,10 @@ export function CategoryToolbar() {
   return (
     <>
       <div className="flex items-center justify-between px-2 py-2 border-b border-border">
-        <span className="text-sm font-medium text-muted-foreground">分类管理</span>
-        
+        <span className="text-sm font-medium text-muted-foreground">
+          分类管理
+        </span>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
@@ -150,19 +150,19 @@ export function CategoryToolbar() {
               <Download className="h-4 w-4 mr-2" />
               导出分类
             </DropdownMenuItem>
-            
+
             <DropdownMenuItem onClick={() => setIsImportDialogOpen(true)}>
               <Upload className="h-4 w-4 mr-2" />
               导入分类
             </DropdownMenuItem>
-            
+
             <DropdownMenuSeparator />
-            
+
             <DropdownMenuItem onClick={handleRebuildStats}>
               <RefreshCw className="h-4 w-4 mr-2" />
               重建统计
             </DropdownMenuItem>
-            
+
             <DropdownMenuItem onClick={handleCleanEmptyCategories}>
               <Trash2 className="h-4 w-4 mr-2" />
               清理空分类
@@ -180,7 +180,7 @@ export function CategoryToolbar() {
               导入分类数据
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="importData">JSON 数据</Label>
@@ -193,21 +193,21 @@ export function CategoryToolbar() {
                 className="font-mono text-xs"
               />
             </div>
-            
+
             <div className="text-xs text-muted-foreground">
               <p>请确保粘贴的是从本系统导出的有效 JSON 格式分类数据。</p>
               <p>导入时会自动跳过已存在的分类，只添加新的分类。</p>
             </div>
           </div>
-          
+
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setIsImportDialogOpen(false)}
             >
               取消
             </Button>
-            <Button 
+            <Button
               onClick={handleImportCategories}
               disabled={!importData.trim()}
             >
@@ -218,4 +218,4 @@ export function CategoryToolbar() {
       </Dialog>
     </>
   );
-} 
+}

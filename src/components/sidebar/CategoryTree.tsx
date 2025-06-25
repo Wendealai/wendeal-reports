@@ -1,11 +1,15 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useAppStore } from '@/store/useAppStore';
-import { Category } from '@/types';
-import { ChevronDown, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
+import { useState } from "react";
+import { useAppStore } from "@/store/useAppStore";
+import { Category } from "@/types";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from "@/components/ui/sidebar";
 
 interface CategoryItemProps {
   category: Category;
@@ -50,9 +54,7 @@ function CategoryItem({ category, level = 0 }: CategoryItemProps) {
               )}
             </Button>
           )}
-          <span className="flex-1 text-left">
-            {category.name}
-          </span>
+          <span className="flex-1 text-left">{category.name}</span>
           <span className="text-xs text-muted-foreground">
             {category.reportCount}
           </span>
@@ -62,11 +64,7 @@ function CategoryItem({ category, level = 0 }: CategoryItemProps) {
       {hasChildren && isExpanded && (
         <div>
           {category.children!.map((child) => (
-            <CategoryItem
-              key={child.id}
-              category={child}
-              level={level + 1}
-            />
+            <CategoryItem key={child.id} category={child} level={level + 1} />
           ))}
         </div>
       )}
@@ -84,4 +82,4 @@ export function CategoryTree() {
       ))}
     </SidebarMenu>
   );
-} 
+}

@@ -1,440 +1,458 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>售出标牌的背后：澳洲房地产中介深度解析与同理心地图</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+SC:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-        :root {
-            --primary-color: #FF6B35;
-            --card-bg: rgba(30, 41, 59, 0.8);
-            --text-color: #E2E8F0;
-            --border-color: rgba(55, 65, 81, 0.6);
-            --bg-dark: #111827;
-            --bg-light: #1F2937;
-        }
+      :root {
+        --primary-color: #ff6b35;
+        --card-bg: rgba(30, 41, 59, 0.8);
+        --text-color: #e2e8f0;
+        --border-color: rgba(55, 65, 81, 0.6);
+        --bg-dark: #111827;
+        --bg-light: #1f2937;
+      }
 
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-        body {
-            font-family: 'Inter', 'Noto Sans SC', sans-serif;
-            background: linear-gradient(145deg, var(--bg-dark) 0%, #000000 100%);
-            color: var(--text-color);
-            line-height: 1.8;
-            font-size: 16px;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
+      body {
+        font-family: "Inter", "Noto Sans SC", sans-serif;
+        background: linear-gradient(145deg, var(--bg-dark) 0%, #000000 100%);
+        color: var(--text-color);
+        line-height: 1.8;
+        font-size: 16px;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
 
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
+      .container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
 
-        header {
-            text-align: center;
-            margin-bottom: 60px;
-        }
+      header {
+        text-align: center;
+        margin-bottom: 60px;
+      }
 
+      header h1 {
+        font-size: 2.8rem;
+        font-weight: 900;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        letter-spacing: 1px;
+      }
+
+      header .subtitle {
+        font-size: 1.5rem;
+        color: var(--text-color);
+        font-family: "Inter", sans-serif;
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+      }
+
+      header .description {
+        font-size: 1.1rem;
+        max-width: 800px;
+        margin: 0 auto;
+        color: #9ca3af;
+      }
+
+      .section-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 30px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--border-color);
+      }
+
+      .grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin-bottom: 60px;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 24px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      .card-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #f9fafb;
+        margin-bottom: 12px;
+      }
+
+      .card-content {
+        flex-grow: 1;
+      }
+
+      .card-content p {
+        color: #d1d5db;
+        font-size: 0.95rem;
+      }
+
+      .large-stat {
+        font-size: 3.5rem;
+        font-weight: 900;
+        color: var(--primary-color);
+        line-height: 1.1;
+      }
+
+      .stat-label {
+        font-size: 1rem;
+        color: #9ca3af;
+        margin-top: 8px;
+      }
+
+      .icon-text {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.1rem;
+        font-weight: bold;
+      }
+
+      .icon-text .icon {
+        font-size: 1.8rem;
+      }
+
+      .tag-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .tag {
+        background-color: rgba(255, 107, 53, 0.15);
+        color: var(--primary-color);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+      }
+
+      .full-report-section {
+        background: rgba(17, 24, 39, 0.7);
+        border-radius: 16px;
+        padding: 40px;
+        border: 1px solid var(--border-color);
+      }
+
+      .full-report-section h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-top: 40px;
+        margin-bottom: 20px;
+      }
+
+      .full-report-section h2:first-child {
+        margin-top: 0;
+      }
+
+      .full-report-section h3 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #d1d5db;
+        margin-top: 30px;
+        margin-bottom: 15px;
+      }
+
+      .full-report-section p {
+        margin-bottom: 20px;
+        text-align: justify;
+      }
+
+      .full-report-section a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: bold;
+        transition:
+          color 0.2s,
+          text-decoration 0.2s;
+      }
+
+      .full-report-section a:hover {
+        color: #ff8a5b;
+        text-decoration: underline;
+      }
+
+      .highlight {
+        color: var(--primary-color);
+        font-weight: bold;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 25px 0;
+        font-size: 0.9em;
+        background-color: var(--bg-light);
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+      }
+
+      table thead tr {
+        background-color: var(--primary-color);
+        color: #ffffff;
+        text-align: left;
+      }
+
+      table th,
+      table td {
+        padding: 12px 15px;
+      }
+
+      table tbody tr {
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      table tbody tr:nth-of-type(even) {
+        background-color: #2d3748;
+      }
+
+      table tbody tr:last-of-type {
+        border-bottom: 2px solid var(--primary-color);
+      }
+
+      @media (max-width: 768px) {
         header h1 {
-            font-size: 2.8rem;
-            font-weight: 900;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-            letter-spacing: 1px;
+          font-size: 2.2rem;
         }
-
         header .subtitle {
-            font-size: 1.5rem;
-            color: var(--text-color);
-            font-family: 'Inter', sans-serif;
-            margin-bottom: 1.5rem;
-            font-weight: 700;
+          font-size: 1.2rem;
         }
-
-        header .description {
-            font-size: 1.1rem;
-            max-width: 800px;
-            margin: 0 auto;
-            color: #9CA3AF;
-        }
-
         .section-title {
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 30px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--border-color);
+          font-size: 1.8rem;
         }
-        
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 60px;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 24px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .card-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #F9FAFB;
-            margin-bottom: 12px;
-        }
-        
-        .card-content {
-            flex-grow: 1;
-        }
-        
-        .card-content p {
-            color: #D1D5DB;
-            font-size: 0.95rem;
-        }
-        
-        .large-stat {
-            font-size: 3.5rem;
-            font-weight: 900;
-            color: var(--primary-color);
-            line-height: 1.1;
-        }
-        
-        .stat-label {
-            font-size: 1rem;
-            color: #9CA3AF;
-            margin-top: 8px;
-        }
-
-        .icon-text {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 1.1rem;
-            font-weight: bold;
-        }
-
-        .icon-text .icon {
-            font-size: 1.8rem;
-        }
-        
-        .tag-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 16px;
-        }
-        
-        .tag {
-            background-color: rgba(255, 107, 53, 0.15);
-            color: var(--primary-color);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
-
         .full-report-section {
-            background: rgba(17, 24, 39, 0.7);
-            border-radius: 16px;
-            padding: 40px;
-            border: 1px solid var(--border-color);
+          padding: 20px;
         }
-
-        .full-report-section h2 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-top: 40px;
-            margin-bottom: 20px;
-        }
-        
-        .full-report-section h2:first-child {
-            margin-top: 0;
-        }
-
-        .full-report-section h3 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #D1D5DB;
-            margin-top: 30px;
-            margin-bottom: 15px;
-        }
-
-        .full-report-section p {
-            margin-bottom: 20px;
-            text-align: justify;
-        }
-
-        .full-report-section a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.2s, text-decoration 0.2s;
-        }
-
-        .full-report-section a:hover {
-            color: #FF8A5B;
-            text-decoration: underline;
-        }
-        
-        .highlight {
-            color: var(--primary-color);
-            font-weight: bold;
-        }
-        
         table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 25px 0;
-            font-size: 0.9em;
-            background-color: var(--bg-light);
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+          display: block;
+          overflow-x: auto;
+          white-space: nowrap;
         }
-
-        table thead tr {
-            background-color: var(--primary-color);
-            color: #ffffff;
-            text-align: left;
-        }
-
-        table th, table td {
-            padding: 12px 15px;
-        }
-        
-        table tbody tr {
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        table tbody tr:nth-of-type(even) {
-            background-color: #2D3748;
-        }
-
-        table tbody tr:last-of-type {
-            border-bottom: 2px solid var(--primary-color);
-        }
-
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 2.2rem;
-            }
-            header .subtitle {
-                font-size: 1.2rem;
-            }
-            .section-title {
-                font-size: 1.8rem;
-            }
-            .full-report-section {
-                padding: 20px;
-            }
-            table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-        }
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <div class="container">
-        <header>
-            <h1>售出标牌的背后</h1>
-            <p class="subtitle">Behind the 'SOLD' Sign: An In-depth Analysis and Empathy Map of Australian Real Estate Agents</p>
-            <p class="description">本报告深入剖析澳洲房地产中介的真实工作与生活，揭示其在光鲜职业形象背后的压力、挑战与内在动机，旨在构建一个全面、立体的同理心视图。</p>
-        </header>
+      <header>
+        <h1>售出标牌的背后</h1>
+        <p class="subtitle">
+          Behind the 'SOLD' Sign: An In-depth Analysis and Empathy Map of
+          Australian Real Estate Agents
+        </p>
+        <p class="description">
+          本报告深入剖析澳洲房地产中介的真实工作与生活，揭示其在光鲜职业形象背后的压力、挑战与内在动机，旨在构建一个全面、立体的同理心视图。
+        </p>
+      </header>
 
-        <h2 class="section-title">核心洞察：中介世界概览</h2>
-        
-        <div class="grid-container">
-            <!-- Card 1: Work Hours -->
-            <div class="card">
-                <div class="card-content">
-                    <div class="large-stat">&gt;46</div>
-                    <div class="stat-label">小时 / 平均每周工作时长</div>
-                    <p>远超全国平均水平，工作与生活的界限模糊，"永远在线"成为常态。</p>
-                </div>
-            </div>
+      <h2 class="section-title">核心洞察：中介世界概览</h2>
 
-            <!-- Card 2: Income Model -->
-            <div class="card">
-                 <div class="card-content">
-                    <div class="icon-text">
-                        <span class="icon">💸</span>
-                        <span>收入模式</span>
-                    </div>
-                    <h3 class="card-title">无成交，无收入</h3>
-                    <p>佣金制度是压力的核心来源，导致财务焦虑和“佣金饥渴”，深刻影响中介的行为和决策。</p>
-                </div>
-            </div>
-            
-            <!-- Card 3: Mental Health -->
-            <div class="card">
-                <div class="card-content">
-                    <div class="large-stat">65%</div>
-                    <div class="stat-label">从业者面临心理健康挑战</div>
-                    <p>职业倦怠普遍，高压环境使其成为自杀高风险行业之一。</p>
-                </div>
-            </div>
-
-            <!-- Card 4: Key Pain Point -->
-            <div class="card">
-                 <div class="card-content">
-                    <div class="icon-text">
-                        <span class="icon">😣</span>
-                        <span>核心痛点</span>
-                    </div>
-                    <h3 class="card-title">财务不安全感</h3>
-                    <p>收入的不确定性是最大的困扰，导致“有流水没利润”的困境，并引发一系列连锁压力。</p>
-                </div>
-                 <div class="tag-container">
-                    <span class="tag">时间稀缺</span>
-                    <span class="tag">声誉损害</span>
-                    <span class="tag">情感消耗</span>
-                </div>
-            </div>
-
-            <!-- Card 5: Key Gain -->
-            <div class="card">
-                 <div class="card-content">
-                    <div class="icon-text">
-                        <span class="icon">🎯</span>
-                        <span>核心目标</span>
-                    </div>
-                    <h3 class="card-title">财务自由与高收入</h3>
-                    <p>对高收入和自主事业的追求是进入该行业最主要的驱动力。</p>
-                </div>
-                <div class="tag-container">
-                    <span class="tag">尊重与认可</span>
-                    <span class="tag">自主与灵活</span>
-                    <span class="tag">效率与杠杆</span>
-                </div>
-            </div>
-
-            <!-- Card 6: Technology -->
-            <div class="card">
-                <div class="card-content">
-                    <div class="icon-text">
-                        <span class="icon">💻</span>
-                        <span>技术依赖</span>
-                    </div>
-                    <h3 class="card-title">数字化的脊梁</h3>
-                    <p>严重依赖 <span class="highlight">CRM</span> (如Agentbox) 和数据平台 (如CoreLogic)。AI正在重塑行业，带来效率也带来淘汰焦虑。</p>
-                </div>
-            </div>
+      <div class="grid-container">
+        <!-- Card 1: Work Hours -->
+        <div class="card">
+          <div class="card-content">
+            <div class="large-stat">&gt;46</div>
+            <div class="stat-label">小时 / 平均每周工作时长</div>
+            <p>远超全国平均水平，工作与生活的界限模糊，"永远在线"成为常态。</p>
+          </div>
         </div>
 
-        <section class="full-report-section">
-            <h1 class="section-title">完整研究报告</h1>
-            <div id="full-text-content">
-                <!-- Content will be injected by JavaScript -->
+        <!-- Card 2: Income Model -->
+        <div class="card">
+          <div class="card-content">
+            <div class="icon-text">
+              <span class="icon">💸</span>
+              <span>收入模式</span>
             </div>
-        </section>
+            <h3 class="card-title">无成交，无收入</h3>
+            <p>
+              佣金制度是压力的核心来源，导致财务焦虑和“佣金饥渴”，深刻影响中介的行为和决策。
+            </p>
+          </div>
+        </div>
 
+        <!-- Card 3: Mental Health -->
+        <div class="card">
+          <div class="card-content">
+            <div class="large-stat">65%</div>
+            <div class="stat-label">从业者面临心理健康挑战</div>
+            <p>职业倦怠普遍，高压环境使其成为自杀高风险行业之一。</p>
+          </div>
+        </div>
+
+        <!-- Card 4: Key Pain Point -->
+        <div class="card">
+          <div class="card-content">
+            <div class="icon-text">
+              <span class="icon">😣</span>
+              <span>核心痛点</span>
+            </div>
+            <h3 class="card-title">财务不安全感</h3>
+            <p>
+              收入的不确定性是最大的困扰，导致“有流水没利润”的困境，并引发一系列连锁压力。
+            </p>
+          </div>
+          <div class="tag-container">
+            <span class="tag">时间稀缺</span>
+            <span class="tag">声誉损害</span>
+            <span class="tag">情感消耗</span>
+          </div>
+        </div>
+
+        <!-- Card 5: Key Gain -->
+        <div class="card">
+          <div class="card-content">
+            <div class="icon-text">
+              <span class="icon">🎯</span>
+              <span>核心目标</span>
+            </div>
+            <h3 class="card-title">财务自由与高收入</h3>
+            <p>对高收入和自主事业的追求是进入该行业最主要的驱动力。</p>
+          </div>
+          <div class="tag-container">
+            <span class="tag">尊重与认可</span>
+            <span class="tag">自主与灵活</span>
+            <span class="tag">效率与杠杆</span>
+          </div>
+        </div>
+
+        <!-- Card 6: Technology -->
+        <div class="card">
+          <div class="card-content">
+            <div class="icon-text">
+              <span class="icon">💻</span>
+              <span>技术依赖</span>
+            </div>
+            <h3 class="card-title">数字化的脊梁</h3>
+            <p>
+              严重依赖 <span class="highlight">CRM</span> (如Agentbox)
+              和数据平台 (如CoreLogic)。AI正在重塑行业，带来效率也带来淘汰焦虑。
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <section class="full-report-section">
+        <h1 class="section-title">完整研究报告</h1>
+        <div id="full-text-content">
+          <!-- Content will be injected by JavaScript -->
+        </div>
+      </section>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlMap = {
-                1: "https://www.jobsandskills.gov.au/data/occupation-and-industry-profiles/occupations/612114-real-estate-agents",
-                2: "https://entryeducation.edu.au/blog/day-in-the-life-of-a-real-estate-agent/",
-                3: "https://www.youtube.com/shorts/ugvMSyFA8ys",
-                4: "https://reaa.com.au/what-does-a-day-in-the-life-of-a-real-estate-professional-look-like/",
-                5: "https://www.youtube.com/watch?v=VNtoWBO9BXs",
-                6: "https://www.youtube.com/watch?v=6e3p6xgbBWA",
-                7: "https://www.agentkee.com/blog/the-importance-of-clear-communication-in-real-estate-transactions/",
-                8: "https://www.homelight.com/blog/signs-of-a-bad-real-estate-agent/",
-                9: "https://www.lemon8-app.com/adrian.tan/7229184876459590145?region=sg",
-                10: "https://www.boxbrownie.com/b/three-signs-of-real-estate-burnout-and-how-to-overcome-them",
-                11: "https://www.propertyme.com.au/blog/property-management/mental-health-office",
-                12: "https://www.agentbox.com.au/blog/time-management-secrets-for-top-real-estate-agents",
-                13: "https://createvic.com.au/a-day-in-the-life-of-a-licensed-real-estate-agent-in-melbourne/08/21/19/",
-                14: "https://www.clarkrealty.com.au/blog/day-life-real-estate-agent/",
-                15: "https://www.upcover.com/blog/a-day-in-the-life-of-a-real-estate-agent-behind-the-scenes-of-a-dynamic-profession",
-                16: "https://www.youtube.com/watch?v=xbmCtjRWcAg",
-                17: "https://www.agentbox.com.au/",
-                18: "https://www.reddit.com/r/AusPropertyChat/comments/17pp3dr/after_being_a_seller_i_now_hate_real_estate/",
-                19: "https://www.youtube.com/watch?v=Q1YjeXiEWtE",
-                20: "https://www.reddit.com/r/AusFinance/comments/18xxs7i/real_estate_career/",
-                21: "https://www.realestate.com.au/advice/real-estate-agent-commissions/",
-                22: "https://www.bizboxinc.com/blog/category/outside-the-box-podcast-repeat-referral-real-estate-business",
-                23: "https://www.agentbox.com.au/blog/real-estate-kpis-every-agent-should-track-using-analytics",
-                24: "https://insightsoftware.com/blog/real-estate-kpis-and-metrics/",
-                25: "https://www.youtube.com/watch?v=-YrAw_IjXic",
-                26: "https://www.agentbox.com.au/blog/kpis-why-are-they-essential-when-prospecting",
-                27: "https://www.youtube.com/watch?v=sI8KkILNesk",
-                28: "https://therealestatetrainer.com/lead-conversion-script-realtors/",
-                29: "https://upsystems.com.au/blog/2023/02/16/top-10-most-used-real-estate-software-in-australia/",
-                30: "https://www.agentbox.com.au/reviews",
-                31: "https://www.stepps.com.au/technology/3-best-real-estate-crms/",
-                32: "https://www.shoreagents.com/real-estate-crm/",
-                33: "https://www.mrisoftware.com/au/blog/best-real-estate-crm/",
-                34: "https://www.hicaliber.com.au/hicaliber-integration-partners/agentbox-integration/",
-                35: "https://openexpert.nz/property/essential-digital-tools-for-real-estate-agents/",
-                36: "https://www.pmva.com.au/ai-for-real-estate-marketing/",
-                37: "https://broadlandestates.com.au/2025/01/31/will-real-estate-agents-be-replaced-by-ai/",
-                38: "https://sunstateproperty.com.au/2024/11/20/ai-meets-real-estate-how-smart-algorithms-are-revolutionizing-the-role-of-buyers-agents-in-australia/",
-                39: "https://www.visive.ai/news/ai-revolutionizing-australias-real-estate-market",
-                40: "https://reaa.com.au/the-future-of-real-estate-in-australia-trends-and-predictions-for-2025/",
-                41: "https://www.brokernews.com.au/news/breaking-news/65-of-real-estate-professionals-suffer-from-poor-mental-health-277000.aspx",
-                42: "https://www.tiktok.com/@katiesteinfeld/video/7515442811265633542",
-                43: "https://nowbam.com/top-10-books-for-real-estate-agents/",
-                44: "https://www.reddit.com/r/AusProperty/comments/11c0ldf/is_it_normal_to_get_lowball_offers_prior_to/",
-                45: "https://www.reddit.com/r/AusProperty/comments/10rlywn/whats_stopping_me_from_selling_my_place_without/",
-                46: "https://law.justia.com/cases/federal/district-courts/oklahoma/okndce/4:2014cv00369/37211/274/",
-                47: "https://www.reddit.com/r/AusPropertyChat/comments/1fiqd15/real_estate_agents_behaving_badly_what_have_you/",
-                48: "https://realtykickstart.com/blogs/insights/imposter-syndrome-in-real-estate",
-                49: "https://myrealpage.com/blog/deal-imposter-syndrome-real-estate/",
-                50: "https://newrepublic.com/article/172775/grant-cardone-hustle-culture-real-estate",
-                51: "https://podcasts.apple.com/au/podcast/million-dollar-agent/id761649354",
-                52: "https://agentgradschool.com/can-you-build-a-successful-real-estate-business-without-social-media/",
-                53: "https://jigglar.com/generate-real-estate-leads-without-social-media/",
-                54: "https://www.youtube.com/watch?v=zwu_UzbGIHY",
-                55: "https://www.reiq.com/articles/agency-practice/going-into-business-franchise-versus-independent-agency",
-                56: "https://www.reconjobs.com.au/jobs/business-development-executive-9",
-                57: "https://ownly.nz/wp-content/uploads/2023/11/Buiding-a-team-or-EBU.pdf",
-                58: "https://www.finspo.com.au/learn/what-is-a-vendor-advocate/",
-                59: "https://www.vendoradvocatemelb.com.au/what-do-vendor-advocates-do/",
-                60: "https://nationalpropertybuyers.com.au/vendor-advocacy/",
-                61: "https://www.realestatewitch.com/how-to-respond-to-a-lowball-offer-on-a-house/",
-                62: "https://prosperitypartnersgroup.org/wp-content/uploads/2024/03/NAR-Settlement-Scripts.pdf",
-                63: "https://www.openagent.com.au/news/what-do-the-new-underquoting-laws-for-buyers-and-sellers-in-new-south-wales-mean",
-                64: "https://www.fairtrading.nsw.gov.au/housing-and-property/buying-and-selling-property/selling-a-property/underquoting",
-                65: "https://www.youtube.com/watch?v=_o325lNys_s",
-                66: "https://entryeducation.edu.au/blog/how-much-do-buyers-agents-earn-australia/",
-                67: "https://www.najibrealestate.co.nz/Social/Najib-Blog/How-To-Become-a-Real-Estate-Agent-NZ/",
-                68: "https://proptechpro.com.au/setting-the-benchmark-ai-and-building-innovations-in-australia-2025/",
-            };
+      document.addEventListener("DOMContentLoaded", function () {
+        const urlMap = {
+          1: "https://www.jobsandskills.gov.au/data/occupation-and-industry-profiles/occupations/612114-real-estate-agents",
+          2: "https://entryeducation.edu.au/blog/day-in-the-life-of-a-real-estate-agent/",
+          3: "https://www.youtube.com/shorts/ugvMSyFA8ys",
+          4: "https://reaa.com.au/what-does-a-day-in-the-life-of-a-real-estate-professional-look-like/",
+          5: "https://www.youtube.com/watch?v=VNtoWBO9BXs",
+          6: "https://www.youtube.com/watch?v=6e3p6xgbBWA",
+          7: "https://www.agentkee.com/blog/the-importance-of-clear-communication-in-real-estate-transactions/",
+          8: "https://www.homelight.com/blog/signs-of-a-bad-real-estate-agent/",
+          9: "https://www.lemon8-app.com/adrian.tan/7229184876459590145?region=sg",
+          10: "https://www.boxbrownie.com/b/three-signs-of-real-estate-burnout-and-how-to-overcome-them",
+          11: "https://www.propertyme.com.au/blog/property-management/mental-health-office",
+          12: "https://www.agentbox.com.au/blog/time-management-secrets-for-top-real-estate-agents",
+          13: "https://createvic.com.au/a-day-in-the-life-of-a-licensed-real-estate-agent-in-melbourne/08/21/19/",
+          14: "https://www.clarkrealty.com.au/blog/day-life-real-estate-agent/",
+          15: "https://www.upcover.com/blog/a-day-in-the-life-of-a-real-estate-agent-behind-the-scenes-of-a-dynamic-profession",
+          16: "https://www.youtube.com/watch?v=xbmCtjRWcAg",
+          17: "https://www.agentbox.com.au/",
+          18: "https://www.reddit.com/r/AusPropertyChat/comments/17pp3dr/after_being_a_seller_i_now_hate_real_estate/",
+          19: "https://www.youtube.com/watch?v=Q1YjeXiEWtE",
+          20: "https://www.reddit.com/r/AusFinance/comments/18xxs7i/real_estate_career/",
+          21: "https://www.realestate.com.au/advice/real-estate-agent-commissions/",
+          22: "https://www.bizboxinc.com/blog/category/outside-the-box-podcast-repeat-referral-real-estate-business",
+          23: "https://www.agentbox.com.au/blog/real-estate-kpis-every-agent-should-track-using-analytics",
+          24: "https://insightsoftware.com/blog/real-estate-kpis-and-metrics/",
+          25: "https://www.youtube.com/watch?v=-YrAw_IjXic",
+          26: "https://www.agentbox.com.au/blog/kpis-why-are-they-essential-when-prospecting",
+          27: "https://www.youtube.com/watch?v=sI8KkILNesk",
+          28: "https://therealestatetrainer.com/lead-conversion-script-realtors/",
+          29: "https://upsystems.com.au/blog/2023/02/16/top-10-most-used-real-estate-software-in-australia/",
+          30: "https://www.agentbox.com.au/reviews",
+          31: "https://www.stepps.com.au/technology/3-best-real-estate-crms/",
+          32: "https://www.shoreagents.com/real-estate-crm/",
+          33: "https://www.mrisoftware.com/au/blog/best-real-estate-crm/",
+          34: "https://www.hicaliber.com.au/hicaliber-integration-partners/agentbox-integration/",
+          35: "https://openexpert.nz/property/essential-digital-tools-for-real-estate-agents/",
+          36: "https://www.pmva.com.au/ai-for-real-estate-marketing/",
+          37: "https://broadlandestates.com.au/2025/01/31/will-real-estate-agents-be-replaced-by-ai/",
+          38: "https://sunstateproperty.com.au/2024/11/20/ai-meets-real-estate-how-smart-algorithms-are-revolutionizing-the-role-of-buyers-agents-in-australia/",
+          39: "https://www.visive.ai/news/ai-revolutionizing-australias-real-estate-market",
+          40: "https://reaa.com.au/the-future-of-real-estate-in-australia-trends-and-predictions-for-2025/",
+          41: "https://www.brokernews.com.au/news/breaking-news/65-of-real-estate-professionals-suffer-from-poor-mental-health-277000.aspx",
+          42: "https://www.tiktok.com/@katiesteinfeld/video/7515442811265633542",
+          43: "https://nowbam.com/top-10-books-for-real-estate-agents/",
+          44: "https://www.reddit.com/r/AusProperty/comments/11c0ldf/is_it_normal_to_get_lowball_offers_prior_to/",
+          45: "https://www.reddit.com/r/AusProperty/comments/10rlywn/whats_stopping_me_from_selling_my_place_without/",
+          46: "https://law.justia.com/cases/federal/district-courts/oklahoma/okndce/4:2014cv00369/37211/274/",
+          47: "https://www.reddit.com/r/AusPropertyChat/comments/1fiqd15/real_estate_agents_behaving_badly_what_have_you/",
+          48: "https://realtykickstart.com/blogs/insights/imposter-syndrome-in-real-estate",
+          49: "https://myrealpage.com/blog/deal-imposter-syndrome-real-estate/",
+          50: "https://newrepublic.com/article/172775/grant-cardone-hustle-culture-real-estate",
+          51: "https://podcasts.apple.com/au/podcast/million-dollar-agent/id761649354",
+          52: "https://agentgradschool.com/can-you-build-a-successful-real-estate-business-without-social-media/",
+          53: "https://jigglar.com/generate-real-estate-leads-without-social-media/",
+          54: "https://www.youtube.com/watch?v=zwu_UzbGIHY",
+          55: "https://www.reiq.com/articles/agency-practice/going-into-business-franchise-versus-independent-agency",
+          56: "https://www.reconjobs.com.au/jobs/business-development-executive-9",
+          57: "https://ownly.nz/wp-content/uploads/2023/11/Buiding-a-team-or-EBU.pdf",
+          58: "https://www.finspo.com.au/learn/what-is-a-vendor-advocate/",
+          59: "https://www.vendoradvocatemelb.com.au/what-do-vendor-advocates-do/",
+          60: "https://nationalpropertybuyers.com.au/vendor-advocacy/",
+          61: "https://www.realestatewitch.com/how-to-respond-to-a-lowball-offer-on-a-house/",
+          62: "https://prosperitypartnersgroup.org/wp-content/uploads/2024/03/NAR-Settlement-Scripts.pdf",
+          63: "https://www.openagent.com.au/news/what-do-the-new-underquoting-laws-for-buyers-and-sellers-in-new-south-wales-mean",
+          64: "https://www.fairtrading.nsw.gov.au/housing-and-property/buying-and-selling-property/selling-a-property/underquoting",
+          65: "https://www.youtube.com/watch?v=_o325lNys_s",
+          66: "https://entryeducation.edu.au/blog/how-much-do-buyers-agents-earn-australia/",
+          67: "https://www.najibrealestate.co.nz/Social/Najib-Blog/How-To-Become-a-Real-Estate-Agent-NZ/",
+          68: "https://proptechpro.com.au/setting-the-benchmark-ai-and-building-innovations-in-australia-2025/",
+        };
 
-            const originalText = `
+        const originalText = `
                 <h2>第一部分：日常现实：中介的一周</h2>
                 <p>要真正理解澳洲房地产中介所面临的压力和挑战，必须首先摒弃那些在电视节目中被美化了的形象，深入探究他们真实的工作周。这不仅仅是一份工作，更是一种吞噬时间、模糊了个人与职业界限的生活方式。官方统计数据显示，澳洲全职房地产中介的平均工作时长为每周46小时，比全国平均水平多出两个小时 1。然而，这个数字远未能描绘出全貌。这个行业本质上不受朝九晚五的束缚 2，其工作节奏是由市场机遇、客户需求和佣金驱动的生存本能共同决定的。</p>
                 <h3>1.1 看不见的时间：解构“平均”46小时工作周</h3>
@@ -642,30 +660,35 @@
                 <span class="highlight">心理韧性 （Resilient）</span>。在一个信息透明度越来越高、客户期望不断提升、技术变革日新月异的市场中，只有那些不仅掌握销售技巧，更能有效管理自身压力、持续学习并适应变化的从业者，才能最终在这个充满挑战的行业中生存并茁壮成长。</p>
             `;
 
-            let processedText = originalText;
-            // This regex finds numbers (acting as citation markers) that are preceded by a space
-            // and followed by a space, period, comma, or the end of a line.
-            // It replaces them with an anchor tag.
-            processedText = processedText.replace(/\s(\d{1,2})(?=[,.\s]|$)/g, (match, numberStr) => {
-                const number = parseInt(numberStr, 10);
-                if (urlMap[number]) {
-                    return ` <a href="${urlMap[number]}" target="_blank" rel="noopener noreferrer">[${number}]</a>`;
-                }
-                return match; // Return the original match if no URL is found
-            });
+        let processedText = originalText;
+        // This regex finds numbers (acting as citation markers) that are preceded by a space
+        // and followed by a space, period, comma, or the end of a line.
+        // It replaces them with an anchor tag.
+        processedText = processedText.replace(
+          /\s(\d{1,2})(?=[,.\s]|$)/g,
+          (match, numberStr) => {
+            const number = parseInt(numberStr, 10);
+            if (urlMap[number]) {
+              return ` <a href="${urlMap[number]}" target="_blank" rel="noopener noreferrer">[${number}]</a>`;
+            }
+            return match; // Return the original match if no URL is found
+          },
+        );
 
-            // A special case for the table data source notes which don't have a leading space.
-             processedText = processedText.replace(/数据来源：综合分析 (\d{1,2})/g, (match, numberStr) => {
-                const number = parseInt(numberStr, 10);
-                if (urlMap[number]) {
-                    return `数据来源：综合分析 <a href="${urlMap[number]}" target="_blank" rel="noopener noreferrer">[${number}]</a>`;
-                }
-                return match;
-            });
+        // A special case for the table data source notes which don't have a leading space.
+        processedText = processedText.replace(
+          /数据来源：综合分析 (\d{1,2})/g,
+          (match, numberStr) => {
+            const number = parseInt(numberStr, 10);
+            if (urlMap[number]) {
+              return `数据来源：综合分析 <a href="${urlMap[number]}" target="_blank" rel="noopener noreferrer">[${number}]</a>`;
+            }
+            return match;
+          },
+        );
 
-
-            document.getElementById('full-text-content').innerHTML = processedText;
-        });
+        document.getElementById("full-text-content").innerHTML = processedText;
+      });
     </script>
-</body>
+  </body>
 </html>

@@ -22,19 +22,23 @@
 ### 2. 修复Props接口
 
 将CreateReportDialog中的CategorySelector使用方式从：
+
 ```tsx
 <CategorySelector
   selectedCategory={formData.category}
-  onCategoryChange={(category) => setFormData(prev => ({ ...prev, category }))}
+  onCategoryChange={(category) =>
+    setFormData((prev) => ({ ...prev, category }))
+  }
   disabled={isSubmitting}
 />
 ```
 
 修改为：
+
 ```tsx
 <SimpleCategorySelector
   value={formData.category}
-  onChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+  onChange={(value) => setFormData((prev) => ({ ...prev, category: value }))}
   disabled={isSubmitting}
 />
 ```
@@ -42,6 +46,7 @@
 ### 3. 组件特性
 
 #### SimpleCategorySelector特性：
+
 - ✅ **原生HTML select**：兼容性好，无额外依赖
 - ✅ **动态分类加载**：自动从store获取分类数据
 - ✅ **层级显示**：支持多级分类的缩进显示
@@ -50,6 +55,7 @@
 - ✅ **TypeScript支持**：完整的类型定义
 
 #### 接口定义：
+
 ```typescript
 interface SimpleCategorySelectorProps {
   value: string;
@@ -62,6 +68,7 @@ interface SimpleCategorySelectorProps {
 ## 测试验证
 
 ### 1. 功能测试
+
 - [x] 分类下拉框能正常打开
 - [x] 显示所有可用分类
 - [x] 能正确选择分类
@@ -69,11 +76,13 @@ interface SimpleCategorySelectorProps {
 - [x] 禁用状态正常工作
 
 ### 2. 数据测试
+
 - [x] 显示默认分类（未分类、技术研究、市场分析等）
 - [x] 动态加载用户创建的自定义分类
 - [x] 支持多级分类的层级显示
 
 ### 3. 集成测试
+
 - [x] 与CreateReportDialog正确集成
 - [x] 表单提交时分类数据正确传递
 - [x] 创建报告后分类正确保存
@@ -81,34 +90,32 @@ interface SimpleCategorySelectorProps {
 ## 使用说明
 
 ### 基本使用
+
 ```tsx
-import { SimpleCategorySelector } from './SimpleCategorySelector';
+import { SimpleCategorySelector } from "./SimpleCategorySelector";
 
 function MyComponent() {
-  const [category, setCategory] = useState('uncategorized');
-  
-  return (
-    <SimpleCategorySelector
-      value={category}
-      onChange={setCategory}
-    />
-  );
+  const [category, setCategory] = useState("uncategorized");
+
+  return <SimpleCategorySelector value={category} onChange={setCategory} />;
 }
 ```
 
 ### 自定义样式
+
 ```tsx
 <SimpleCategorySelector
   value={category}
   onChange={setCategory}
   style={{
-    border: '2px solid #3b82f6',
-    borderRadius: '12px'
+    border: "2px solid #3b82f6",
+    borderRadius: "12px",
   }}
 />
 ```
 
 ### 禁用状态
+
 ```tsx
 <SimpleCategorySelector
   value={category}
@@ -133,4 +140,4 @@ function MyComponent() {
 
 ---
 
-修复完成后，新增报告功能中的分类选择器应该能够正常工作。 
+修复完成后，新增报告功能中的分类选择器应该能够正常工作。

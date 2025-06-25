@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useAppStore } from '@/store/useAppStore';
-import { Report } from '@/types';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { getReportsByCategory } from '@/data/mockData';
-import { useMemo } from 'react';
-import { Star, Clock, FileText } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { safeTextContent } from '@/lib/htmlUtils';
+import { useAppStore } from "@/store/useAppStore";
+import { Report } from "@/types";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { getReportsByCategory } from "@/data/mockData";
+import { useMemo } from "react";
+import { Star, Clock, FileText } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { safeTextContent } from "@/lib/htmlUtils";
 
 interface ReportListProps {
   categoryId: string;
@@ -18,33 +18,33 @@ function ReportCard({ report }: { report: Report }) {
   const { selectedReport, setSelectedReport } = useAppStore();
   const isSelected = selectedReport?.id === report.id;
 
-  const getStatusIcon = (status: Report['readStatus']) => {
+  const getStatusIcon = (status: Report["readStatus"]) => {
     switch (status) {
-      case 'completed':
+      case "completed":
         return <Star className="h-3 w-3 text-green-500" />;
-      case 'reading':
+      case "reading":
         return <Clock className="h-3 w-3 text-yellow-500" />;
       default:
         return <FileText className="h-3 w-3 text-muted-foreground" />;
     }
   };
 
-  const getStatusText = (status: Report['readStatus']) => {
+  const getStatusText = (status: Report["readStatus"]) => {
     switch (status) {
-      case 'completed':
-        return '已完成';
-      case 'reading':
-        return '阅读中';
+      case "completed":
+        return "已完成";
+      case "reading":
+        return "阅读中";
       default:
-        return '未读';
+        return "未读";
     }
   };
 
   return (
-    <Card 
+    <Card
       className={cn(
         "cursor-pointer transition-colors hover:bg-accent",
-        isSelected && "bg-accent border-primary"
+        isSelected && "bg-accent border-primary",
       )}
       onClick={() => setSelectedReport(report)}
     >
@@ -58,13 +58,13 @@ function ReportCard({ report }: { report: Report }) {
               <Star className="h-3 w-3 text-yellow-500 fill-current flex-shrink-0" />
             )}
           </div>
-          
+
           {report.description && (
             <p className="text-xs text-muted-foreground line-clamp-2">
               {safeTextContent(report.description, 100)}
             </p>
           )}
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
               {getStatusIcon(report.readStatus)}
@@ -76,11 +76,15 @@ function ReportCard({ report }: { report: Report }) {
               {report.wordCount?.toLocaleString()} 字
             </span>
           </div>
-          
+
           {report.tags.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {report.tags.slice(0, 3).map((tag) => (
-                <Badge key={tag} variant="outline" className="text-xs px-1 py-0">
+                <Badge
+                  key={tag}
+                  variant="outline"
+                  className="text-xs px-1 py-0"
+                >
                   {tag}
                 </Badge>
               ))}
@@ -104,16 +108,19 @@ export function ReportList({ categoryId }: ReportListProps) {
     let result: Report[] = [];
 
     switch (categoryId) {
-      case 'favorites':
-        result = reports.filter(report => report.isFavorite);
+      case "favorites":
+        result = reports.filter((report) => report.isFavorite);
         break;
-      case 'recent':
+      case "recent":
         result = reports
-          .filter(report => report.readStatus !== 'unread')
-          .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+          .filter((report) => report.readStatus !== "unread")
+          .sort(
+            (a, b) =>
+              new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+          )
           .slice(0, 10);
         break;
-      case 'all':
+      case "all":
         result = reports;
         break;
       default:
@@ -123,10 +130,15 @@ export function ReportList({ categoryId }: ReportListProps) {
 
     // 应用搜索过滤
     if (searchQuery) {
-      result = result.filter(report =>
-        report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        report.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        report.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      result = result.filter(
+        (report) =>
+          report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          report.description
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          report.tags.some((tag) =>
+            tag.toLowerCase().includes(searchQuery.toLowerCase()),
+          ),
       );
     }
 
@@ -137,7 +149,7 @@ export function ReportList({ categoryId }: ReportListProps) {
     return (
       <div className="p-4 text-center">
         <p className="text-sm text-muted-foreground">
-          {searchQuery ? '没有找到匹配的报告' : '该分类下暂无报告'}
+          {searchQuery ? "没有找到匹配的报告" : "该分类下暂无报告"}
         </p>
       </div>
     );
@@ -153,4 +165,4 @@ export function ReportList({ categoryId }: ReportListProps) {
       ))}
     </div>
   );
-} 
+}

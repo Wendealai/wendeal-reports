@@ -1,27 +1,27 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Plus, Folder } from 'lucide-react';
-import { Category } from '@/types';
-import { useAppStore } from '@/store/useAppStore';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Plus, Folder } from "lucide-react";
+import { Category } from "@/types";
+import { useAppStore } from "@/store/useAppStore";
 
 interface CategorySelectorProps {
   value?: string;
@@ -30,41 +30,45 @@ interface CategorySelectorProps {
   className?: string;
 }
 
-export function CategorySelector({ 
-  value, 
-  onValueChange, 
+export function CategorySelector({
+  value,
+  onValueChange,
   placeholder = "选择分类",
-  className 
+  className,
 }: CategorySelectorProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState('');
-  const [newCategoryDescription, setNewCategoryDescription] = useState('');
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryDescription, setNewCategoryDescription] = useState("");
   const { categories, setCategories } = useAppStore();
 
   // 扁平化分类列表，包含层级显示
-  const flattenCategories = (cats: Category[], level = 0): Array<{category: Category, level: number}> => {
-    const result: Array<{category: Category, level: number}> = [];
-    
-    cats.forEach(cat => {
+  const flattenCategories = (
+    cats: Category[],
+    level = 0,
+  ): Array<{ category: Category; level: number }> => {
+    const result: Array<{ category: Category; level: number }> = [];
+
+    cats.forEach((cat) => {
       // 排除未分类，因为这是默认选项
-      if (cat.id !== 'uncategorized') {
+      if (cat.id !== "uncategorized") {
         result.push({ category: cat, level });
         if (cat.children) {
           result.push(...flattenCategories(cat.children, level + 1));
         }
       }
     });
-    
+
     return result;
   };
 
   const flatCategories = flattenCategories(categories);
 
   const generateCategoryId = (name: string) => {
-    return name.toLowerCase()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
+    return name
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
       .trim();
   };
 
@@ -75,25 +79,25 @@ export function CategorySelector({
       id: generateCategoryId(newCategoryName),
       name: newCategoryName.trim(),
       reportCount: 0,
-      icon: 'Folder',
+      icon: "Folder",
       description: newCategoryDescription.trim() || undefined,
     };
 
     // 添加到分类列表（作为顶级分类）
     setCategories([...categories, newCategory]);
-    
+
     // 选择新创建的分类
     onValueChange(newCategory.id);
-    
+
     // 重置表单并关闭对话框
-    setNewCategoryName('');
-    setNewCategoryDescription('');
+    setNewCategoryName("");
+    setNewCategoryDescription("");
     setIsCreateDialogOpen(false);
   };
 
   const openCreateDialog = () => {
-    setNewCategoryName('');
-    setNewCategoryDescription('');
+    setNewCategoryName("");
+    setNewCategoryDescription("");
     setIsCreateDialogOpen(true);
   };
 
@@ -111,11 +115,14 @@ export function CategorySelector({
               <span>未分类</span>
             </div>
           </SelectItem>
-          
+
           {/* 现有分类 */}
           {flatCategories.map(({ category, level }) => (
             <SelectItem key={category.id} value={category.id}>
-              <div className="flex items-center gap-2" style={{ paddingLeft: `${level * 12}px` }}>
+              <div
+                className="flex items-center gap-2"
+                style={{ paddingLeft: `${level * 12}px` }}
+              >
                 <Folder className="h-4 w-4 text-muted-foreground" />
                 <span>{category.name}</span>
                 {category.reportCount > 0 && (
@@ -126,10 +133,10 @@ export function CategorySelector({
               </div>
             </SelectItem>
           ))}
-          
+
           {/* 创建新分类选项 */}
           <SelectItem value="__create_new__">
-            <div 
+            <div
               className="flex items-center gap-2 text-primary cursor-pointer"
               onClick={(e) => {
                 e.preventDefault();
@@ -152,7 +159,7 @@ export function CategorySelector({
               创建新分类
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="categoryName">分类名称 *</Label>
@@ -164,7 +171,7 @@ export function CategorySelector({
                 autoFocus
               />
             </div>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="categoryDescription">分类描述</Label>
               <Textarea
@@ -176,15 +183,15 @@ export function CategorySelector({
               />
             </div>
           </div>
-          
+
           <DialogFooter>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setIsCreateDialogOpen(false)}
             >
               取消
             </Button>
-            <Button 
+            <Button
               onClick={handleCreateCategory}
               disabled={!newCategoryName.trim()}
             >
@@ -195,4 +202,4 @@ export function CategorySelector({
       </Dialog>
     </>
   );
-} 
+}

@@ -1,13 +1,24 @@
-'use client';
+"use client";
 
-import { Report } from '@/types';
-import { Button } from '@/components/ui/button';
-import { Star, Clock, FileText, ExternalLink, ArrowLeft, Edit, StarOff, Trash2, CheckCircle, BookOpen } from 'lucide-react';
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { useAppStore } from '@/store/useAppStore';
-import { ReportEditDialog } from './ReportEditDialog';
-import { safeTextContent } from '@/lib/htmlUtils';
-import { FileReplaceDialog } from './FileReplaceDialog';
+import { Report } from "@/types";
+import { Button } from "@/components/ui/button";
+import {
+  Star,
+  Clock,
+  FileText,
+  ExternalLink,
+  ArrowLeft,
+  Edit,
+  StarOff,
+  Trash2,
+  CheckCircle,
+  BookOpen,
+} from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useAppStore } from "@/store/useAppStore";
+import { ReportEditDialog } from "./ReportEditDialog";
+import { safeTextContent } from "@/lib/htmlUtils";
+import { FileReplaceDialog } from "./FileReplaceDialog";
 
 interface ReportViewerProps {
   report: Report;
@@ -16,19 +27,20 @@ interface ReportViewerProps {
 export function ReportViewer({ report }: ReportViewerProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [contentBlobUrl, setContentBlobUrl] = useState<string>('');
-  const { setSelectedReport, theme, toggleFavorite, deleteReport } = useAppStore();
+  const [contentBlobUrl, setContentBlobUrl] = useState<string>("");
+  const { setSelectedReport, theme, toggleFavorite, deleteReport } =
+    useAppStore();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [showReplaceDialog, setShowReplaceDialog] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // 创建内容的Blob URL
   useEffect(() => {
-    console.log('📄 处理报告内容:', {
+    console.log("📄 处理报告内容:", {
       hasContent: !!report.content,
       hasFilePath: !!report.filePath,
       contentLength: report.content?.length || 0,
-      filePath: report.filePath
+      filePath: report.filePath,
     });
 
     if (report.content && report.content.trim()) {
@@ -45,18 +57,18 @@ export function ReportViewer({ report }: ReportViewerProps) {
             line-height: 1.6;
             margin: 0;
             padding: 20px;
-            color: ${theme === 'dark' ? '#e2e8f0' : '#333'};
-            background-color: ${theme === 'dark' ? '#1e293b' : '#ffffff'};
+            color: ${theme === "dark" ? "#e2e8f0" : "#333"};
+            background-color: ${theme === "dark" ? "#1e293b" : "#ffffff"};
             min-height: 100vh;
             box-sizing: border-box;
         }
-        h1, h2, h3 { color: ${theme === 'dark' ? '#60a5fa' : '#2563eb'}; }
-        h1 { border-bottom: 2px solid ${theme === 'dark' ? '#60a5fa' : '#2563eb'}; padding-bottom: 10px; }
+        h1, h2, h3 { color: ${theme === "dark" ? "#60a5fa" : "#2563eb"}; }
+        h1 { border-bottom: 2px solid ${theme === "dark" ? "#60a5fa" : "#2563eb"}; padding-bottom: 10px; }
         h2 { margin-top: 30px; }
-        .highlight { background-color: ${theme === 'dark' ? '#374151' : '#fef3c7'}; padding: 2px 4px; border-radius: 3px; }
+        .highlight { background-color: ${theme === "dark" ? "#374151" : "#fef3c7"}; padding: 2px 4px; border-radius: 3px; }
         .code-block {
-            background-color: ${theme === 'dark' ? '#374151' : '#f8fafc'};
-            border: 1px solid ${theme === 'dark' ? '#475569' : '#e2e8f0'};
+            background-color: ${theme === "dark" ? "#374151" : "#f8fafc"};
+            border: 1px solid ${theme === "dark" ? "#475569" : "#e2e8f0"};
             border-radius: 6px;
             padding: 16px;
             margin: 16px 0;
@@ -68,20 +80,20 @@ export function ReportViewer({ report }: ReportViewerProps) {
             margin: 16px 0;
         }
         th, td {
-            border: 1px solid ${theme === 'dark' ? '#475569' : '#e2e8f0'};
+            border: 1px solid ${theme === "dark" ? "#475569" : "#e2e8f0"};
             padding: 12px;
             text-align: left;
         }
         th {
-            background-color: ${theme === 'dark' ? '#374151' : '#f8fafc'};
+            background-color: ${theme === "dark" ? "#374151" : "#f8fafc"};
             font-weight: 600;
         }
         a {
-            color: ${theme === 'dark' ? '#60a5fa' : '#2563eb'};
+            color: ${theme === "dark" ? "#60a5fa" : "#2563eb"};
         }
         blockquote {
-            border-left: 4px solid ${theme === 'dark' ? '#60a5fa' : '#2563eb'};
-            background-color: ${theme === 'dark' ? '#374151' : '#f8fafc'};
+            border-left: 4px solid ${theme === "dark" ? "#60a5fa" : "#2563eb"};
+            background-color: ${theme === "dark" ? "#374151" : "#f8fafc"};
             padding: 16px;
             margin: 16px 0;
         }
@@ -91,21 +103,21 @@ export function ReportViewer({ report }: ReportViewerProps) {
     ${report.content}
 </body>
 </html>`;
-      
-      const blob = new Blob([fullHtml], { type: 'text/html' });
+
+      const blob = new Blob([fullHtml], { type: "text/html" });
       const url = URL.createObjectURL(blob);
       setContentBlobUrl(url);
-      console.log('✅ 内容Blob URL创建成功');
-      
+      console.log("✅ 内容Blob URL创建成功");
+
       // 清理函数
       return () => {
         URL.revokeObjectURL(url);
-        console.log('🗑️ Blob URL已清理');
+        console.log("🗑️ Blob URL已清理");
       };
     } else if (report.filePath && report.filePath.trim()) {
       // 如果有文件路径，使用文件路径
       setContentBlobUrl(report.filePath);
-      console.log('📁 使用文件路径:', report.filePath);
+      console.log("📁 使用文件路径:", report.filePath);
     } else {
       // 如果既没有content也没有filePath，创建一个占位符HTML
       const simpleHtml = `<!DOCTYPE html>
@@ -120,8 +132,8 @@ export function ReportViewer({ report }: ReportViewerProps) {
             line-height: 1.6;
             margin: 0;
             padding: 40px;
-            color: ${theme === 'dark' ? '#e2e8f0' : '#333'};
-            background-color: ${theme === 'dark' ? '#1e293b' : '#ffffff'};
+            color: ${theme === "dark" ? "#e2e8f0" : "#333"};
+            background-color: ${theme === "dark" ? "#1e293b" : "#ffffff"};
             text-align: center;
             min-height: 100vh;
             box-sizing: border-box;
@@ -131,9 +143,9 @@ export function ReportViewer({ report }: ReportViewerProps) {
         }
         .placeholder {
             padding: 40px;
-            background-color: ${theme === 'dark' ? '#374151' : '#f8fafc'};
+            background-color: ${theme === "dark" ? "#374151" : "#f8fafc"};
             border-radius: 8px;
-            border: 2px dashed ${theme === 'dark' ? '#475569' : '#e2e8f0'};
+            border: 2px dashed ${theme === "dark" ? "#475569" : "#e2e8f0"};
             max-width: 500px;
             width: 100%;
         }
@@ -142,11 +154,11 @@ export function ReportViewer({ report }: ReportViewerProps) {
             margin-bottom: 16px;
         }
         h2 {
-            color: ${theme === 'dark' ? '#94a3b8' : '#64748b'};
+            color: ${theme === "dark" ? "#94a3b8" : "#64748b"};
             margin-bottom: 16px;
         }
         p {
-            color: ${theme === 'dark' ? '#94a3b8' : '#64748b'};
+            color: ${theme === "dark" ? "#94a3b8" : "#64748b"};
             margin: 0 auto;
         }
     </style>
@@ -155,63 +167,79 @@ export function ReportViewer({ report }: ReportViewerProps) {
     <div class="placeholder">
         <div class="icon">📄</div>
         <h2>暂无内容</h2>
-        <p>${report.description || '该报告暂时没有可显示的内容。您可以点击编辑按钮来添加内容。'}</p>
+        <p>${report.description || "该报告暂时没有可显示的内容。您可以点击编辑按钮来添加内容。"}</p>
     </div>
 </body>
 </html>`;
-      
-      const blob = new Blob([simpleHtml], { type: 'text/html' });
+
+      const blob = new Blob([simpleHtml], { type: "text/html" });
       const url = URL.createObjectURL(blob);
       setContentBlobUrl(url);
-      console.log('📝 创建占位符内容');
-      
+      console.log("📝 创建占位符内容");
+
       return () => {
         URL.revokeObjectURL(url);
       };
     }
-  }, [report.content, report.filePath, report.title, report.description, theme]);
+  }, [
+    report.content,
+    report.filePath,
+    report.title,
+    report.description,
+    theme,
+  ]);
 
-  const getStatusIcon = (status: Report['readStatus']) => {
+  const getStatusIcon = (status: Report["readStatus"]) => {
     switch (status) {
-      case 'completed':
+      case "completed":
         return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'reading':
-        return <Clock style={{ width: '1rem', height: '1rem', color: '#f59e0b' }} />;
+      case "reading":
+        return (
+          <Clock style={{ width: "1rem", height: "1rem", color: "#f59e0b" }} />
+        );
       default:
-        return <FileText style={{ width: '1rem', height: '1rem', color: theme === 'dark' ? '#94a3b8' : '#64748b' }} />;
+        return (
+          <FileText
+            style={{
+              width: "1rem",
+              height: "1rem",
+              color: theme === "dark" ? "#94a3b8" : "#64748b",
+            }}
+          />
+        );
     }
   };
 
-  const getStatusText = (status: Report['readStatus']) => {
+  const getStatusText = (status: Report["readStatus"]) => {
     switch (status) {
-      case 'completed':
-        return '已完成';
-      case 'reading':
-        return '阅读中';
+      case "completed":
+        return "已完成";
+      case "reading":
+        return "阅读中";
       default:
-        return '未读';
+        return "未读";
     }
   };
 
   const formatDate = (date: Date | string | number) => {
-    if (!date) return '未知日期';
+    if (!date) return "未知日期";
     try {
-      return new Intl.DateTimeFormat('zh-CN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
+      return new Intl.DateTimeFormat("zh-CN", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       }).format(new Date(date));
     } catch (error) {
-      console.error('日期格式化失败:', error);
-      return '无效日期';
+      console.error("日期格式化失败:", error);
+      return "无效日期";
     }
   };
 
   const handleOpenInNewTab = () => {
-    if (report.filePath && report.filePath.startsWith('data:')) {
-      window.open(report.filePath, '_blank');
+    if (report.filePath && report.filePath.startsWith("data:")) {
+      window.open(report.filePath, "_blank");
       return;
     }
 
@@ -238,12 +266,12 @@ export function ReportViewer({ report }: ReportViewerProps) {
     <div>${report.content}</div>
 </body>
 </html>`;
-      const blob = new Blob([fullHtml], { type: 'text/html' });
+      const blob = new Blob([fullHtml], { type: "text/html" });
       const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
+      window.open(url, "_blank");
     } else if (report.filePath) {
       // 假定是相对路径
-      window.open(report.filePath, '_blank');
+      window.open(report.filePath, "_blank");
     }
   };
 
@@ -293,65 +321,105 @@ export function ReportViewer({ report }: ReportViewerProps) {
   } = report;
 
   const isHtmlContent =
-    (content && content.trim().startsWith('<')) ||
-    (filePath && (filePath.startsWith('data:text/html') || filePath.endsWith('.html')));
+    (content && content.trim().startsWith("<")) ||
+    (filePath &&
+      (filePath.startsWith("data:text/html") || filePath.endsWith(".html")));
 
   return (
-    <div style={{ 
-      height: '100vh', 
-      display: 'flex', 
-      flexDirection: 'column', 
-      overflow: 'hidden',
-      backgroundColor: theme === 'dark' ? '#0f172a' : '#ffffff',
-      color: theme === 'dark' ? '#ffffff' : '#000000'
-    }}>
+    <div
+      style={{
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        backgroundColor: theme === "dark" ? "#0f172a" : "#ffffff",
+        color: theme === "dark" ? "#ffffff" : "#000000",
+      }}
+    >
       {/* 顶部信息卡片 */}
-      <div style={{ 
-        margin: '1.5rem', 
-        marginBottom: '1rem',
-        border: `1px solid ${theme === 'dark' ? '#334155' : '#e2e8f0'}`,
-        borderRadius: '0.5rem',
-        backgroundColor: theme === 'dark' ? '#1e293b' : '#ffffff'
-      }}>
-        <div style={{ padding: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem' }}>
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <h1 style={{ 
-                  fontSize: '1.5rem', 
-                  fontWeight: 'bold', 
-                  margin: 0,
-                  color: theme === 'dark' ? '#ffffff' : '#000000'
-                }}>
+      <div
+        style={{
+          margin: "1.5rem",
+          marginBottom: "1rem",
+          border: `1px solid ${theme === "dark" ? "#334155" : "#e2e8f0"}`,
+          borderRadius: "0.5rem",
+          backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
+        }}
+      >
+        <div style={{ padding: "1.5rem" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              gap: "1rem",
+            }}
+          >
+            <div
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.5rem",
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+              >
+                <h1
+                  style={{
+                    fontSize: "1.5rem",
+                    fontWeight: "bold",
+                    margin: 0,
+                    color: theme === "dark" ? "#ffffff" : "#000000",
+                  }}
+                >
                   {report.title}
                 </h1>
                 {report.isFavorite && (
-                  <Star style={{ width: '1.25rem', height: '1.25rem', color: '#fbbf24', fill: '#fbbf24' }} />
+                  <Star
+                    style={{
+                      width: "1.25rem",
+                      height: "1.25rem",
+                      color: "#fbbf24",
+                      fill: "#fbbf24",
+                    }}
+                  />
                 )}
               </div>
-              
+
               {/* 描述 */}
               {report.description && (
-                <div style={{ 
-                  marginBottom: '1rem', 
-                  fontSize: '0.95rem', 
-                  lineHeight: '1.6', 
-                  color: theme === 'dark' ? '#cbd5e1' : '#64748b',
-                  fontStyle: 'italic' 
-                }}>
+                <div
+                  style={{
+                    marginBottom: "1rem",
+                    fontSize: "0.95rem",
+                    lineHeight: "1.6",
+                    color: theme === "dark" ? "#cbd5e1" : "#64748b",
+                    fontStyle: "italic",
+                  }}
+                >
                   {safeTextContent(report.description)}
                 </div>
               )}
-              
-              <div style={{ 
-                display: 'flex', 
-                flexWrap: 'wrap', 
-                alignItems: 'center', 
-                gap: '1rem', 
-                fontSize: '0.875rem', 
-                color: theme === 'dark' ? '#94a3b8' : '#64748b' 
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: "1rem",
+                  fontSize: "0.875rem",
+                  color: theme === "dark" ? "#94a3b8" : "#64748b",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                  }}
+                >
                   {getStatusIcon(report.readStatus)}
                   <span>{getStatusText(report.readStatus)}</span>
                 </div>
@@ -365,65 +433,115 @@ export function ReportViewer({ report }: ReportViewerProps) {
                 )}
               </div>
             </div>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                flexWrap: "wrap",
+              }}
+            >
               <Button variant="outline" size="sm" onClick={handleBack}>
-                <ArrowLeft style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} />
+                <ArrowLeft
+                  style={{
+                    width: "1rem",
+                    height: "1rem",
+                    marginRight: "0.5rem",
+                  }}
+                />
                 返回
               </Button>
-              
+
               <Button variant="outline" size="sm" onClick={handleEdit}>
-                <Edit style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} />
+                <Edit
+                  style={{
+                    width: "1rem",
+                    height: "1rem",
+                    marginRight: "0.5rem",
+                  }}
+                />
                 编辑
               </Button>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
+
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleToggleFavorite}
-                style={{ color: report.isFavorite ? '#ca8a04' : undefined }}
+                style={{ color: report.isFavorite ? "#ca8a04" : undefined }}
               >
                 {report.isFavorite ? (
                   <>
-                    <StarOff style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} />
+                    <StarOff
+                      style={{
+                        width: "1rem",
+                        height: "1rem",
+                        marginRight: "0.5rem",
+                      }}
+                    />
                     取消收藏
                   </>
                 ) : (
                   <>
-                    <Star style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} />
+                    <Star
+                      style={{
+                        width: "1rem",
+                        height: "1rem",
+                        marginRight: "0.5rem",
+                      }}
+                    />
                     收藏
                   </>
                 )}
               </Button>
-              
+
               <Button variant="outline" size="sm" onClick={handleOpenInNewTab}>
-                <ExternalLink style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} />
+                <ExternalLink
+                  style={{
+                    width: "1rem",
+                    height: "1rem",
+                    marginRight: "0.5rem",
+                  }}
+                />
                 新标签页打开
               </Button>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
+
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={handleDelete}
-                style={{ color: '#ef4444' }}
+                style={{ color: "#ef4444" }}
               >
-                <Trash2 style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} />
+                <Trash2
+                  style={{
+                    width: "1rem",
+                    height: "1rem",
+                    marginRight: "0.5rem",
+                  }}
+                />
                 删除
               </Button>
             </div>
           </div>
-          
+
           {report.tags.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', paddingTop: '0.5rem' }}>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "0.5rem",
+                paddingTop: "0.5rem",
+              }}
+            >
               {report.tags.map((tag) => (
-                <span 
-                  key={tag} 
+                <span
+                  key={tag}
                   style={{
-                    backgroundColor: theme === 'dark' ? '#374151' : '#f1f5f9',
-                    color: theme === 'dark' ? '#e5e7eb' : '#374151',
-                    padding: '0.25rem 0.5rem',
-                    borderRadius: '0.25rem',
-                    fontSize: '0.75rem'
+                    backgroundColor: theme === "dark" ? "#374151" : "#f1f5f9",
+                    color: theme === "dark" ? "#e5e7eb" : "#374151",
+                    padding: "0.25rem 0.5rem",
+                    borderRadius: "0.25rem",
+                    fontSize: "0.75rem",
                   }}
                 >
                   {tag}
@@ -435,26 +553,28 @@ export function ReportViewer({ report }: ReportViewerProps) {
       </div>
 
       {/* 内容区域 */}
-      <div style={{ 
-        flex: 1, 
-        margin: '0 1.5rem 1.5rem 1.5rem', 
-        overflow: 'hidden',
-        border: `1px solid ${theme === 'dark' ? '#334155' : '#e2e8f0'}`,
-        borderRadius: '0.5rem',
-        backgroundColor: theme === 'dark' ? '#1e293b' : '#ffffff'
-      }}>
-        <div style={{ padding: 0, height: '100%' }}>
+      <div
+        style={{
+          flex: 1,
+          margin: "0 1.5rem 1.5rem 1.5rem",
+          overflow: "hidden",
+          border: `1px solid ${theme === "dark" ? "#334155" : "#e2e8f0"}`,
+          borderRadius: "0.5rem",
+          backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
+        }}
+      >
+        <div style={{ padding: 0, height: "100%" }}>
           {isHtmlContent ? (
             <iframe
               ref={iframeRef}
-              srcDoc={content || ''}
-              src={filePath || ''}
+              srcDoc={content || ""}
+              src={filePath || ""}
               title={title}
-              style={{ 
-                width: '100%', 
-                height: '100%', 
-                border: 0, 
-                borderRadius: '0.5rem' 
+              style={{
+                width: "100%",
+                height: "100%",
+                border: 0,
+                borderRadius: "0.5rem",
               }}
               onLoad={handleIframeLoad}
               onLoadStart={() => setIsLoading(true)}
@@ -487,8 +607,12 @@ export function ReportViewer({ report }: ReportViewerProps) {
       {/* 添加旋转动画的CSS */}
       <style jsx>{`
         @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
         }
       `}</style>
 
@@ -511,4 +635,4 @@ export function ReportViewer({ report }: ReportViewerProps) {
       )}
     </div>
   );
-} 
+}

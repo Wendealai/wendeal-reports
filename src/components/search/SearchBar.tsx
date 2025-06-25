@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { useAppStore } from '@/store/useAppStore';
-import { useState } from 'react';
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { useAppStore } from "@/store/useAppStore";
+import { useState } from "react";
 
 export function SearchBar() {
   const { searchQuery, setSearchQuery } = useAppStore();
@@ -26,4 +26,4 @@ export function SearchBar() {
       />
     </div>
   );
-} 
+}

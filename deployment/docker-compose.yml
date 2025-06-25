@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   wendeal-reports:
@@ -31,7 +31,15 @@ services:
       - ${PWD}/public:/app/public:${MOUNT_MODE:-ro}
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000/api/health",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -154,4 +162,4 @@ networks:
   wendeal-network:
     driver: bridge
     labels:
-      - "com.wendeal.network=main" 
+      - "com.wendeal.network=main"
