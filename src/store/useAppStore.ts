@@ -173,9 +173,9 @@ export const useAppStore = create<AppState>()((set, get) => ({
         }
       }
 
-    // 🚀 新增：同步到数据库
-    try {
-      // 首先尝试在数据库中查找或创建对应的分类
+      // 🚀 新增：同步到数据库
+      try {
+        // 首先尝试在数据库中查找或创建对应的分类
       const categoryMappings: Record<
         string,
         { name: string; icon: string; color: string }
