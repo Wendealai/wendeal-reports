@@ -107,3 +107,6 @@ jspm_packages/
 .vscode-test
 
 /src/generated/prisma
+
+# Local Netlify folder
+.netlify
