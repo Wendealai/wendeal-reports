@@ -12,7 +12,7 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci && npm cache clean --force
 
 # Copy source code
 COPY . .
@@ -26,8 +26,8 @@ RUN npm run build
 # Production stage
 FROM node:18-alpine AS runner
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Install dumb-init and curl for proper signal handling and health checks
+RUN apk add --no-cache dumb-init curl
 
 # Create app user
 RUN addgroup --system --gid 1001 nodejs
@@ -58,7 +58,7 @@ EXPOSE 11280
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:11280/api/health || exit 1
+  CMD curl -f http://localhost:11280/api/health || exit 1
 
 # Set environment variables
 ENV NODE_ENV=production
