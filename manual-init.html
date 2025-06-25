@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vercel生产数据库初始化</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .button {
+            background: #0070f3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+            transition: background 0.2s;
+        }
+        .button:hover {
+            background: #0051a2;
+        }
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .success {
+            background: #e6fffa;
+            border: 1px solid #38d9a9;
+            color: #087f5b;
+        }
+        .error {
+            background: #ffe0e6;
+            border: 1px solid #ff6b6b;
+            color: #c92a2a;
+        }
+        .info {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            color: #1565c0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Vercel生产环境数据库初始化</h1>
+        
+        <p>点击下面的按钮来初始化Vercel生产环境的数据库：</p>
+        
+        <button id="initBtn" class="button" onclick="initializeDatabase()">
+            🔧 初始化生产数据库
+        </button>
+        
+        <button id="checkBtn" class="button" onclick="checkHealth()">
+            🏥 检查健康状态
+        </button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const VERCEL_URL = 'https://wendeal-reports.vercel.app';
+        
+        async function initializeDatabase() {
+            const btn = document.getElementById('initBtn');
+            const result = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ 正在初始化...';
+            
+            try {
+                showResult('📡 正在连接到Vercel API...', 'info');
+                
+                const response = await fetch(`${VERCEL_URL}/api/admin/init-database`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'initialize'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    let message = '✅ 数据库初始化成功！\\n\\n';
+                    
+                    if (data.data) {
+                        message += `👤 默认用户: ${data.data.user === 'created' ? '已创建' : '已存在'}\\n`;
+                        
+                        if (data.data.categories) {
+                            message += '📁 分类状态:\\n';
+                            data.data.categories.forEach(cat => {
+                                message += `   • ${cat.name}: ${cat.status === 'created' ? '已创建' : '已存在'}\\n`;
+                            });
+                        }
+                        
+                        if (data.data.statistics) {
+                            message += '\\n📊 数据库统计:\\n';
+                            message += `   用户数量: ${data.data.statistics.users}\\n`;
+                            message += `   分类数量: ${data.data.statistics.categories}\\n`;
+                            message += `   报告数量: ${data.data.statistics.reports}\\n`;
+                        }
+                    }
+                    
+                    message += `\\n🎉 ${data.message}`;
+                    message += `\\n🌐 现在可以正常使用文件上传功能了！`;
+                    message += `\\n📱 访问: ${VERCEL_URL}`;
+                    
+                    showResult(message, 'success');
+                } else {
+                    let errorMessage = `❌ 初始化失败\\n\\n`;
+                    errorMessage += `状态码: ${response.status}\\n`;
+                    errorMessage += `错误信息: ${data.error || data.message || '未知错误'}\\n`;
+                    
+                    if (data.troubleshooting) {
+                        errorMessage += '\\n🔧 故障排除建议:\\n';
+                        data.troubleshooting.forEach((tip, index) => {
+                            errorMessage += `   ${index + 1}. ${tip}\\n`;
+                        });
+                    }
+                    
+                    showResult(errorMessage, 'error');
+                }
+                
+            } catch (error) {
+                let errorMessage = `❌ 网络请求失败\\n\\n`;
+                errorMessage += `错误信息: ${error.message}\\n\\n`;
+                errorMessage += `🔧 可能的原因:\\n`;
+                errorMessage += `   1. 网络连接问题\\n`;
+                errorMessage += `   2. Vercel服务不可用\\n`;
+                errorMessage += `   3. API端点未正确部署\\n`;
+                errorMessage += `   4. CORS策略限制\\n`;
+                
+                showResult(errorMessage, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔧 初始化生产数据库';
+            }
+        }
+        
+        async function checkHealth() {
+            const btn = document.getElementById('checkBtn');
+            const result = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ 检查中...';
+            
+            try {
+                showResult('📡 正在检查健康状态...', 'info');
+                
+                const response = await fetch(`${VERCEL_URL}/api/health`, {
+                    method: 'GET'
+                });
+                
+                const data = await response.json();
+                
+                let message = `🏥 健康检查结果\\n\\n`;
+                message += `状态码: ${response.status}\\n`;
+                message += `响应时间: ${new Date().toLocaleString()}\\n\\n`;
+                message += `服务状态: ${data.status || '未知'}\\n`;
+                
+                if (data.database) {
+                    message += `数据库状态: ${data.database.status || '未知'}\\n`;
+                }
+                
+                message += `\\n原始响应:\\n${JSON.stringify(data, null, 2)}`;
+                
+                showResult(message, response.ok ? 'success' : 'error');
+                
+            } catch (error) {
+                showResult(`❌ 健康检查失败: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🏥 检查健康状态';
+            }
+        }
+        
+        function showResult(message, type) {
+            const result = document.getElementById('result');
+            result.textContent = message;
+            result.className = `result ${type}`;
+        }
+        
+        // 页面加载时显示说明
+        window.onload = function() {
+            showResult('📋 准备就绪，点击上方按钮开始操作', 'info');
+        };
+    </script>
+</body>
+</html>

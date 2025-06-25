@@ -220,9 +220,9 @@ export class StorageUtils {
             used += localStorage[key].length + key.length;
           }
         }
-        info.localStorage.used = used;
+        (info.localStorage as any).used = used;
         // Most browsers limit localStorage to 5-10MB
-        info.localStorage.total = 5 * 1024 * 1024; // 5MB estimate
+        (info.localStorage as any).total = 5 * 1024 * 1024; // 5MB estimate
       }
     } catch (error) {
       logger.warn("⚠️ Failed to get localStorage info:", undefined, error);
@@ -238,8 +238,8 @@ export class StorageUtils {
             used += sessionStorage[key].length + key.length;
           }
         }
-        info.sessionStorage.used = used;
-        info.sessionStorage.total = 5 * 1024 * 1024; // 5MB estimate
+        (info.sessionStorage as any).used = used;
+        (info.sessionStorage as any).total = 5 * 1024 * 1024; // 5MB estimate
       }
     } catch (error) {
       logger.warn("⚠️ Failed to get sessionStorage info:", undefined, error);

@@ -88,7 +88,7 @@ async function createCategory(request: Request) {
         {
           error: "数据库连接失败",
           message: "无法连接到数据库，请检查数据库配置",
-          details: process.env.NODE_ENV === "development" ? dbError.message : "Database connection error"
+          details: process.env.NODE_ENV === "development" ? (dbError instanceof Error ? dbError.message : String(dbError)) : "Database connection error"
         },
         { status: 503 }
       );

@@ -218,8 +218,11 @@ export const useAppStore = create<AppState>()((set, get) => ({
           });
         }
       }
+      } catch (error) {
+        logger.warn("⚠️ 数据库同步出错，但localStorage已更新:", undefined, error);
+      }
     } catch (error) {
-      logger.warn("⚠️ 数据库同步出错，但localStorage已更新:", undefined, error);
+      logger.error("❌ updatePredefinedCategoryName 操作失败:", undefined, error);
     }
   },
 

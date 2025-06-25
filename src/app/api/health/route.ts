@@ -43,7 +43,7 @@ export async function GET() {
         const categoryCount = await prisma.category.count();
         
         healthInfo.status = "healthy";
-        healthInfo.database = {
+        (healthInfo.database as any) = {
           status: "connected",
           url_configured: !!process.env.DATABASE_URL,
           direct_url_configured: !!process.env.DIRECT_URL,

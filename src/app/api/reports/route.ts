@@ -141,7 +141,7 @@ async function createReport(request: Request) {
         {
           error: "数据库连接失败",
           message: "无法连接到数据库，请稍后重试",
-          details: process.env.NODE_ENV === "development" ? dbError.message : undefined
+          details: process.env.NODE_ENV === "development" ? (dbError instanceof Error ? dbError.message : String(dbError)) : undefined
         },
         { status: 503 }
       );
