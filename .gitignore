@@ -110,3 +110,16 @@ jspm_packages/
 
 # Local Netlify folder
 .netlify
+
+# Docker & deployment
+data/
+backups/
+.env
+.env.local
+.env.production
+.env.backup
+
+# Docker volumes and data
+docker-data/
+postgres-data/
+uploads/

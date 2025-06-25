@@ -1,0 +1,94 @@
+# Dependencies
+node_modules
+npm-debug.log*
+
+# Next.js build output
+.next/
+out/
+
+# Environment files (except example)
+.env
+.env.local
+.env.production
+.env.backup
+.env.docker
+
+# Development files
+.git
+.gitignore
+README.md
+*.md
+docs/
+
+# Testing
+tests/
+coverage/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Database files
+prisma/dev.db
+prisma/dev.db-journal
+
+# Vercel
+.vercel/
+
+# Build artifacts
+tsconfig.tsbuildinfo
+
+# Temporary files
+tmp/
+temp/
+
+# Cache
+.cache/
+
+# Local data directories
+data/
+
+# Scripts (build-time only)
+scripts/
+deployment/
+
+# Test files
+test-*.js
+test-*.html
+*.test.js
+*.spec.js
+
+# CI/CD
+.github/
+.netlify/
+netlify/
+
+# Manual files
+manual-*.html
+call-init-api.js
+deploy-and-test.js
+fix-vercel-env.js
+get-categories.js
+init-vercel-production.js
+run-production-init.js
+setup-database.js
+test-*.js
+DEPLOYMENT*.md
+PROBLEM_SOLUTION.md
+QUICK_DB_SETUP.md
+AUTOPREFIXER_FIX.md
+
+# Docker files (don't copy into image)
+Dockerfile
+docker-compose.yml
+.dockerignore

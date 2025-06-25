@@ -1,0 +1,140 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: wendeal-reports-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: wendeal_reports
+      POSTGRES_USER: wendeal
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-wendeal123456}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - wendeal-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wendeal -d wendeal_reports"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Wendeal Reports Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wendeal-reports-app
+    restart: unless-stopped
+    environment:
+      # Database Configuration
+      DATABASE_URL: "postgresql://wendeal:${DB_PASSWORD:-wendeal123456}@postgres:5432/wendeal_reports?sslmode=disable"
+      DIRECT_URL: "postgresql://wendeal:${DB_PASSWORD:-wendeal123456}@postgres:5432/wendeal_reports?sslmode=disable"
+      
+      # Next.js Configuration
+      NODE_ENV: production
+      PORT: 11280
+      HOSTNAME: "0.0.0.0"
+      
+      # Authentication
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-your-super-secret-key-change-in-production}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:11280}
+      
+      # Optional Analytics
+      VERCEL_ANALYTICS_ID: ${VERCEL_ANALYTICS_ID:-}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+    ports:
+      - "11280:11280"
+    volumes:
+      # Persistent storage for uploaded files
+      - uploads_data:/app/uploads
+      # Optional: Mount logs directory
+      - logs_data:/app/logs
+    networks:
+      - wendeal-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:11280/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+  # Optional: Redis for caching (uncomment if needed)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: wendeal-reports-redis
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   networks:
+  #     - wendeal-network
+  #   command: redis-server --appendonly yes
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+
+  # Optional: Nginx reverse proxy (uncomment if needed)
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: wendeal-reports-nginx
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./nginx/ssl:/etc/nginx/ssl:ro
+  #   networks:
+  #     - wendeal-network
+  #   depends_on:
+  #     - app
+
+volumes:
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}/postgres
+  uploads_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}/uploads
+  logs_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}/logs
+  # redis_data:
+  #   driver: local
+
+networks:
+  wendeal-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
