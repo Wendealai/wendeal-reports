@@ -29,7 +29,7 @@ export function CreateReportDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const { addReport } = useAppStore();
+  const { addReport, refreshData } = useAppStore();
 
   // 从HTML内容中提取标题
   const extractTitleFromHTML = (html: string): string => {
@@ -128,9 +128,15 @@ export function CreateReportDialog({
         isFavorite: false,
         readStatus: "unread",
         fileSize: new Blob([formData.content]).size,
-        wordCount: formData.content.replace(/<[^>]*>/g, "").split(/\s+/).length,
+        wordCount: formData.content.replace(/\<[^>]*\>/g, "").split(/\s+/).length,
       });
 
+      // 强制刷新数据确保新报告显示
+      await refreshData();
+
+      // 显示成功提示
+      console.log("✅ 报告创建成功:", formData.title);
+      
       // 重置表单
       setFormData({
         title: "",
