@@ -366,7 +366,7 @@ function CategoryCard({
           ? `linear-gradient(135deg, ${theme === "dark" ? "rgba(59, 130, 246, 0.3)" : "rgba(59, 130, 246, 0.2)"}, ${theme === "dark" ? "rgba(16, 185, 129, 0.3)" : "rgba(16, 185, 129, 0.2)"})`
           : isOver
             ? `linear-gradient(135deg, ${theme === "dark" ? "rgba(34, 197, 94, 0.3)" : "rgba(34, 197, 94, 0.2)"}, ${theme === "dark" ? "rgba(16, 185, 129, 0.3)" : "rgba(16, 185, 129, 0.2)"})`
-            : `linear-gradient(135deg, ${theme === "dark" ? "rgba(51, 65, 85, 0.3)" : "rgba(241, 245, 249, 0.8)"}, ${theme === "dark" ? "rgba(30, 41, 59, 0.3)" : "rgba(226, 232, 240, 0.8)"})`;
+            : theme === "dark" ? "rgba(51, 65, 85, 0.3)" : "rgba(241, 245, 249, 0.8)",
         border: `1px solid ${
           isActive
             ? theme === "dark"

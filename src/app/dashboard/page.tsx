@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -69,13 +69,13 @@ export default function DashboardPage() {
     categories,
   } = useAppStore();
 
-  // 配置拖拽传感器
+  // 閰嶇疆鎷栨嫿浼犳劅鍣?
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor)
   );
 
-  // 处理拖拽结束事件 - 用于文章拖拽到分类
+  // 澶勭悊鎷栨嫿缁撴潫浜嬩欢 - 鐢ㄤ簬鏂囩珷鎷栨嫿鍒板垎绫?
   const handleDndDragEnd = async (event: any) => {
     const { active, over } = event;
     if (!over) return;
@@ -83,63 +83,63 @@ export default function DashboardPage() {
     const activeData = active.data?.current;
     const overData = over.data?.current;
 
-    // 检查是否是报告拖拽到分类
+    // 妫€鏌ユ槸鍚︽槸鎶ュ憡鎷栨嫿鍒板垎绫?
     if (activeData?.type === 'report' && overData?.type === 'category') {
       const report = activeData.report;
       const targetCategoryId = overData.categoryId;
       
-      // 如果目标分类与当前分类相同，不需要更新
+      // 濡傛灉鐩爣鍒嗙被涓庡綋鍓嶅垎绫荤浉鍚岋紝涓嶉渶瑕佹洿鏂?
       if (report.category === targetCategoryId) return;
 
       try {
         setOperationLoading(true);
-        console.log('拖拽更新报告分类:', report.id, '->', targetCategoryId);
+        console.log('鎷栨嫿鏇存柊鎶ュ憡鍒嗙被:', report.id, '->', targetCategoryId);
         
         await updateReport(report.id, { category: targetCategoryId });
         await refreshData();
         
-        console.log('✅ 拖拽更新成功');
+        console.log('鉁?鎷栨嫿鏇存柊鎴愬姛');
       } catch (error) {
-        console.error('❌ 拖拽更新失败:', error);
-        alert('更新报告分类失败，请稍后重试');
+        console.error('鉂?鎷栨嫿鏇存柊澶辫触:', error);
+        alert('鏇存柊鎶ュ憡鍒嗙被澶辫触锛岃绋嶅悗閲嶈瘯');
       } finally {
         setOperationLoading(false);
       }
     }
   };
 
-  // 客户端渲染检查（无认证）
+  // 瀹㈡埛绔覆鏌撴鏌ワ紙鏃犺璇侊級
   useEffect(() => {
     setIsClient(true);
     setIsSSR(false);
     setIsAuthenticated(true);
     setAuthLoading(false);
 
-    // 单用户系统，直接加载数据
+    // 鍗曠敤鎴风郴缁燂紝鐩存帴鍔犺浇鏁版嵁
     const loadDashboardData = async () => {
       try {
-        console.log("🔄 Dashboard 开始加载数据");
+        console.log("🔧 Dashboard 开始加载数据");
         await loadData();
-        console.log("✅ Dashboard 数据加载完成");
+        console.log("鉁?Dashboard 鏁版嵁鍔犺浇瀹屾垚");
 
-        // 🚀 修复：移除强制重置逻辑，避免覆盖用户的分类编辑
-        // 注释掉强制触发更新，让Zustand自然的状态订阅机制处理UI更新
+        // 馃殌 淇锛氱Щ闄ゅ己鍒堕噸缃€昏緫锛岄伩鍏嶈鐩栫敤鎴风殑鍒嗙被缂栬緫
+        // 娉ㄩ噴鎺夊己鍒惰Е鍙戞洿鏂帮紝璁㈱ustand鑷劧鐨勭姸鎬佽闃呮満鍒跺鐞哢I鏇存柊
         // setTimeout(() => {
         //   window.dispatchEvent(new CustomEvent('categoryOrderChanged'));
-        //   console.log('📢 通知sidebar更新分类显示');
+        //   console.log('馃摙 閫氱煡sidebar鏇存柊鍒嗙被鏄剧ず');
         // }, 100);
       } catch (error) {
-        console.error("❌ Dashboard 数据加载失败:", error);
+        console.error("鉂?Dashboard 鏁版嵁鍔犺浇澶辫触:", error);
       }
     };
 
     loadDashboardData();
   }, [loadData]);
 
-  // 监听文件上传成功事件
+  // 鐩戝惉鏂囦欢涓婁紶鎴愬姛浜嬩欢
   useEffect(() => {
     const handleForceUpdate = () => {
-      console.log("🔄 文件上传成功，强制刷新报告列表...");
+      console.log("馃攧 鏂囦欢涓婁紶鎴愬姛锛屽己鍒跺埛鏂版姤鍛婂垪琛?..");
       loadData();
     };
 
@@ -150,14 +150,14 @@ export default function DashboardPage() {
     };
   }, [loadData]);
 
-  // 监听分类名称变化
+  // 鐩戝惉鍒嗙被鍚嶇О鍙樺寲
   useEffect(() => {
     const handleCategoryChange = () => {
-      // 更新refreshKey来触发重新渲染
+      // 鏇存柊refreshKey鏉ヨЕ鍙戦噸鏂版覆鏌?
       setRefreshKey((prev) => prev + 1);
     };
 
-    // 监听localStorage变化和自定义事件
+    // 鐩戝惉localStorage鍙樺寲鍜岃嚜瀹氫箟浜嬩欢
     window.addEventListener("storage", handleCategoryChange);
     window.addEventListener("categoryOrderChanged", handleCategoryChange);
 
@@ -167,7 +167,7 @@ export default function DashboardPage() {
     };
   }, []);
 
-  // 动态更新分类报告数量
+  // 鍔ㄦ€佹洿鏂板垎绫绘姤鍛婃暟閲?
   useEffect(() => {
     if (!isClient) return;
 
@@ -176,16 +176,16 @@ export default function DashboardPage() {
       reports.length,
     );
 
-    // 直接使用store中的分类数据，不需要重新计算
-    // store中的分类数据已经是从数据库加载的最新数据
+    // 鐩存帴浣跨敤store涓殑鍒嗙被鏁版嵁锛屼笉闇€瑕侀噸鏂拌绠?
+    // store涓殑鍒嗙被鏁版嵁宸茬粡鏄粠鏁版嵁搴撳姞杞界殑鏈€鏂版暟鎹?
     console.log("Categories already loaded from database:", categories.length);
   }, [reports, categories, isClient]);
 
-  // 应用搜索、过滤和排序
+  // 搴旂敤鎼滅储銆佽繃婊ゅ拰鎺掑簭
   const { categoryReports, totalCategoryReports } = useMemo(() => {
     if (!isClient) return { categoryReports: [], totalCategoryReports: 0 };
 
-    // 获取当前分类的报告
+    // 鑾峰彇褰撳墠鍒嗙被鐨勬姤鍛?
     const getCategoryReports = () => {
       if (!selectedCategory) return [];
 
@@ -204,7 +204,7 @@ export default function DashboardPage() {
         case "all":
           return reports;
         case "uncategorized":
-          // 只显示真正的未分类报告：categoryId为'uncategorized'或者为空/null
+          // 鍙樉绀虹湡姝ｇ殑鏈垎绫绘姤鍛婏細categoryId涓?uncategorized'鎴栬€呬负绌?null
           return reports.filter(
             (report) =>
               report.category === "uncategorized" ||
@@ -213,7 +213,7 @@ export default function DashboardPage() {
               report.category === "",
           );
         default:
-          // 按分类ID筛选，确保精确匹配，避免重复显示
+          // 鎸夊垎绫籌D绛涢€夛紝纭繚绮剧‘鍖归厤锛岄伩鍏嶉噸澶嶆樉绀?
           return reports.filter(
             (report) => report.category === selectedCategory,
           );
@@ -247,7 +247,7 @@ export default function DashboardPage() {
     }
   };
 
-  // 按状态分组报告 - 三列布局的核心
+  // 鎸夌姸鎬佸垎缁勬姤鍛?- 涓夊垪甯冨眬鐨勬牳蹇?
   const reportsByStatus = useMemo(() => {
     if (!isClient) return { unread: [], reading: [], completed: [] };
 
@@ -264,7 +264,7 @@ export default function DashboardPage() {
     };
   }, [categoryReports, isClient]);
 
-  // 拖拽处理函数 - 改为异步
+  // 鎷栨嫿澶勭悊鍑芥暟 - 鏀逛负寮傛
   const handleStatusChange = async (
     reportId: string,
     newStatus: "unread" | "reading" | "completed",
@@ -281,19 +281,19 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("Error updating report status:", error);
       alert(
-        `更新报告状态失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `鏇存柊鎶ュ憡鐘舵€佸け璐? ${error instanceof Error ? error.message : "鏈煡閿欒"}`,
       );
     } finally {
       setOperationLoading(false);
     }
   };
 
-  // 安全的报告选择函数
+  // 瀹夊叏鐨勬姤鍛婇€夋嫨鍑芥暟
   const handleReportSelect = (report: any) => {
     setSelectedReport(report);
   };
 
-  // 删除报告处理函数 - 改为异步
+  // 鍒犻櫎鎶ュ憡澶勭悊鍑芥暟 - 鏀逛负寮傛
   const handleDeleteReport = async (reportId: string) => {
     if (operationLoading) return;
 
@@ -308,20 +308,20 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("Error deleting report:", error);
       alert(
-        `删除报告失败: ${error instanceof Error ? error.message : "未知错误"}`,
+        `鍒犻櫎鎶ュ憡澶辫触: ${error instanceof Error ? error.message : "鏈煡閿欒"}`,
       );
     } finally {
       setOperationLoading(false);
     }
   };
 
-  // 拖放处理函数
+  // 鎷栨斁澶勭悊鍑芥暟
   const handleDragStart = (e: React.DragEvent, report: any) => {
     setDraggedReport(report);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/html", report.id);
 
-    // 添加拖拽样式
+    // 娣诲姞鎷栨嫿鏍峰紡
     setTimeout(() => {
       (e.target as HTMLElement).style.opacity = "0.5";
     }, 0);
@@ -343,7 +343,7 @@ export default function DashboardPage() {
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
-    // 只有当离开整个列容器时才清除高亮
+    // 鍙湁褰撶寮€鏁翠釜鍒楀鍣ㄦ椂鎵嶆竻闄ら珮浜?
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const x = e.clientX;
     const y = e.clientY;
@@ -366,34 +366,34 @@ export default function DashboardPage() {
     setDraggedReport(null);
   };
 
-  // 获取分类显示名称的函数
+  // 鑾峰彇鍒嗙被鏄剧ず鍚嶇О鐨勫嚱鏁?
   const getCategoryDisplayName = (categoryId: string): string => {
-    // 添加refreshKey依赖，确保名称变化时重新计算
+    // 娣诲姞refreshKey渚濊禆锛岀‘淇濆悕绉板彉鍖栨椂閲嶆柊璁＄畻
     const _ = refreshKey;
 
-    // 特殊分类
+    // 鐗规畩鍒嗙被
     if (categoryId === "all") return "所有报告";
     if (categoryId === "favorites") return "收藏夹";
     if (categoryId === "recent") return "最近查看";
 
-    // 预定义分类名称映射
+    // 棰勫畾涔夊垎绫诲悕绉版槧灏?
     const predefinedNames = JSON.parse(
       localStorage.getItem("predefined_category_names") || "{}",
     );
     const baseCategoryNames: Record<string, string> = {
       uncategorized: "📁 未分类",
       "tech-research": "💻 技术研究",
-      "market-analysis": "📊 市场分析",
+      "market-analysis": "📈 市场分析",
       "product-review": "🔍 产品评测",
       "industry-insights": "🔬 行业洞察",
     };
 
-    // 如果是预定义分类，先检查是否有自定义名称
+    // 濡傛灉鏄瀹氫箟鍒嗙被锛屽厛妫€鏌ユ槸鍚︽湁鑷畾涔夊悕绉?
     if (baseCategoryNames[categoryId]) {
       return predefinedNames[categoryId] || baseCategoryNames[categoryId];
     }
 
-    // 从自定义分类中查找
+    // 浠庤嚜瀹氫箟鍒嗙被涓煡鎵?
     const customCategories = JSON.parse(
       localStorage.getItem("custom_categories") || "[]",
     );
@@ -404,17 +404,17 @@ export default function DashboardPage() {
       return customCategory.label;
     }
 
-    // 从API获取的分类中查找
+    // 浠嶢PI鑾峰彇鐨勫垎绫讳腑鏌ユ壘
     const apiCategory = categories.find((c) => c.id === categoryId);
     if (apiCategory) {
       return apiCategory.name;
     }
 
-    // 如果都找不到，返回分类ID
+    // 濡傛灉閮芥壘涓嶅埌锛岃繑鍥炲垎绫籌D
     return categoryId;
   };
 
-  // 如果还在服务器端渲染、正在认证检查或正在加载，显示加载状态
+  // 濡傛灉杩樺湪鏈嶅姟鍣ㄧ娓叉煋銆佹鍦ㄨ璇佹鏌ユ垨姝ｅ湪鍔犺浇锛屾樉绀哄姞杞界姸鎬?
   if (!isClient || authLoading || loading) {
     return (
       <div
@@ -461,29 +461,29 @@ export default function DashboardPage() {
             }}
           >
             {authLoading
-              ? "验证登录状态..."
+              ? "楠岃瘉鐧诲綍鐘舵€?.."
               : loading
-                ? "正在加载数据..."
-                : "加载中..."}
+                ? "姝ｅ湪鍔犺浇鏁版嵁..."
+                : "鍔犺浇涓?.."}
           </h2>
           <p style={{ color: theme === "dark" ? "#94a3b8" : "#64748b" }}>
             {authLoading
-              ? "正在验证您的身份"
+              ? "姝ｅ湪楠岃瘉鎮ㄧ殑韬唤"
               : loading
-                ? "正在从后端获取最新数据"
-                : "正在初始化系统"}
+                ? "姝ｅ湪浠庡悗绔幏鍙栨渶鏂版暟鎹?
+                : "姝ｅ湪鍒濆鍖栫郴缁?}
           </p>
         </div>
       </div>
     );
   }
 
-  // 未认证用户会被重定向到首页
+  // 鏈璇佺敤鎴蜂細琚噸瀹氬悜鍒伴椤?
   if (!isAuthenticated) {
     return null;
   }
 
-  // 可拖拽的报告卡片组件
+  // 鍙嫋鎷界殑鎶ュ憡鍗＄墖缁勪欢
   const DraggableReportCard = ({
     report,
     onStatusChange,
@@ -515,7 +515,7 @@ export default function DashboardPage() {
       cursor: operationLoading ? "wait" : "grab",
       marginBottom: "0.5rem",
       transition: isDragging ? "none" : "all 0.2s ease",
-      userSelect: "none",
+      userSelect: "none" as const,
     };
 
     return (
@@ -580,9 +580,9 @@ export default function DashboardPage() {
             marginLeft: "0.5rem",
             opacity: operationLoading ? 0.5 : 1,
           }}
-          title="删除报告"
+          title="鍒犻櫎鎶ュ憡"
         >
-          🗑️
+          馃棏锔?
         </button>
       </div>
       {report.description && (
@@ -599,7 +599,7 @@ export default function DashboardPage() {
           color: theme === "dark" ? "#94a3b8" : "#64748b",
         }}
       >
-        <span>{report.isFavorite ? "⭐" : ""}</span>
+        <span>{report.isFavorite ? "猸? : ""}</span>
         {onStatusChange && (
           <div style={{ display: "flex", gap: "0.25rem" }}>
             <button
@@ -625,7 +625,7 @@ export default function DashboardPage() {
                 opacity: operationLoading ? 0.5 : 1,
               }}
             >
-              未读
+              鏈
             </button>
             <button
               onClick={(e) => {
@@ -650,7 +650,7 @@ export default function DashboardPage() {
                 opacity: operationLoading ? 0.5 : 1,
               }}
             >
-              阅读中
+              闃呰涓?
             </button>
             <button
               onClick={(e) => {
@@ -675,7 +675,7 @@ export default function DashboardPage() {
                 opacity: operationLoading ? 0.5 : 1,
               }}
             >
-              已完成
+              宸插畬鎴?
             </button>
           </div>
         )}
@@ -694,10 +694,10 @@ export default function DashboardPage() {
           color: theme === "dark" ? "#ffffff" : "#000000",
         }}
       >
-        {/* 左侧边栏 */}
+        {/* 宸︿晶杈规爮 */}
         <DashboardSidebar />
 
-      {/* 主内容区域 */}
+      {/* 涓诲唴瀹瑰尯鍩?*/}
       <main
         style={{
           flex: "1",
@@ -706,7 +706,7 @@ export default function DashboardPage() {
           overflow: "hidden",
         }}
       >
-        {/* 顶部栏 */}
+        {/* 椤堕儴鏍?*/}
         <header
           style={{
             padding: "1rem",
@@ -725,7 +725,7 @@ export default function DashboardPage() {
               {getCategoryDisplayName(selectedCategory || "all")}
             </h2>
             <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              {/* 主题切换按钮 */}
+              {/* 涓婚鍒囨崲鎸夐挳 */}
               <button
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 style={{
@@ -774,10 +774,10 @@ export default function DashboardPage() {
                       ? "0 1px 3px rgba(0, 0, 0, 0.3)"
                       : "0 1px 3px rgba(0, 0, 0, 0.1)";
                 }}
-                title={theme === "dark" ? "切换到浅色模式" : "切换到深色模式"}
+                title={theme === "dark" ? "鍒囨崲鍒版祬鑹叉ā寮? : "鍒囨崲鍒版繁鑹叉ā寮?}
               >
                 <span style={{ fontSize: "16px" }}>
-                  {theme === "dark" ? "☀️" : "🌙"}
+                  {theme === "dark" ? "鈽€锔? : "馃寵"}
                 </span>
               </button>
 
@@ -830,7 +830,7 @@ export default function DashboardPage() {
                 }}
               >
                 <Upload style={{ width: "16px", height: "16px" }} />
-                上传新报告
+                涓婁紶鏂版姤鍛?
               </button>
 
               <button
@@ -882,18 +882,18 @@ export default function DashboardPage() {
                 }}
               >
                 <FileText style={{ width: "16px", height: "16px" }} />
-                新增报告
+                鏂板鎶ュ憡
               </button>
             </div>
           </div>
         </header>
 
-        {/* 内容区域 */}
+        {/* 鍐呭鍖哄煙 */}
         <div style={{ flex: 1, overflow: "hidden" }}>
           {selectedReport ? (
-            <ReportViewer report={selectedReport} />
+            <ReportViewer report={selectedReport!} />
           ) : selectedCategory && categoryReports.length > 0 ? (
-            /* 三列看板布局 */
+            /* 涓夊垪鐪嬫澘甯冨眬 */
             <div style={{ height: "100%", overflow: "hidden" }}>
               <div
                 style={{
@@ -904,7 +904,7 @@ export default function DashboardPage() {
                   padding: "1.5rem",
                 }}
               >
-                {/* 未读列 */}
+                {/* 鏈鍒?*/}
                 <div
                   onDragOver={(e) => handleDragOver(e, "unread")}
                   onDragLeave={handleDragLeave}
@@ -939,7 +939,7 @@ export default function DashboardPage() {
                     <h3
                       style={{ fontSize: "1rem", fontWeight: "600", margin: 0 }}
                     >
-                      📋 未阅读 ({reportsByStatus.unread.length})
+                      馃搵 鏈槄璇?({reportsByStatus.unread.length})
                     </h3>
                   </div>
                   <div
@@ -969,13 +969,13 @@ export default function DashboardPage() {
                           marginTop: "2rem",
                         }}
                       >
-                        拖拽报告到这里设为未读
+                        鎷栨嫿鎶ュ憡鍒拌繖閲岃涓烘湭璇?
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* 阅读中列 */}
+                {/* 闃呰涓垪 */}
                 <div
                   onDragOver={(e) => handleDragOver(e, "reading")}
                   onDragLeave={handleDragLeave}
@@ -1010,7 +1010,7 @@ export default function DashboardPage() {
                     <h3
                       style={{ fontSize: "1rem", fontWeight: "600", margin: 0 }}
                     >
-                      📖 阅读中 ({reportsByStatus.reading.length})
+                      馃摉 闃呰涓?({reportsByStatus.reading.length})
                     </h3>
                   </div>
                   <div
@@ -1040,13 +1040,13 @@ export default function DashboardPage() {
                           marginTop: "2rem",
                         }}
                       >
-                        拖拽报告到这里设为阅读中
+                        鎷栨嫿鎶ュ憡鍒拌繖閲岃涓洪槄璇讳腑
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* 已完成列 */}
+                {/* 宸插畬鎴愬垪 */}
                 <div
                   onDragOver={(e) => handleDragOver(e, "completed")}
                   onDragLeave={handleDragLeave}
@@ -1081,7 +1081,7 @@ export default function DashboardPage() {
                     <h3
                       style={{ fontSize: "1rem", fontWeight: "600", margin: 0 }}
                     >
-                      ✅ 已完成 ({reportsByStatus.completed.length})
+                      鉁?宸插畬鎴?({reportsByStatus.completed.length})
                     </h3>
                   </div>
                   <div
@@ -1111,7 +1111,7 @@ export default function DashboardPage() {
                           marginTop: "2rem",
                         }}
                       >
-                        拖拽报告到这里设为已完成
+                        鎷栨嫿鎶ュ憡鍒拌繖閲岃涓哄凡瀹屾垚
                       </div>
                     )}
                   </div>
@@ -1135,7 +1135,7 @@ export default function DashboardPage() {
                     marginBottom: "0.5rem",
                   }}
                 >
-                  欢迎使用 Wendeal Reports
+                  娆㈣繋浣跨敤 Wendeal Reports
                 </h2>
                 <p
                   style={{
@@ -1143,7 +1143,7 @@ export default function DashboardPage() {
                     marginBottom: "1rem",
                   }}
                 >
-                  请从左侧选择一个分类查看报告
+                  璇蜂粠宸︿晶閫夋嫨涓€涓垎绫绘煡鐪嬫姤鍛?
                 </p>
                 <div
                   style={{
@@ -1151,8 +1151,8 @@ export default function DashboardPage() {
                     color: theme === "dark" ? "#94a3b8" : "#64748b",
                   }}
                 >
-                  <p>总报告数: {reports.length}</p>
-                  <p>当前主题: {theme}</p>
+                  <p>鎬绘姤鍛婃暟: {reports.length}</p>
+                  <p>褰撳墠涓婚: {theme}</p>
                 </div>
               </div>
             </div>
@@ -1160,13 +1160,13 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      {/* 上传对话框 */}
+      {/* 涓婁紶瀵硅瘽妗?*/}
       <UploadDialog
         open={isUploadDialogOpen}
         onOpenChange={setIsUploadDialogOpen}
       />
 
-      {/* 新增报告对话框 */}
+      {/* 鏂板鎶ュ憡瀵硅瘽妗?*/}
       <CreateReportDialog
         open={isCreateReportDialogOpen}
         onOpenChange={setIsCreateReportDialogOpen}
@@ -1175,5 +1175,3 @@ export default function DashboardPage() {
     </DndContext>
   );
 }
-}  
- 
