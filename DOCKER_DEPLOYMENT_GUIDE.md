@@ -115,6 +115,35 @@ New-Item -ItemType Directory -Path "data\logs" -Force
 
 ## 部署应用 / Deploy Application
 
+### 特殊配置：ZimaOS 只读根目录 / Special Configuration: ZimaOS Read-only Root
+
+如果您在 ZimaOS 或其他只读根目录系统上部署，请先执行以下步骤：
+If deploying on ZimaOS or other read-only root systems, execute the following steps first:
+
+#### 方法1：使用自动化部署脚本 / Method 1: Use Automated Deployment Script
+
+```bash
+# 进入项目目录 / Enter project directory
+cd /DATA/wendeal-reports
+
+# 运行 ZimaOS 专用部署脚本 / Run ZimaOS-specific deployment script
+chmod +x scripts/deploy-zimaos.sh
+./scripts/deploy-zimaos.sh
+```
+
+#### 方法2：手动配置 / Method 2: Manual Configuration
+
+```bash
+# 设置 Docker 配置目录到 /DATA / Set Docker config directory to /DATA
+export DOCKER_CONFIG=/DATA/.docker
+mkdir -p /DATA/.docker
+
+# 确保在 /DATA 目录下操作 / Ensure operating in /DATA directory
+cd /DATA/wendeal-reports
+
+# 然后继续常规部署步骤 / Then continue with regular deployment steps
+```
+
 ### 方式一：快速部署 / Method 1: Quick Deployment
 
 ```powershell

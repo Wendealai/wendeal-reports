@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma, testDatabaseConnection } from "@/lib/prisma";
+import { checkDatabaseInitialization } from "@/lib/database-init";
 
 export async function GET() {
   const healthInfo = {
@@ -42,9 +43,13 @@ export async function GET() {
         const reportCount = await prisma.report.count();
         const categoryCount = await prisma.category.count();
         
-        healthInfo.status = "healthy";
+        // Check database initialization status
+        const isInitialized = await checkDatabaseInitialization();
+        
+        healthInfo.status = isInitialized ? "healthy" : "degraded";
         (healthInfo.database as any) = {
           status: "connected",
+          initialized: isInitialized,
           url_configured: !!process.env.DATABASE_URL,
           direct_url_configured: !!process.env.DIRECT_URL,
           statistics: {

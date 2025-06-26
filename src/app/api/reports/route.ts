@@ -15,19 +15,12 @@ import {
   cacheManager,
   measureQuery,
 } from "@/lib/performance";
-
-// 预定义分类的前端ID到数据库ID的映射
-const PREDEFINED_CATEGORY_ID_MAP: Record<string, string> = {
-  uncategorized: "predefined-uncategorized",
-  "tech-research": "predefined-tech-research",
-  "market-analysis": "predefined-market-analysis",
-  "product-review": "predefined-product-review",
-  "industry-insights": "predefined-industry-insights",
-};
-
-// 默认用户ID（用于简化的单用户系统）
-const DEFAULT_USER_ID =
-  process.env.DEFAULT_USER_ID || "cmbusc9x00000x2w0fqyu591k";
+import {
+  initializeDatabase,
+  checkDatabaseInitialization,
+  PREDEFINED_CATEGORY_ID_MAP,
+  DEFAULT_USER_ID,
+} from "@/lib/database-init";
 
 // 获取报告列表
 async function getReports(request: Request) {
@@ -142,6 +135,28 @@ async function createReport(request: Request) {
           error: "数据库连接失败",
           message: "无法连接到数据库，请稍后重试",
           details: process.env.NODE_ENV === "development" ? (dbError instanceof Error ? dbError.message : String(dbError)) : undefined
+        },
+        { status: 503 }
+      );
+    }
+
+    // Check and initialize database if needed
+    try {
+      const isInitialized = await checkDatabaseInitialization();
+      if (!isInitialized) {
+        console.log("🔧 Database not initialized, initializing now...");
+        await initializeDatabase();
+        console.log("✅ Database initialization completed");
+      } else {
+        console.log("✅ Database already initialized");
+      }
+    } catch (initError) {
+      console.error("❌ Database initialization failed:", initError);
+      return NextResponse.json(
+        {
+          error: "数据库初始化失败",
+          message: "无法初始化数据库，请稍后重试",
+          details: process.env.NODE_ENV === "development" ? (initError instanceof Error ? initError.message : String(initError)) : undefined
         },
         { status: 503 }
       );
