@@ -13,11 +13,32 @@ interface DatabaseStatus {
   error?: string;
 }
 
+interface User {
+  id: string;
+  username: string;
+  email: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  icon?: string;
+  color?: string;
+  userId: string;
+}
+
+interface CategoryResult {
+  action: 'created' | 'exists' | 'error';
+  category?: Category;
+  categoryId?: string;
+  error?: string;
+}
+
 interface InitResult {
   success: boolean;
-  user?: any;
-  categories?: any[];
-  categoryResults?: any[];
+  user?: User;
+  categories?: Category[];
+  categoryResults?: CategoryResult[];
   message?: string;
   error?: string;
 }

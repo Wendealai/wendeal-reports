@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { updateReportSchema } from "@/lib/validations";
-
-// 默认用户ID（用于简化的单用户系统）
-const DEFAULT_USER_ID = "cmbusc9x00000x2w0fqyu591k";
+import { DEFAULT_USER_ID, PREDEFINED_CATEGORY_ID_MAP } from "@/lib/database-init";
+import { ZodError } from "zod";
 
 // 获取单个报告
 async function getReport(
@@ -77,7 +76,13 @@ async function updateReport(
 
     // 验证输入数据
     const validatedData = updateReportSchema.parse(body);
-    const { tags, ...reportData } = validatedData;
+    const { tags, categoryId, ...reportData } = validatedData;
+
+    console.log("📝 Report update request:", {
+      reportId: params.id,
+      categoryId,
+      validatedData
+    });
 
     // 检查报告是否存在且属于当前用户
     const existingReport = await prisma.report.findFirst({
@@ -91,10 +96,42 @@ async function updateReport(
       return NextResponse.json({ error: "报告不存在" }, { status: 404 });
     }
 
+    // 处理分类ID映射
+    let finalCategoryId = categoryId;
+    if (categoryId) {
+      // 检查是否为预定义分类的前端ID
+      if (PREDEFINED_CATEGORY_ID_MAP[categoryId]) {
+        finalCategoryId = PREDEFINED_CATEGORY_ID_MAP[categoryId];
+        console.log("🔄 Category ID mapped:", categoryId, "→", finalCategoryId);
+      } else {
+        // 验证分类是否存在
+        try {
+          const category = await prisma.category.findUnique({
+            where: { id: categoryId },
+          });
+          if (!category) {
+            console.warn(`分类不存在: ${categoryId}, 保持原分类`);
+            finalCategoryId = undefined; // 不更新分类
+          }
+        } catch (e) {
+          console.warn(`检查分类时出错: ${categoryId}`, e);
+          finalCategoryId = undefined; // 不更新分类
+        }
+      }
+    }
+
+    // 构建更新数据
+    const updateData = { ...reportData };
+    if (finalCategoryId !== undefined) {
+      updateData.categoryId = finalCategoryId;
+    }
+
+    console.log("💾 Final update data:", updateData);
+
     // 更新报告基本信息
     const updatedReport = await prisma.report.update({
       where: { id: params.id },
-      data: reportData,
+      data: updateData,
       include: {
         category: {
           select: {

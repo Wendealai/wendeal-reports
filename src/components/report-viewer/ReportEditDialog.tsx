@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { Report, Category } from "@/types";
 import { Button } from "@/components/ui/button";
+import { SimpleCategorySelector } from "@/components/upload/SimpleCategorySelector";
 import { X, Plus } from "lucide-react";
 
 interface ReportEditDialogProps {
@@ -40,30 +41,6 @@ export function ReportEditDialog({
     }
   }, [report]);
 
-  // 获取扁平化的分类列表
-  const getFlatCategories = (
-    categories: Category[],
-  ): Array<{ id: string; name: string; level: number }> => {
-    const result: Array<{ id: string; name: string; level: number }> = [];
-
-    const traverse = (cats: Category[], level = 0) => {
-      for (const cat of cats) {
-        result.push({
-          id: cat.id,
-          name: cat.name,
-          level,
-        });
-        if (cat.children) {
-          traverse(cat.children, level + 1);
-        }
-      }
-    };
-
-    traverse(categories);
-    return result;
-  };
-
-  const flatCategories = getFlatCategories(categories);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -280,10 +257,10 @@ export function ReportEditDialog({
             >
               分类
             </label>
-            <select
+            <SimpleCategorySelector
               value={formData.category}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, category: e.target.value }))
+              onChange={(value) =>
+                setFormData((prev) => ({ ...prev, category: value }))
               }
               style={{
                 padding: "0.5rem 0.75rem",
@@ -293,19 +270,7 @@ export function ReportEditDialog({
                 color: theme === "dark" ? "#ffffff" : "#000000",
                 fontSize: "0.875rem",
               }}
-            >
-              <option value="uncategorized">未分类</option>
-              <option value="tech-research">技术研究</option>
-              <option value="market-analysis">市场分析</option>
-              <option value="product-review">产品评测</option>
-              <option value="industry-insights">行业洞察</option>
-              {flatCategories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {"  ".repeat(cat.level)}
-                  {cat.name}
-                </option>
-              ))}
-            </select>
+            />
           </div>
 
           {/* 标签 */}
