@@ -44,7 +44,17 @@ export const createReportWithFileSchema = z.object({
   mimeType: z.string().optional(),
 });
 
-export const updateReportSchema = createReportSchema.partial();
+export const updateReportSchema = z.object({
+  title: z.string().min(1, "标题不能为空").max(200, "标题最多200个字符").optional(),
+  content: z.string().min(1, "内容不能为空").optional(),
+  summary: z.string().optional(),
+  description: z.string().optional(),
+  status: z.enum(["draft", "published", "archived", "unread", "reading", "completed"]).optional(),
+  readStatus: z.enum(["unread", "reading", "completed"]).optional(), // 添加readStatus字段
+  priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
+  categoryId: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+});
 
 // 分类相关验证
 export const createCategorySchema = z.object({

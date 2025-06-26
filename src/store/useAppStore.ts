@@ -674,8 +674,8 @@ export const useAppStore = create<AppState>()((set, get) => ({
         updateData.categoryId = updates.category;
       if (updates.tags !== undefined) updateData.tags = updates.tags;
       if (updates.readStatus !== undefined) {
-        updateData.status =
-          updates.readStatus === "completed" ? "completed" : "unread";
+        // 直接将readStatus传递给API，让API处理映射
+        updateData.readStatus = updates.readStatus;
       }
 
       logger.debug("🧪 更新数据:", updateData);

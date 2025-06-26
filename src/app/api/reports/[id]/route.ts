@@ -76,13 +76,21 @@ async function updateReport(
 
     // 验证输入数据
     const validatedData = updateReportSchema.parse(body);
-    const { tags, categoryId, ...reportData } = validatedData;
+    const { tags, categoryId, readStatus, ...reportData } = validatedData;
 
     console.log("📝 Report update request:", {
       reportId: params.id,
       categoryId,
+      readStatus,
       validatedData
     });
+
+    // 处理readStatus字段映射
+    if (readStatus !== undefined) {
+      // 将readStatus映射到status字段
+      reportData.status = readStatus;
+      console.log("🔄 Mapped readStatus to status:", readStatus);
+    }
 
     // 检查报告是否存在且属于当前用户
     const existingReport = await prisma.report.findFirst({
