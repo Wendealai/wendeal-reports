@@ -500,6 +500,7 @@ export const useAppStore = create<AppState>()((set, get) => ({
         `数据库加载失败: ${error instanceof Error ? error.message : "未知错误"}`,
       );
     } finally {
+      clearTimeout(loadTimeout); // 清除超时
       setLoading(false);
     }
   },

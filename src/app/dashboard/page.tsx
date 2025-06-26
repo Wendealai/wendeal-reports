@@ -108,46 +108,37 @@ export default function DashboardPage() {
     }
   };
 
-  // 瀹㈡埛绔覆鏌撴鏌ワ紙鏃犺璇侊級
+  // 🔧 修复：简化客户端初始化，避免复杂的状态管理
   useEffect(() => {
     setIsClient(true);
     setIsSSR(false);
     setIsAuthenticated(true);
     setAuthLoading(false);
 
-    // 🔧 添加加载超时保护
-    const loadTimeout = setTimeout(() => {
-      console.log("⚠️ 数据加载超时，强制显示主界面");
-      setLoading(false);
-    }, 10000); // 10秒超时
-
-    // 鍗曠敤鎴风郴缁燂紝鐩存帴鍔犺浇鏁版嵁
-    const loadDashboardData = async () => {
+    // 🔧 修复：直接调用数据加载，不使用复杂的超时逻辑
+    const initializeDashboard = async () => {
       try {
-        console.log("🔧 Dashboard 开始加载数据");
-        await loadData();
-        console.log("鉁?Dashboard 鏁版嵁鍔犺浇瀹屾垚");
-        clearTimeout(loadTimeout); // 成功加载后清除超时
-
-        // 馃殌 淇锛氱Щ闄ゅ己鍒堕噸缃€昏緫锛岄伩鍏嶈鐩栫敤鎴风殑鍒嗙被缂栬緫
-        // 娉ㄩ噴鎺夊己鍒惰Е鍙戞洿鏂帮紝璁㊿ustand鑷劧鐨勭姸鎬佽闃呮満鍒跺鐞哢I鏇存柊
-        // setTimeout(() => {
-        //   window.dispatchEvent(new CustomEvent('categoryOrderChanged'));
-        //   console.log('馃摙 閫氱煡sidebar鏇存柊鍒嗙被鏄剧ず');
-        // }, 100);
+        console.log("🔧 Dashboard 初始化开始");
+        
+        // 🔧 简化：直接设置loading为false，避免卡在加载状态
+        if (reports.length === 0) {
+          console.log("📊 开始加载数据...");
+          await loadData();
+        } else {
+          console.log("📊 使用已有数据");
+          setLoading(false);
+        }
+        
+        console.log("✅ Dashboard 初始化完成");
       } catch (error) {
-        console.error("鉂?Dashboard 鏁版嵁鍔犺浇澶辫触:", error);
-        clearTimeout(loadTimeout);
-        setLoading(false); // 失败时也要停止加载状态
+        console.error("❌ Dashboard 初始化失败:", error);
+        // 🔧 即使失败也要显示界面
+        setLoading(false);
       }
     };
 
-    loadDashboardData();
-
-    return () => {
-      clearTimeout(loadTimeout);
-    };
-  }, [loadData, setLoading]);
+    initializeDashboard();
+  }, []); // 🔧 移除依赖，只在组件挂载时执行一次
 
   // 鐩戝惉鏂囦欢涓婁紶鎴愬姛浜嬩欢
   useEffect(() => {
@@ -545,10 +536,11 @@ export default function DashboardPage() {
     console.log("🔧 数据正在加载但有基本数据，继续渲染主界面");
   }
 
-  // 鏈璇佺敤鎴蜂細琚噸瀹氬悜鍒伴椤?
-  if (!isAuthenticated) {
-    return null;
-  }
+  // 🔧 修复：移除认证检查，这是单用户系统，不需要认证
+  // 原来的认证检查可能导致页面闪烁
+  // if (!isAuthenticated) {
+  //   return null;
+  // }
 
   // 鍙嫋鎷界殑鎶ュ憡鍗＄墖缁勪欢
   const DraggableReportCard = ({
