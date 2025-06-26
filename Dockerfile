@@ -14,6 +14,9 @@ COPY prisma ./prisma/
 # Install dependencies
 RUN npm ci && npm cache clean --force
 
+# Copy build environment
+COPY .env.build .env
+
 # Copy source code
 COPY . .
 

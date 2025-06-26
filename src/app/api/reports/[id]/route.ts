@@ -121,7 +121,7 @@ async function updateReport(
     }
 
     // 构建更新数据
-    const updateData = { ...reportData };
+    const updateData: any = { ...reportData };
     if (finalCategoryId !== undefined) {
       updateData.categoryId = finalCategoryId;
     }
