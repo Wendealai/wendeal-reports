@@ -13,6 +13,7 @@ import {
   Trash2,
   CheckCircle,
   BookOpen,
+  Download,
 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAppStore } from "@/store/useAppStore";
@@ -504,6 +505,31 @@ export function ReportViewer({ report }: ReportViewerProps) {
                   }}
                 />
                 新标签页打开
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (contentBlobUrl) {
+                    const a = document.createElement('a');
+                    a.href = contentBlobUrl;
+                    a.download = `${report.title}.html`;
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                  }
+                }}
+              >
+                <Download
+                  style={{
+                    width: "1rem",
+                    height: "1rem",
+                    marginRight: "0.5rem",
+                  }}
+                />
+                下载HTML
               </Button>
 
               <Button

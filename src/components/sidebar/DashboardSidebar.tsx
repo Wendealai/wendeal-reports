@@ -594,9 +594,9 @@ export function DashboardSidebar() {
   );
 
   const quickActions = [
-    { id: "all", label: "📊 所有报告", icon: File },
-    { id: "favorites", label: "⭐ 收藏夹", icon: Star },
-    { id: "recent", label: "🕒 最近查看", icon: Clock },
+    { id: "all", label: "📊 所有报告", icon: File, order: -3 },
+    { id: "favorites", label: "⭐ 收藏夹", icon: Star, order: -2 },
+    { id: "recent", label: "🕒 最近查看", icon: Clock, order: -1 },
   ];
 
   // 预定义分类 - 从store中获取自定义名称并支持排序
@@ -1477,6 +1477,37 @@ export function DashboardSidebar() {
                 strategy={verticalListSortingStrategy}
               >
                 <div>
+                  {/* 快速操作区域 */}
+                  {quickActions.map((action) => (
+                    <CategoryCard
+                      key={action.id}
+                      category={action}
+                      isActive={selectedCategory === action.id}
+                      onClick={() => {
+                        setSelectedCategory(action.id);
+                        setSelectedReport(null);
+                      }}
+                      count={getCategoryCount(action.id)}
+                      isEditing={editingId === action.id}
+                      editValue={editValue}
+                      onStartEdit={handleStartEdit}
+                      onSaveEdit={handleSaveEdit}
+                      onCancelEdit={handleCancelEdit}
+                      onEditValueChange={setEditValue}
+                      // 不允许删除快速操作项
+                    />
+                  ))}
+                  
+                  {/* 分隔线 */}
+                  <div
+                    style={{
+                      height: "1px",
+                      backgroundColor: theme === "dark" ? "rgba(51, 65, 85, 0.3)" : "rgba(203, 213, 225, 0.3)",
+                      margin: "12px 0",
+                    }}
+                  />
+                  
+                  {/* 用户分类 */}
                   {predefinedCategories.map((category) => (
                     <CategoryCard
                       key={category.id}
