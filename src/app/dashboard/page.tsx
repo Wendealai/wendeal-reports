@@ -1166,11 +1166,11 @@ export default function DashboardPage() {
         onOpenChange={setIsUploadDialogOpen}
       />
 
-        {/* 新增报告对话框 */}
-        <CreateReportDialog
-          open={isCreateReportDialogOpen}
-          onOpenChange={setIsCreateReportDialogOpen}
-        />
+      {/* 新增报告对话框 */}
+      <CreateReportDialog
+        open={isCreateReportDialogOpen}
+        onOpenChange={setIsCreateReportDialogOpen}
+      />
       </div>
     </DndContext>
   );
