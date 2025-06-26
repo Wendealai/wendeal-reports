@@ -108,12 +108,18 @@ export default function DashboardPage() {
     }
   };
 
-  // 瀹㈡埛绔覆鏌撴鏌ワ紙鏃犺璇侊級
+  // 瀹㈡埛绔覆鏌撴鏌ワ紙鏃犺璇侊級
   useEffect(() => {
     setIsClient(true);
     setIsSSR(false);
     setIsAuthenticated(true);
     setAuthLoading(false);
+
+    // 🔧 添加加载超时保护
+    const loadTimeout = setTimeout(() => {
+      console.log("⚠️ 数据加载超时，强制显示主界面");
+      setLoading(false);
+    }, 10000); // 10秒超时
 
     // 鍗曠敤鎴风郴缁燂紝鐩存帴鍔犺浇鏁版嵁
     const loadDashboardData = async () => {
@@ -121,20 +127,27 @@ export default function DashboardPage() {
         console.log("🔧 Dashboard 开始加载数据");
         await loadData();
         console.log("鉁?Dashboard 鏁版嵁鍔犺浇瀹屾垚");
+        clearTimeout(loadTimeout); // 成功加载后清除超时
 
-        // 馃殌 淇锛氱Щ闄ゅ己鍒堕噸缃€昏緫锛岄伩鍏嶈鐩栫敤鎴风殑鍒嗙被缂栬緫
-        // 娉ㄩ噴鎺夊己鍒惰Е鍙戞洿鏂帮紝璁㈱ustand鑷劧鐨勭姸鎬佽闃呮満鍒跺鐞哢I鏇存柊
+        // 馃殌 淇锛氱Щ闄ゅ己鍒堕噸缃€昏緫锛岄伩鍏嶈鐩栫敤鎴风殑鍒嗙被缂栬緫
+        // 娉ㄩ噴鎺夊己鍒惰Е鍙戞洿鏂帮紝璁㊿ustand鑷劧鐨勭姸鎬佽闃呮満鍒跺鐞哢I鏇存柊
         // setTimeout(() => {
         //   window.dispatchEvent(new CustomEvent('categoryOrderChanged'));
         //   console.log('馃摙 閫氱煡sidebar鏇存柊鍒嗙被鏄剧ず');
         // }, 100);
       } catch (error) {
         console.error("鉂?Dashboard 鏁版嵁鍔犺浇澶辫触:", error);
+        clearTimeout(loadTimeout);
+        setLoading(false); // 失败时也要停止加载状态
       }
     };
 
     loadDashboardData();
-  }, [loadData]);
+
+    return () => {
+      clearTimeout(loadTimeout);
+    };
+  }, [loadData, setLoading]);
 
   // 鐩戝惉鏂囦欢涓婁紶鎴愬姛浜嬩欢
   useEffect(() => {
@@ -414,8 +427,9 @@ export default function DashboardPage() {
     return categoryId;
   };
 
-  // 濡傛灉杩樺湪鏈嶅姟鍣ㄧ娓叉煋銆佹鍦ㄨ璇佹鏌ユ垨姝ｅ湪鍔犺浇锛屾樉绀哄姞杞界姸鎬?
-  if (!isClient || authLoading || loading) {
+  // 🔧 修复：简化加载状态判断，避免卡在加载状态
+  // 只在真正需要的时候显示加载状态
+  if (!isClient) {
     return (
       <div
         style={{
@@ -460,22 +474,75 @@ export default function DashboardPage() {
               marginBottom: "0.5rem",
             }}
           >
-            {authLoading
-              ? "验证登录状态.."
-              : loading
-                ? "正在加载数据..."
-                : "加载中.."}
+            正在初始化系统...
           </h2>
           <p style={{ color: theme === "dark" ? "#94a3b8" : "#64748b" }}>
-            {authLoading
-              ? "正在验证您的身份"
-              : loading
-                ? "正在从后端获取最新数据"
-                : "正在初始化系统"}
+            请稍等片刻
           </p>
         </div>
       </div>
     );
+  }
+
+  // 🔧 修复：如果数据正在加载但已经是客户端，显示简化的加载指示器
+  if (loading && reports.length === 0) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          backgroundColor: theme === "dark" ? "#0f172a" : "#ffffff",
+          color: theme === "dark" ? "#ffffff" : "#000000",
+        }}
+      >
+        <DashboardSidebar />
+        <main
+          style={{
+            flex: "1",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div style={{ textAlign: "center" }}>
+            <div
+              style={{
+                width: "32px",
+                height: "32px",
+                border: "3px solid #f3f3f3",
+                borderTop: "3px solid #3498db",
+                borderRadius: "50%",
+                animation: "spin 1s linear infinite",
+                margin: "0 auto 16px",
+              }}
+            />
+            <p style={{ color: theme === "dark" ? "#94a3b8" : "#64748b" }}>
+              正在加载数据...
+            </p>
+            {/* 🔧 调试信息 */}
+            <div style={{ 
+              marginTop: "20px", 
+              fontSize: "12px", 
+              color: theme === "dark" ? "#64748b" : "#94a3b8",
+              textAlign: "left",
+              maxWidth: "300px"
+            }}>
+              <div>isClient: {isClient.toString()}</div>
+              <div>loading: {loading.toString()}</div>
+              <div>reports.length: {reports.length}</div>
+              <div>categories.length: {categories.length}</div>
+              <div>selectedCategory: {selectedCategory || "null"}</div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // 🔧 修复：强制渲染主界面，即使还在加载中
+  // 如果有基本数据就显示，避免卡在加载状态
+  if (loading && reports.length > 0) {
+    console.log("🔧 数据正在加载但有基本数据，继续渲染主界面");
   }
 
   // 鏈璇佺敤鎴蜂細琚噸瀹氬悜鍒伴椤?

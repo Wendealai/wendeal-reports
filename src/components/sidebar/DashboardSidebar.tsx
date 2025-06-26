@@ -636,32 +636,42 @@ export function DashboardSidebar() {
 
   // 在组件加载时读取保存的分类名称和排序
   useEffect(() => {
-    // 🚀 修复：移除loadPredefinedCategoryNames()调用，避免与Dashboard页面的loadData()竞争
+    // 🔧 修复：移除loadPredefinedCategoryNames()调用，避免与Dashboard页面的loadData()竞争
     // loadPredefinedCategoryNames(); // 已移除，由Dashboard页面统一加载
-
+    
+    // 🔧 防抖更新函数，避免频繁更新
+    let updateTimeoutId: NodeJS.Timeout | null = null;
+    
     const updateCategories = () => {
       // 🛡️ 如果正在编辑分类，暂停更新避免冲突
       if (editingId) {
         console.log("⏸️ 正在编辑分类，跳过自动更新:", editingId);
         return;
       }
-      console.log("🔄 更新分类列表...");
-
-      // 🚀 防抖检查：如果正在编辑，跳过更新
-      const editingKeys = [
-        "category_editing_uncategorized",
-        "category_editing_tech-research",
-        "category_editing_market-analysis",
-        "category_editing_product-review",
-        "category_editing_industry-insights",
-      ];
-      const isEditing = editingKeys.some(
-        (key) => localStorage.getItem(key) === "true",
-      );
-      if (isEditing) {
-        console.log("⏸️ 检测到正在编辑分类，跳过更新");
-        return;
+      
+      // 🔧 防抖：取消之前的更新
+      if (updateTimeoutId) {
+        clearTimeout(updateTimeoutId);
       }
+      
+      updateTimeoutId = setTimeout(() => {
+        console.log("🔄 更新分类列表...");
+
+        // 🔧 防抖检查：如果正在编辑，跳过更新
+        const editingKeys = [
+          "category_editing_uncategorized",
+          "category_editing_tech-research",
+          "category_editing_market-analysis",
+          "category_editing_product-review",
+          "category_editing_industry-insights",
+        ];
+        const isEditing = editingKeys.some(
+          (key) => localStorage.getItem(key) === "true",
+        );
+        if (isEditing) {
+          console.log("⏸️ 检测到正在编辑分类，跳过更新");
+          return;
+        }
 
       // 🚀 修复：移除硬编码初始化，完全依赖数据库和store
       // 不再进行本地硬编码初始化，由loadData函数从数据库加载

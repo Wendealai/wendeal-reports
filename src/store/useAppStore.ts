@@ -286,6 +286,12 @@ export const useAppStore = create<AppState>()((set, get) => ({
     const { setLoading } = get();
     setLoading(true);
 
+    // 🔧 添加超时保护机制
+    const loadTimeout = setTimeout(() => {
+      logger.warn("⚠️ 数据加载超时，强制停止loading状态");
+      setLoading(false);
+    }, 8000); // 8秒超时
+
     try {
       logger.debug("🔄 开始从数据库加载数据...");
 
