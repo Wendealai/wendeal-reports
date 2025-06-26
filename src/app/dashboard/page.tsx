@@ -461,17 +461,17 @@ export default function DashboardPage() {
             }}
           >
             {authLoading
-              ? "楠岃瘉鐧诲綍鐘舵€?.."
+              ? "验证登录状态.."
               : loading
-                ? "姝ｅ湪鍔犺浇鏁版嵁..."
-                : "鍔犺浇涓?.."}
+                ? "正在加载数据..."
+                : "加载中.."}
           </h2>
           <p style={{ color: theme === "dark" ? "#94a3b8" : "#64748b" }}>
             {authLoading
-              ? "姝ｅ湪楠岃瘉鎮ㄧ殑韬唤"
+              ? "正在验证您的身份"
               : loading
-                ? "姝ｅ湪浠庡悗绔幏鍙栨渶鏂版暟鎹?
-                : "姝ｅ湪鍒濆鍖栫郴缁?}
+                ? "正在从后端获取最新数据"
+                : "正在初始化系统"}
           </p>
         </div>
       </div>
@@ -599,7 +599,7 @@ export default function DashboardPage() {
           color: theme === "dark" ? "#94a3b8" : "#64748b",
         }}
       >
-        <span>{report.isFavorite ? "猸? : ""}</span>
+        <span>{report.isFavorite ? "★" : ""}</span>
         {onStatusChange && (
           <div style={{ display: "flex", gap: "0.25rem" }}>
             <button
@@ -774,10 +774,10 @@ export default function DashboardPage() {
                       ? "0 1px 3px rgba(0, 0, 0, 0.3)"
                       : "0 1px 3px rgba(0, 0, 0, 0.1)";
                 }}
-                title={theme === "dark" ? "鍒囨崲鍒版祬鑹叉ā寮? : "鍒囨崲鍒版繁鑹叉ā寮?}
+                title={theme === "dark" ? "切换到浅色模式" : "切换到深色模式"}
               >
                 <span style={{ fontSize: "16px" }}>
-                  {theme === "dark" ? "鈽€锔? : "馃寵"}
+                  {theme === "dark" ? "☀️" : "🌙"}
                 </span>
               </button>
 
@@ -1174,4 +1174,5 @@ export default function DashboardPage() {
       </div>
     </DndContext>
   );
+}
 }
