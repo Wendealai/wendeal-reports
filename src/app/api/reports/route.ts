@@ -162,6 +162,200 @@ async function createReport(request: Request) {
       );
     }
 
+    // 检查请求类型：FormData（文件上传）还是JSON（直接创建）
+    const contentType = request.headers.get("content-type") || "";
+    
+    if (contentType.includes("application/json")) {
+      // 处理JSON数据
+      return await createReportFromJSON(request);
+    } else {
+      // 处理FormData（文件上传）
+      return await createReportFromFile(request);
+    }
+  } catch (error: any) {
+    console.error("Create report error:", error);
+    return NextResponse.json(
+      {
+        error: "创建报告失败",
+        message: "服务器内部错误，请稍后重试",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// 从JSON数据创建报告
+async function createReportFromJSON(request: Request) {
+  try {
+    const body = await request.json();
+    console.log("📝 接收到的JSON数据:", body);
+
+    // 验证必需字段
+    if (!body.title || !body.content) {
+      return NextResponse.json(
+        { error: "标题和内容是必需的" },
+        { status: 400 }
+      );
+    }
+
+    // 处理分类ID
+    let finalCategoryId = "uncategorized";
+    if (body.categoryId) {
+      // 检查是否为预定义分类
+      if (PREDEFINED_CATEGORY_ID_MAP[body.categoryId]) {
+        finalCategoryId = PREDEFINED_CATEGORY_ID_MAP[body.categoryId];
+        console.log("✅ 使用预定义分类:", body.categoryId, "→", finalCategoryId);
+      } else {
+        // 检查分类是否存在于数据库中
+        try {
+          const category = await prisma.category.findUnique({
+            where: { id: body.categoryId },
+          });
+          if (category) {
+            finalCategoryId = body.categoryId;
+            console.log("✅ 使用数据库分类:", finalCategoryId);
+          } else {
+            console.warn("⚠️ 分类不存在，使用默认分类:", body.categoryId);
+            finalCategoryId = PREDEFINED_CATEGORY_ID_MAP["uncategorized"];
+          }
+        } catch (e) {
+          console.warn("⚠️ 检查分类时出错，使用默认分类:", e);
+          finalCategoryId = PREDEFINED_CATEGORY_ID_MAP["uncategorized"];
+        }
+      }
+    }
+
+    // 创建报告数据
+    const reportData = {
+      title: body.title,
+      content: body.content,
+      description: body.description || "",
+      status: body.status || "published",
+      priority: body.priority || "medium",
+      categoryId: finalCategoryId,
+      userId: DEFAULT_USER_ID,
+    };
+
+    console.log("💾 创建报告数据:", reportData);
+
+    // 创建报告
+    const report = await prisma.report.create({
+      data: reportData,
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            color: true,
+            icon: true,
+          },
+        },
+      },
+    });
+
+    // 处理标签
+    if (body.tags && Array.isArray(body.tags) && body.tags.length > 0) {
+      try {
+        // 创建或获取标签
+        const tagRecords = await Promise.all(
+          body.tags.map(async (tagName: string) => {
+            return prisma.tag.upsert({
+              where: { name: tagName },
+              update: {},
+              create: { name: tagName },
+            });
+          })
+        );
+
+        // 创建报告标签关联
+        await prisma.reportTag.createMany({
+          data: tagRecords.map((tag) => ({
+            reportId: report.id,
+            tagId: tag.id,
+          })),
+        });
+
+        console.log("✅ 标签关联创建成功:", body.tags);
+      } catch (tagError) {
+        console.warn("⚠️ 标签处理失败，但报告创建成功:", tagError);
+      }
+    }
+
+    // 重新获取包含标签的报告
+    const reportWithTags = await prisma.report.findUnique({
+      where: { id: report.id },
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true,
+            color: true,
+            icon: true,
+          },
+        },
+        reportTags: {
+          include: {
+            tag: {
+              select: {
+                id: true,
+                name: true,
+                color: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    console.log("✅ 报告创建成功:", report.id);
+
+    return NextResponse.json({
+      message: "报告创建成功",
+      report: {
+        ...reportWithTags,
+        tags: reportWithTags?.reportTags.map((rt) => rt.tag) || [],
+        reportTags: undefined,
+      },
+    });
+  } catch (error: any) {
+    console.error("❌ JSON报告创建失败:", error);
+    
+    // 处理数据库约束错误
+    if (error.code === "P2002") {
+      return NextResponse.json(
+        {
+          error: "数据重复",
+          message: "报告标题已存在",
+        },
+        { status: 409 }
+      );
+    }
+
+    if (error.code === "P2025") {
+      return NextResponse.json(
+        {
+          error: "关联数据不存在",
+          message: "指定的分类不存在",
+        },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        error: "创建报告失败",
+        message: "服务器内部错误，请稍后重试",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// 从文件创建报告
+async function createReportFromFile(request: Request) {
+  let uploadedFilePath: string | null = null;
+
+  try {
     const formData = await request.formData();
 
     const file = formData.get("file") as File | null;

@@ -97,16 +97,27 @@ export function SimpleCategorySelector({
   const getAllCategories = () => {
     const result: Array<{ id: string; name: string; level: number }> = [];
     const seenIds = new Set<string>();
+    const seenNames = new Set<string>(); // 新增：防止名称重复
 
-    // 首先添加预定义分类
+    // 首先添加预定义分类（带emoji的版本）
     Object.entries(predefinedNames).forEach(([id, name]) => {
-      result.push({ id, name, level: 0 });
-      seenIds.add(id);
+      if (!seenIds.has(id) && !seenNames.has(name)) {
+        result.push({ id, name, level: 0 });
+        seenIds.add(id);
+        seenNames.add(name);
+        // 同时记录不带emoji的名称，避免重复
+        const nameWithoutEmoji = name.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/gu, '').trim();
+        if (nameWithoutEmoji) {
+          seenNames.add(nameWithoutEmoji);
+        }
+      }
     });
 
-    // 然后添加数据库中的其他分类（排除已经在预定义中的）
+    // 然后添加数据库中的其他分类（排除已经在预定义中的和名称重复的）
     flatCategories.forEach((cat) => {
-      if (!seenIds.has(cat.id)) {
+      const cleanName = cat.name.trim();
+      
+      if (!seenIds.has(cat.id) && !seenNames.has(cleanName)) {
         // 对于自定义分类，检查是否有自定义显示名称
         const customCategories = JSON.parse(
           localStorage.getItem("custom_categories") || "[]",
@@ -114,14 +125,18 @@ export function SimpleCategorySelector({
         const customCategory = customCategories.find(
           (c: any) => c.id === cat.id,
         );
-        const displayName = customCategory ? customCategory.label : cat.name;
+        const displayName = customCategory ? customCategory.label : cleanName;
 
-        result.push({
-          id: cat.id,
-          name: displayName,
-          level: cat.level,
-        });
-        seenIds.add(cat.id);
+        // 再次检查显示名称是否重复
+        if (!seenNames.has(displayName)) {
+          result.push({
+            id: cat.id,
+            name: displayName,
+            level: cat.level,
+          });
+          seenIds.add(cat.id);
+          seenNames.add(displayName);
+        }
       }
     });
 
