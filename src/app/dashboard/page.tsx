@@ -8,6 +8,14 @@ import {
   buildCategoryTree,
   calculateReportCounts,
 } from "@/data/mockData";
+import {
+  DndContext,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  useDraggable,
+} from "@dnd-kit/core";
 import { processReports } from "@/lib/searchUtils";
 import dynamic from "next/dynamic";
 
@@ -60,6 +68,45 @@ export default function DashboardPage() {
     loadPredefinedCategoryNames,
     categories,
   } = useAppStore();
+
+  // 配置拖拽传感器
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor)
+  );
+
+  // 处理拖拽结束事件 - 用于文章拖拽到分类
+  const handleDndDragEnd = async (event: any) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeData = active.data?.current;
+    const overData = over.data?.current;
+
+    // 检查是否是报告拖拽到分类
+    if (activeData?.type === 'report' && overData?.type === 'category') {
+      const report = activeData.report;
+      const targetCategoryId = overData.categoryId;
+      
+      // 如果目标分类与当前分类相同，不需要更新
+      if (report.category === targetCategoryId) return;
+
+      try {
+        setOperationLoading(true);
+        console.log('拖拽更新报告分类:', report.id, '->', targetCategoryId);
+        
+        await updateReport(report.id, { category: targetCategoryId });
+        await refreshData();
+        
+        console.log('✅ 拖拽更新成功');
+      } catch (error) {
+        console.error('❌ 拖拽更新失败:', error);
+        alert('更新报告分类失败，请稍后重试');
+      } finally {
+        setOperationLoading(false);
+      }
+    }
+  };
 
   // 客户端渲染检查（无认证）
   useEffect(() => {
@@ -436,56 +483,64 @@ export default function DashboardPage() {
     return null;
   }
 
-  // 报告卡片组件
-  const ReportCard = ({
+  // 可拖拽的报告卡片组件
+  const DraggableReportCard = ({
     report,
     onStatusChange,
   }: {
     report: any;
     onStatusChange?: (status: "unread" | "reading" | "completed") => void;
-  }) => (
-    <div
-      draggable={true}
-      onDragStart={(e) => handleDragStart(e, report)}
-      onDragEnd={handleDragEnd}
-      style={{
-        border: `1px solid ${theme === "dark" ? "#334155" : "#e2e8f0"}`,
-        borderRadius: "0.5rem",
-        padding: "0.75rem",
-        backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
-        cursor: operationLoading ? "wait" : "grab",
-        marginBottom: "0.5rem",
-        transition: "all 0.2s ease",
-        userSelect: "none",
-        opacity: operationLoading ? 0.6 : 1,
-      }}
-      onClick={() => !operationLoading && handleReportSelect(report)}
-      onMouseEnter={(e) => {
-        if (!draggedReport && !operationLoading) {
-          e.currentTarget.style.transform = "translateY(-2px)";
-          e.currentTarget.style.boxShadow =
-            theme === "dark"
-              ? "0 4px 12px rgba(0, 0, 0, 0.3)"
-              : "0 4px 12px rgba(0, 0, 0, 0.1)";
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!draggedReport && !operationLoading) {
-          e.currentTarget.style.transform = "translateY(0)";
-          e.currentTarget.style.boxShadow = "none";
-        }
-      }}
-      onMouseDown={(e) => {
-        if (!operationLoading) {
-          e.currentTarget.style.cursor = "grabbing";
-        }
-      }}
-      onMouseUp={(e) => {
-        if (!operationLoading) {
-          e.currentTarget.style.cursor = "grab";
-        }
-      }}
-    >
+  }) => {
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      isDragging,
+    } = useDraggable({
+      id: report.id,
+      data: {
+        type: 'report',
+        report: report,
+      },
+    });
+
+    const style = {
+      transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+      opacity: isDragging ? 0.5 : 1,
+      border: `1px solid ${theme === "dark" ? "#334155" : "#e2e8f0"}`,
+      borderRadius: "0.5rem",
+      padding: "0.75rem",
+      backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
+      cursor: operationLoading ? "wait" : "grab",
+      marginBottom: "0.5rem",
+      transition: isDragging ? "none" : "all 0.2s ease",
+      userSelect: "none",
+    };
+
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...listeners}
+        {...attributes}
+        onClick={() => !operationLoading && !isDragging && handleReportSelect(report)}
+        onMouseEnter={(e) => {
+          if (!isDragging && !operationLoading) {
+            e.currentTarget.style.transform = "translateY(-2px)";
+            e.currentTarget.style.boxShadow =
+              theme === "dark"
+                ? "0 4px 12px rgba(0, 0, 0, 0.3)"
+                : "0 4px 12px rgba(0, 0, 0, 0.1)";
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isDragging && !operationLoading) {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "none";
+          }
+        }}
+      >
       <div
         style={{
           display: "flex",
@@ -629,17 +684,18 @@ export default function DashboardPage() {
   );
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        width: "100%",
-        backgroundColor: theme === "dark" ? "#0f172a" : "#ffffff",
-        color: theme === "dark" ? "#ffffff" : "#000000",
-      }}
-    >
-      {/* 左侧边栏 */}
-      <DashboardSidebar />
+    <DndContext sensors={sensors} onDragEnd={handleDndDragEnd}>
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          width: "100%",
+          backgroundColor: theme === "dark" ? "#0f172a" : "#ffffff",
+          color: theme === "dark" ? "#ffffff" : "#000000",
+        }}
+      >
+        {/* 左侧边栏 */}
+        <DashboardSidebar />
 
       {/* 主内容区域 */}
       <main
@@ -896,7 +952,7 @@ export default function DashboardPage() {
                     }}
                   >
                     {reportsByStatus.unread.map((report) => (
-                      <ReportCard
+                      <DraggableReportCard
                         key={report.id}
                         report={report}
                         onStatusChange={(status) =>
@@ -967,7 +1023,7 @@ export default function DashboardPage() {
                     }}
                   >
                     {reportsByStatus.reading.map((report) => (
-                      <ReportCard
+                      <DraggableReportCard
                         key={report.id}
                         report={report}
                         onStatusChange={(status) =>
@@ -1038,7 +1094,7 @@ export default function DashboardPage() {
                     }}
                   >
                     {reportsByStatus.completed.map((report) => (
-                      <ReportCard
+                      <DraggableReportCard
                         key={report.id}
                         report={report}
                         onStatusChange={(status) =>
@@ -1110,11 +1166,12 @@ export default function DashboardPage() {
         onOpenChange={setIsUploadDialogOpen}
       />
 
-      {/* 新增报告对话框 */}
-      <CreateReportDialog
-        open={isCreateReportDialogOpen}
-        onOpenChange={setIsCreateReportDialogOpen}
-      />
-    </div>
+        {/* 新增报告对话框 */}
+        <CreateReportDialog
+          open={isCreateReportDialogOpen}
+          onOpenChange={setIsCreateReportDialogOpen}
+        />
+      </div>
+    </DndContext>
   );
 }

@@ -22,6 +22,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { useDroppable } from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
@@ -63,6 +64,15 @@ function CategoryCard({
 
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: category.id });
+
+  // 添加拖拽接收功能
+  const { setNodeRef: setDroppableRef, isOver } = useDroppable({
+    id: `droppable-${category.id}`,
+    data: {
+      type: 'category',
+      categoryId: category.id
+    }
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -342,7 +352,10 @@ function CategoryCard({
   // 普通状态的卡片
   return (
     <div
-      ref={setNodeRef}
+      ref={(node) => {
+        setNodeRef(node);
+        setDroppableRef(node);
+      }}
       data-category-id={category.id}
       style={{
         ...style,
@@ -351,24 +364,34 @@ function CategoryCard({
         borderRadius: "12px",
         background: isActive
           ? `linear-gradient(135deg, ${theme === "dark" ? "rgba(59, 130, 246, 0.3)" : "rgba(59, 130, 246, 0.2)"}, ${theme === "dark" ? "rgba(16, 185, 129, 0.3)" : "rgba(16, 185, 129, 0.2)"})`
-          : `linear-gradient(135deg, ${theme === "dark" ? "rgba(51, 65, 85, 0.3)" : "rgba(241, 245, 249, 0.8)"}, ${theme === "dark" ? "rgba(30, 41, 59, 0.3)" : "rgba(226, 232, 240, 0.8)"})`,
+          : isOver
+            ? `linear-gradient(135deg, ${theme === "dark" ? "rgba(34, 197, 94, 0.3)" : "rgba(34, 197, 94, 0.2)"}, ${theme === "dark" ? "rgba(16, 185, 129, 0.3)" : "rgba(16, 185, 129, 0.2)"})`
+            : `linear-gradient(135deg, ${theme === "dark" ? "rgba(51, 65, 85, 0.3)" : "rgba(241, 245, 249, 0.8)"}, ${theme === "dark" ? "rgba(30, 41, 59, 0.3)" : "rgba(226, 232, 240, 0.8)"})`;
         border: `1px solid ${
           isActive
             ? theme === "dark"
               ? "rgba(59, 130, 246, 0.4)"
               : "rgba(59, 130, 246, 0.3)"
-            : theme === "dark"
-              ? "rgba(51, 65, 85, 0.4)"
-              : "rgba(203, 213, 225, 0.5)"
+            : isOver
+              ? theme === "dark"
+                ? "rgba(34, 197, 94, 0.6)"
+                : "rgba(34, 197, 94, 0.4)"
+              : theme === "dark"
+                ? "rgba(51, 65, 85, 0.4)"
+                : "rgba(203, 213, 225, 0.5)"
         }`,
         backdropFilter: "blur(10px)",
         boxShadow: isActive
           ? theme === "dark"
             ? "0 8px 32px rgba(59, 130, 246, 0.2)"
             : "0 8px 32px rgba(59, 130, 246, 0.15)"
-          : theme === "dark"
-            ? "0 4px 16px rgba(0, 0, 0, 0.2)"
-            : "0 4px 16px rgba(0, 0, 0, 0.08)",
+          : isOver
+            ? theme === "dark"
+              ? "0 8px 32px rgba(34, 197, 94, 0.3)"
+              : "0 8px 32px rgba(34, 197, 94, 0.2)"
+            : theme === "dark"
+              ? "0 4px 16px rgba(0, 0, 0, 0.2)"
+              : "0 4px 16px rgba(0, 0, 0, 0.08)",
         transition: "all 0.3s ease",
         cursor: "pointer",
       }}

@@ -6,9 +6,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getReportsByCategory } from "@/data/mockData";
 import { useMemo } from "react";
-import { Star, Clock, FileText } from "lucide-react";
+import { Star, Clock, FileText, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { safeTextContent } from "@/lib/htmlUtils";
+import { useDraggable } from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
 
 interface ReportListProps {
   categoryId: string;
@@ -17,6 +19,19 @@ interface ReportListProps {
 function ReportCard({ report }: { report: Report }) {
   const { selectedReport, setSelectedReport } = useAppStore();
   const isSelected = selectedReport?.id === report.id;
+
+  // 设置拖拽功能
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: `report-${report.id}`,
+    data: {
+      type: 'report',
+      report: report
+    }
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+  };
 
   const getStatusIcon = (status: Report["readStatus"]) => {
     switch (status) {
@@ -42,18 +57,32 @@ function ReportCard({ report }: { report: Report }) {
 
   return (
     <Card
+      ref={setNodeRef}
+      style={style}
       className={cn(
-        "cursor-pointer transition-colors hover:bg-accent",
+        "cursor-pointer transition-colors hover:bg-accent relative",
         isSelected && "bg-accent border-primary",
+        isDragging && "opacity-50 shadow-lg z-50",
       )}
       onClick={() => setSelectedReport(report)}
     >
       <CardContent className="p-3">
         <div className="space-y-2">
           <div className="flex items-start justify-between">
-            <h4 className="text-sm font-medium line-clamp-2 pr-2">
-              {report.title}
-            </h4>
+            <div className="flex items-center gap-2 flex-1">
+              {/* 拖拽手柄 */}
+              <div
+                {...attributes}
+                {...listeners}
+                className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-100 rounded transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <GripVertical className="h-3 w-3 text-muted-foreground" />
+              </div>
+              <h4 className="text-sm font-medium line-clamp-2 pr-2 flex-1">
+                {report.title}
+              </h4>
+            </div>
             {report.isFavorite && (
               <Star className="h-3 w-3 text-yellow-500 fill-current flex-shrink-0" />
             )}
