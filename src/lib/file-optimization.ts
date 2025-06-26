@@ -87,6 +87,7 @@ export async function sanitizeAndOptimizeHtml(
     try {
       sanitized = DOMPurify.sanitize(html, {
         ALLOWED_TAGS: [
+          "style", // 允许style标签以保留CSS样式
           "h1",
           "h2",
           "h3",
