@@ -570,13 +570,37 @@ export const useAppStore = create<AppState>()((set, get) => ({
               report.category as keyof typeof categoryDefinitions
             ];
           if (categoryDef) {
+            // 对于预定义分类，首先检查是否已存在
+            logger.debug("Checking if predefined category exists:", {
+              category: report.category,
+            });
             try {
-              const categoryResponse = await categoriesApi.create(categoryDef);
-              categoryId = categoryResponse.category.id;
-              logger.debug("Category created/found:", { categoryId });
+              // 获取所有分类，检查是否已存在
+              const categoriesResponse = await categoriesApi.getAll();
+              const existingCategory = categoriesResponse.categories.find(
+                (cat: any) => cat.name === categoryDef.name
+              );
+              
+              if (existingCategory) {
+                // 分类已存在，直接使用其ID
+                categoryId = existingCategory.id;
+                logger.debug("Using existing category:", { 
+                  categoryId, 
+                  name: existingCategory.name 
+                });
+              } else {
+                // 分类不存在，创建新分类
+                logger.debug("Creating new predefined category:", categoryDef);
+                const categoryResponse = await categoriesApi.create(categoryDef);
+                categoryId = categoryResponse.category.id;
+                logger.debug("Category created:", { categoryId });
+              }
             } catch (error) {
-              // 可能已存在，尝试获取
-              logger.debug("Category might exist, continuing with original ID");
+              // 如果出错，回退到使用原始ID
+              logger.warn("Error handling predefined category, using original ID:", {
+                error: error instanceof Error ? error.message : String(error),
+                originalId: report.category,
+              });
               categoryId = report.category;
             }
           } else {
