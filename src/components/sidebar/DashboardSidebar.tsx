@@ -13,7 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { UserManagement } from "./UserManagement";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   DndContext,
   closestCenter,
@@ -583,11 +583,12 @@ function CategoryCard({
 
 export function DashboardSidebar() {
   // 防抖函数，避免频繁触发更新事件
-  const debounceUpdateCategories = useCallback(
-    debounce(() => {
-      console.log("🔄 防抖触发分类更新");
-      window.dispatchEvent(new CustomEvent("categoryOrderChanged"));
-    }, 100),
+  const debounceUpdateCategories = useMemo(
+    () =>
+      debounce(() => {
+        console.log("🔄 防抖触发分类更新");
+        window.dispatchEvent(new CustomEvent("categoryOrderChanged"));
+      }, 100),
     [],
   );
   const {
@@ -851,7 +852,7 @@ export function DashboardSidebar() {
         handleCustomStorageChange,
       );
     };
-  }, []); // 🚀 修复：移除依赖项，只在组件挂载时执行一次
+  }, [editingId]); // 🚀 修复：移除依赖项，只在组件挂载时执行一次
 
   // 演示模式已禁用（单用户系统）
   useEffect(() => {

@@ -647,7 +647,7 @@ export function ReportViewer({ report }: ReportViewerProps) {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-8 rounded-lg">
             <h2 className="text-xl font-bold mb-4">确认删除</h2>
-            <p>确定要删除报告 "{title}" 吗？此操作无法撤销。</p>
+            <p>确定要删除报告 &quot;{title}&quot; 吗？此操作无法撤销。</p>
             <div className="mt-4 flex justify-end">
               <Button variant="outline" onClick={handleConfirmDelete}>
                 取消

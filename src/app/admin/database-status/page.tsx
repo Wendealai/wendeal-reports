@@ -285,10 +285,10 @@ export default function DatabaseStatusPage() {
         <CardContent>
           <div className="space-y-3 text-sm">
             <div>
-              <strong>检查状态:</strong> 点击"刷新状态"按钮检查当前数据库初始化状态
+              <strong>检查状态:</strong> 点击&quot;刷新状态&quot;按钮检查当前数据库初始化状态
             </div>
             <div>
-              <strong>初始化数据库:</strong> 如果数据库未初始化，点击"初始化数据库"按钮创建默认用户和分类
+              <strong>初始化数据库:</strong> 如果数据库未初始化，点击&quot;初始化数据库&quot;按钮创建默认用户和分类
             </div>
             <div>
               <strong>故障排除:</strong> 如果初始化失败，请检查数据库连接和权限设置

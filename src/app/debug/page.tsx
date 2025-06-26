@@ -179,10 +179,10 @@ export default function DebugPage() {
         <h2 style={{ color: "#374151", marginBottom: "15px" }}>🎯 使用说明</h2>
         <ol style={{ color: "#6b7280", lineHeight: "1.6" }}>
           <li>
-            <strong>首先</strong>：点击"清除所有数据并刷新"清理环境
+            <strong>首先</strong>：点击&quot;清除所有数据并刷新&quot;清理环境
           </li>
           <li>
-            <strong>然后</strong>：点击"设置Token并跳转仪表板"测试完整流程
+            <strong>然后</strong>：点击&quot;设置Token并跳转仪表板&quot;测试完整流程
           </li>
           <li>
             <strong>如果失败</strong>：依次测试localStorage和重定向功能

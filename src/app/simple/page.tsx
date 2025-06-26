@@ -133,9 +133,9 @@ export default function SimplePage() {
       >
         <h3>🎯 测试步骤</h3>
         <ol>
-          <li>点击"清除数据"按钮清理环境</li>
-          <li>点击"演示登录"设置认证信息</li>
-          <li>点击"去仪表板"测试是否能正常跳转</li>
+          <li>点击&quot;清除数据&quot;按钮清理环境</li>
+          <li>点击&quot;演示登录&quot;设置认证信息</li>
+          <li>点击&quot;去仪表板&quot;测试是否能正常跳转</li>
         </ol>
       </div>
     </div>
