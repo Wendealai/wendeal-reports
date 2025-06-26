@@ -36,11 +36,24 @@ export async function POST(request: Request) {
         categoriesByName[name].length > 1
       );
 
-      const result = {
+      const result: {
+        totalCategories: number;
+        duplicateGroups: number;
+        duplicates: any[];
+        actions: any[];
+        finalState?: {
+          totalCategories: number;
+          categories: {
+            id: string;
+            name: string;
+            reportsCount: number;
+          }[];
+        };
+      } = {
         totalCategories: allCategories.length,
         duplicateGroups: duplicateNames.length,
-        duplicates: [] as any[],
-        actions: [] as any[]
+        duplicates: [],
+        actions: []
       };
 
       if (duplicateNames.length > 0) {
