@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -34,9 +33,9 @@ model Category {
   parentId    String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
   children    Category[] @relation("CategoryHierarchy")
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   reports     Report[]
 
   @@map("categories")
@@ -68,8 +67,8 @@ model Report {
   publishedAt DateTime?
   files       File[]
   reportTags  ReportTag[]
-  category    Category?   @relation(fields: [categoryId], references: [id])
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category    Category?   @relation(fields: [categoryId], references: [id])
 
   @@map("reports")
 }
@@ -78,8 +77,8 @@ model ReportTag {
   id       String @id @default(cuid())
   reportId String
   tagId    String
-  report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
   tag      Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
 
   @@unique([reportId, tagId])
   @@map("report_tags")
